@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Crown Waters — a procedural chronicle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0c1124;--night2:#111830;--panel:#151d3a;--panel2:#1a2447;--line:#2a3560;--line2:#3a477a;
+  --gold:#d8b565;--gold-soft:#e7cf94;--gold-dim:#9c8449;--flame:#ef9a3d;--flame-hot:#ffc271;
+  --ivory:#ece3cd;--ivory-dim:#b3ac90;--garnet:#c05a4e;--lapis:#4a74d6;--sage:#7fa06a;--violet:#9a6fd0;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:radial-gradient(1200px 700px at 78% -12%,#18234a 0%,transparent 60%),radial-gradient(900px 600px at -8% 112%,#171d3c 0%,transparent 55%),var(--night);color:var(--ivory);font-family:'Spectral',Georgia,serif;font-size:16px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1360px;margin:0 auto;padding:14px 14px 60px}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:13px 18px;margin-bottom:14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(28,38,74,.7),rgba(16,24,50,.6));box-shadow:0 1px 0 rgba(216,181,101,.12) inset}
+.crest{display:flex;align-items:center;gap:13px;min-width:0}
+.flame-wrap{width:30px;height:40px;position:relative;flex:none}
+.flame{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:15px;height:24px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 75%,var(--flame-hot),var(--flame) 55%,#b5551d 100%);animation:flick 1.6s ease-in-out infinite alternate;box-shadow:0 0 16px 4px rgba(239,154,61,.5)}
+.flame:after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:6px;height:11px;border-radius:50%;background:#fff3d0;opacity:.85}
+@keyframes flick{0%{transform:translateX(-50%) scaleY(1) rotate(-2deg)}100%{transform:translateX(-52%) scaleY(1.12) rotate(2deg)}}
+.title h1{font-family:'Cinzel',serif;font-weight:700;font-size:21px;letter-spacing:.13em;margin:0;color:var(--gold-soft);text-transform:uppercase;line-height:1}
+.title .sub{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-dim);margin-top:4px}
+.era-badge{margin-left:auto;text-align:right}.era-badge .yr{font-family:'Cinzel',serif;font-size:24px;color:var(--gold);line-height:1}.era-badge .era{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-dim);margin-top:2px}
+.seedchip{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ivory-dim);border:1px solid var(--line);border-radius:20px;padding:3px 10px;margin-left:14px}
+.grid{display:grid;grid-template-columns:1fr 356px;gap:14px;align-items:start}@media(max-width:960px){.grid{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(26,36,71,.5),rgba(18,25,48,.5));overflow:hidden}
+.card h2{font-family:'Cinzel',serif;font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-soft);margin:0;padding:11px 15px;border-bottom:1px solid var(--line);background:rgba(12,17,36,.4);display:flex;align-items:center;gap:8px}
+.card h2 .glyph{color:var(--gold-dim)}.card .body{padding:13px 15px}
+.mapcard{position:relative}
+.mapwrap{position:relative;width:100%;aspect-ratio:1.4/1;background:linear-gradient(160deg,#0c1430,#0a1024);overflow:hidden;cursor:grab;touch-action:none}
+.mapwrap.grabbing{cursor:grabbing}#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mapctrl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:5px;z-index:6}
+.mapctrl button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line2);background:rgba(16,24,50,.85);color:var(--gold-soft);font-size:16px;cursor:pointer;font-family:'Cinzel',serif;line-height:1}
+.mapctrl button:hover{border-color:var(--gold-dim);background:rgba(30,42,80,.9)}
+.scalebar{position:absolute;left:12px;bottom:11px;z-index:6;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ivory);text-shadow:0 1px 3px #000}
+.scalebar .track{height:5px;border:1px solid rgba(236,227,205,.7);border-top:none;display:flex}
+.scalebar .track div{flex:1;border-left:1px solid rgba(236,227,205,.7)}.scalebar .track div:nth-child(even){background:rgba(236,227,205,.55)}
+.compass{position:absolute;left:12px;top:10px;z-index:6;font-family:'Cinzel',serif;font-size:11px;color:var(--ivory-dim);letter-spacing:.1em}
+.hint{position:absolute;right:12px;bottom:11px;z-index:6;font-size:10.5px;color:var(--ivory-dim);font-style:italic;background:rgba(12,17,36,.6);padding:3px 8px;border-radius:14px;border:1px solid var(--line)}
+.node{cursor:pointer}.node text{font-family:'Spectral',serif;fill:var(--ivory);paint-order:stroke;stroke:#0a1024;stroke-width:3px;stroke-linejoin:round}
+@keyframes pop{0%{opacity:0;transform:scale(.2)}70%{transform:scale(1.25)}100%{opacity:1;transform:scale(1)}}
+.reveal{animation:pop .6s ease both;transform-box:fill-box;transform-origin:center}
+@keyframes ripple{0%{r:8;opacity:.9}100%{r:60;opacity:0}}
+.legend{display:flex;gap:11px;flex-wrap:wrap;padding:9px 15px;border-top:1px solid var(--line);font-size:11px;color:var(--ivory-dim);background:rgba(12,17,36,.35)}
+.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.3)}
+.stat{display:flex;align-items:center;gap:9px;margin:8px 0}.stat .lab{font-size:12px;color:var(--ivory-dim);width:92px;flex:none;text-transform:uppercase}
+.stat .bar{flex:1;height:7px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid var(--line)}.stat .fill{height:100%;border-radius:6px;transition:width .5s}.stat .val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ivory);width:56px;text-align:right;flex:none}
+.counts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.count{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:rgba(12,17,36,.35)}
+.count .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ivory-dim)}.count .v{font-family:'IBM Plex Mono',monospace;font-size:17px;color:var(--gold-soft);margin-top:2px}.count .v small{font-size:10px;color:var(--ivory-dim)}
+.helptext{font-size:13px;color:var(--ivory-dim);font-style:italic;margin:0 0 11px}
+.focus-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.focus{position:relative;text-align:left;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:rgba(21,29,58,.6);color:var(--ivory);cursor:pointer;font-family:inherit;transition:.15s;min-height:58px}
+.focus:hover:not(:disabled){border-color:var(--gold-dim);background:rgba(28,40,76,.8)}
+.focus .fname{font-family:'Cinzel',serif;font-size:11.5px;letter-spacing:.06em;color:var(--gold-soft);text-transform:uppercase}
+.focus .fdesc{font-size:11px;color:var(--ivory-dim);margin-top:2px;line-height:1.32}
+.focus .tgt{font-size:10.5px;color:var(--flame);margin-top:3px;font-family:'IBM Plex Mono',monospace}
+.focus.sel{border-color:var(--gold);background:linear-gradient(180deg,rgba(216,181,101,.16),rgba(21,29,58,.7));box-shadow:0 0 0 1px var(--gold-dim) inset}
+.focus.sel:after{content:"✦";position:absolute;top:6px;right:8px;color:var(--gold);font-size:11px}
+.focus:disabled{opacity:.4;cursor:not-allowed}.focus .lock{position:absolute;top:7px;right:8px;font-size:10px;color:var(--ivory-dim)}
+.btnrow{display:flex;gap:8px;margin-top:11px}
+.btn{flex:1;font-family:'Cinzel',serif;letter-spacing:.13em;text-transform:uppercase;font-size:11.5px;padding:11px;border-radius:10px;border:1px solid var(--gold-dim);background:linear-gradient(180deg,var(--gold),var(--gold-dim));color:#241a08;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover:not(:disabled){filter:brightness(1.08)}.btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+.btn.ghost{background:transparent;color:var(--gold-soft);border-color:var(--line2)}.btn.ghost:hover{background:rgba(216,181,101,.08)}
+.selcount{font-size:11.5px;color:var(--ivory-dim);margin-top:9px;text-align:center;font-style:italic}
+.modepanel{margin-top:9px;border:1px solid var(--line);border-radius:10px;background:rgba(12,17,36,.42);padding:9px 11px}
+.modepanel .mh{font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.modepanel .mh .tag{color:var(--flame);font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:400;letter-spacing:0}
+.modepanel select{width:100%;background:var(--night);border:1px solid var(--line2);border-radius:8px;color:var(--ivory);font-family:'Spectral',serif;font-size:13px;padding:8px 9px}
+.modepanel .mdesc{font-size:11.5px;color:var(--ivory-dim);margin-top:6px;line-height:1.35}
+.modepanel .mmeta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--gold-soft);margin-top:5px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.modepanel .mmeta .b{color:var(--garnet)}.modepanel .mmeta .g{color:var(--sage)}
+.modepanel .dseg{display:flex;gap:5px;margin-top:7px}
+.modepanel .dseg button{flex:1;padding:5px 0;border-radius:7px;border:1px solid var(--line);background:rgba(21,29,58,.6);color:var(--ivory-dim);cursor:pointer;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.05em}
+.modepanel .dseg button.on{border-color:var(--gold);color:var(--gold-soft);background:rgba(216,181,101,.12)}
+.labor{display:flex;gap:6px;margin-top:11px}
+.labor .lb{flex:1;border:1px solid var(--line);border-radius:8px;padding:6px 3px;text-align:center;background:rgba(12,17,36,.35)}
+.labor .lb .k{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ivory-dim)}
+.labor .lb .v{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold-soft);margin-top:1px}
+.labor .lb.warn{border-color:var(--garnet);background:rgba(192,90,78,.08)}.labor .lb.warn .v{color:var(--garnet)}
+.assets{font-size:11px;color:var(--ivory-dim);margin-top:9px;line-height:1.55;border-top:1px solid var(--line);padding-top:8px}
+.assets b{color:var(--gold-soft);font-family:'IBM Plex Mono',monospace}
+.foodwarn{margin-top:8px;font-size:11.5px;color:var(--garnet);font-style:italic}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.toolbar .btn{flex:1 1 auto;min-width:92px;font-size:10.5px;padding:9px}
+.tabs{display:flex;gap:6px;margin:16px 0 12px;flex-wrap:wrap}
+.tab{font-family:'Cinzel',serif;letter-spacing:.13em;text-transform:uppercase;font-size:11px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:rgba(21,29,58,.5);color:var(--ivory-dim);cursor:pointer}
+.tab.active{color:var(--gold-soft);border-color:var(--gold-dim);background:rgba(216,181,101,.1)}
+.pane{display:none}.pane.active{display:block}
+.entry{border-left:2px solid var(--line2);padding:2px 0 14px 15px;margin-left:5px;position:relative}
+.entry:before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--gold-dim);box-shadow:0 0 0 3px var(--night)}
+.entry.mile:before{background:var(--flame);box-shadow:0 0 0 3px var(--night),0 0 12px 2px rgba(239,154,61,.6)}
+.entry .yhead{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.08em;color:var(--gold-soft);text-transform:uppercase}
+.entry .statline{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ivory-dim);margin:5px 0;background:rgba(12,17,36,.4);border:1px solid var(--line);border-radius:6px;padding:6px 9px;white-space:pre-wrap;line-height:1.5}
+.entry .res{margin:5px 0 0;font-size:13px}.entry .res b{color:var(--gold-soft)}
+.entry .milebox{margin-top:8px;border:1px solid rgba(239,154,61,.4);border-radius:8px;padding:8px 11px;background:rgba(239,154,61,.07)}
+.entry .milebox .t{font-family:'Cinzel',serif;font-size:11.5px;letter-spacing:.08em;color:var(--flame);text-transform:uppercase}.entry .milebox p{margin-top:4px}
+.tiprow{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--line);gap:10px}
+.tiprow .k{color:var(--ivory-dim)}.tiprow .v{font-family:'IBM Plex Mono',monospace;color:var(--gold-soft);text-align:right}
+.pill{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-top:8px}
+.p-capital{background:rgba(239,154,61,.15);color:var(--flame);border:1px solid rgba(239,154,61,.4)}
+.p-owned{background:rgba(127,160,106,.15);color:var(--sage);border:1px solid rgba(127,160,106,.4)}
+.p-vassal{background:rgba(74,116,214,.15);color:var(--lapis);border:1px solid rgba(74,116,214,.4)}
+.p-known{background:rgba(216,181,101,.12);color:var(--gold-dim);border:1px solid var(--line2)}
+.p-hostile{background:rgba(192,90,78,.15);color:var(--garnet);border:1px solid rgba(192,90,78,.4)}
+.odds{margin-top:10px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:rgba(12,17,36,.4)}
+.odds h4{margin:0 0 5px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-soft);display:flex;justify-content:space-between}
+.odds .big{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--flame)}
+.odds .mod{font-size:11px;color:var(--ivory-dim);display:flex;justify-content:space-between;padding:1px 0}
+.odds .mod .g{color:var(--sage)}.odds .mod .b{color:var(--garnet)}
+.act{width:100%;margin-top:8px;font-family:'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase;font-size:11px;padding:9px;border-radius:8px;cursor:pointer;border:1px solid var(--line2);background:rgba(21,29,58,.7);color:var(--gold-soft)}
+.act:hover{border-color:var(--gold-dim);background:rgba(28,40,76,.9)}
+.act.armed{border-color:var(--flame);color:var(--flame);background:rgba(239,154,61,.1)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid var(--gold-dim);color:var(--gold-soft);padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:80;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.overlay{position:fixed;inset:0;background:rgba(6,9,20,.82);display:none;align-items:center;justify-content:center;z-index:90;padding:18px;backdrop-filter:blur(3px)}.overlay.show{display:flex}
+.modal{max-width:560px;width:100%;border:1px solid var(--gold-dim);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--night2));box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:90vh;overflow:auto}
+.modal .mhead{font-family:'Cinzel',serif;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-soft);font-size:15px;padding:15px 20px;border-bottom:1px solid var(--line)}.modal .mbody{padding:17px 20px}.modal p{font-size:14px}
+.opt-row{margin:14px 0}.opt-row .ol{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;min-width:70px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(21,29,58,.6);color:var(--ivory-dim);cursor:pointer;font-family:inherit;font-size:12.5px}
+.seg button.on{border-color:var(--gold);color:var(--gold-soft);background:rgba(216,181,101,.12)}
+.fcol{display:flex;flex-direction:column;gap:7px}
+.fchoice{text-align:left;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:rgba(21,29,58,.6);color:var(--ivory);cursor:pointer;font-family:inherit;font-size:12.5px;line-height:1.35}
+.fchoice:hover{border-color:var(--gold-dim);background:rgba(28,40,76,.8)}
+.fchoice.on{border-color:var(--gold);background:linear-gradient(180deg,rgba(216,181,101,.16),rgba(21,29,58,.7));box-shadow:0 0 0 1px var(--gold-dim) inset}
+.fchoice b{color:var(--gold-soft)}
+.relcard{border:1px solid var(--gold-dim);border-radius:10px;padding:12px 14px;background:rgba(239,154,61,.06);margin:12px 0}
+.relcard .rr{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.06em;color:var(--flame)}
+.relcard .rd{font-size:12.5px;color:var(--ivory-dim);margin-top:5px;line-height:1.4}
+.rel-stat{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.rel-stat .k{color:var(--ivory-dim)}.rel-stat .v{font-family:'IBM Plex Mono',monospace;color:var(--gold-soft)}
+.tenet-chip{display:inline-block;font-size:11px;border:1px solid var(--gold-dim);color:var(--gold-soft);border-radius:16px;padding:3px 10px;margin:4px 5px 0 0}
+input.seed{width:100%;background:var(--night);border:1px solid var(--line);border-radius:8px;color:var(--ivory);font-family:'IBM Plex Mono',monospace;font-size:14px;padding:10px}
+textarea.save{width:100%;height:100px;background:var(--night);border:1px solid var(--line);border-radius:8px;color:var(--ivory-dim);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:9px;resize:vertical}
+.codex h3{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.1em;color:var(--gold-soft);text-transform:uppercase;margin:18px 0 7px;border-bottom:1px solid var(--line);padding-bottom:5px}.codex h3:first-child{margin-top:2px}
+.codex p{font-size:14px;margin:7px 0}.codex .term{color:var(--gold-soft);font-weight:600}.codex ul{padding-left:18px}.codex li{font-size:13.5px;margin:4px 0}
+.foot{margin-top:24px;text-align:center;font-size:11px;color:var(--ivory-dim)}
+.mile-flash{animation:mf 2s ease}@keyframes mf{0%,100%{box-shadow:none}25%{box-shadow:0 0 0 2px var(--flame),0 0 30px 4px rgba(239,154,61,.5)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crest"><div class="flame-wrap"><div class="flame"></div></div>
+      <div class="title"><h1 id="realmName">Crown Waters</h1><div class="sub" id="realmSub">a procedural chronicle</div></div></div>
+    <span class="seedchip" id="seedChip">seed —</span>
+    <div class="era-badge"><div class="yr" id="yearLabel">Year 1</div><div class="era" id="eraLabel">Founding &amp; Survival</div></div>
+  </header>
+  <div class="grid">
+    <div class="card mapcard">
+      <h2><span class="glyph">✦</span> <span id="mapTitle">The Realm</span></h2>
+      <div class="mapwrap" id="mapwrap">
+        <svg id="map" viewBox="0 0 2400 1720" preserveAspectRatio="xMidYMid meet" aria-label="Map"></svg>
+        <div class="compass">N ↑</div>
+        <div class="mapctrl"><button id="zoomIn">＋</button><button id="zoomOut">－</button><button id="zoomReset">⌂</button></div>
+        <div class="scalebar" id="scalebar"></div>
+        <div class="hint">drag to pan · scroll to zoom · tap a place</div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--flame)"></i>Capital</span>
+        <span><i class="dot" style="background:var(--sage)"></i>Held</span>
+        <span><i class="dot" style="background:var(--lapis)"></i>Converted</span>
+        <span><i class="dot" style="background:var(--gold-dim)"></i>Known</span>
+        <span><i class="dot" style="background:var(--garnet)"></i>Hostile</span>
+        <span style="color:var(--gold-dim)">— roads · ~ river</span>
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="glyph">❖</span> Realm Ledger</h2><div class="body" id="ledgerBody"></div></div>
+      <div class="card" style="margin-top:14px"><h2><span class="glyph">◈</span> <span id="infoTitle">A place on the map</span></h2><div class="body" id="infoBody"><p class="helptext">Tap any known settlement to see its people, culture, faith and standing — and your odds of taking it by sword or by the faith.</p></div></div>
+      <div class="card" style="margin-top:14px"><h2><span class="glyph">✶</span> Council of the Year</h2>
+        <div class="body">
+          <p class="helptext" id="actionHelp">Choose two priorities. To conquer or convert a place, select it on the map first.</p>
+          <div class="focus-grid" id="focusGrid"></div>
+          <div id="modePanels"></div>
+          <div class="selcount" id="selCount">0 of 2 chosen</div>
+          <div class="btnrow"><button class="btn" id="advanceBtn" disabled>Advance the Year ▸</button></div>
+          <div class="toolbar"><button class="btn ghost" id="newBtn">New World</button><button class="btn ghost" id="saveBtn">Save</button><button class="btn ghost" id="loadBtn">Load</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs"><button class="tab active" data-pane="chronicle">The Chronicle</button><button class="tab" data-pane="religion">The Faith</button><button class="tab" data-pane="codex">Codex — how the realm works</button></div>
+  <div class="pane active" id="pane-chronicle"><div class="card"><div class="body" id="chronicle"></div></div></div>
+  <div class="pane" id="pane-religion"><div class="card"><div class="body codex" id="religion"></div></div></div>
+  <div class="pane" id="pane-codex"><div class="card"><div class="body codex" id="codex"></div></div></div>
+  <div class="foot">Every world is generated from a seed · faith and the sword both take land, each with its own odds · distances are to scale</div>
+</div>
+<div id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+"use strict";
+/* ================= RNG + helpers ================= */
+function mulberry(seed){let a=seed>>>0;return function(){a|=0;a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+const clamp=(x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const pick=(r,a)=>a[Math.floor(r()*a.length)];
+const chance=(r,p)=>r()<p;
+
+/* ================= name grammars ================= */
+const PRE=["Ta","Da","Gor","Abj","Az","Nar","Sar","Vish","Bah","Ard","Khu","Gu","Vi","Ir","Mah","Hor","Tir","Es","Pey","Ka","Ba","Sho","Mith","Yaz","Den","Pars","Ush","Zar","Fra","Rov","An","Shir","Kev","Damav"];
+const MID=["ja","va","ra","na","sha","zi","du","mi","go","ba","ru","se","ta","khe","vi","da","ne","za","hi","mo"];
+const END=["b","th","n","d","r","sh","kh","z","m","dan","gird","bad","kert","van","abad","mar","os","eth","dar","pur","shan"];
+const GEO=["River","Ford","Stone","Oak","Ash","Fen","Reed","Clay","Hill","Vale","Bend","Water","Mill","Long","Deep","Green","Elder","North","Bright","Salt"];
+const HOLD=["hold","ford","mere","stead","gate","reach","crossing","market","bury","haven","fold","wick","meet","barrow"];
+const FPRE=["Green","Golden","Broad","Sun","Wheat","Rill","Meadow","Elm","Willow","Fern","Barley","Clover"],FSUF=["field","dale","hollow","furrow","acre","meadow","brook","grove","bank","holt"];
+const IPRE=["Iron","Grey","Red","Flint","Craig","Storm","Bone","Black","Frost","Ash"],ISUF=["claw","fang","spear","axe","shield","hammer","stone","maw","horn","brand"];
+const NOMAD=["Windriders","Dust-Kin","Free Horse","Salt Walkers","Grass Lords","Sky-Herd","Long Riders","Ash Nomads"];
+const REGADJ=["Ashen","Sunder","Gilded","Pale","Ember","Drowned","Silver","Thorn","Wind","Hollow","Bright","Cold","Elder","Salt","Amber"];
+const REGFEAT={mtn:["Peaks","Crags","Spine","Highlands","Fells","Reach"],forest:["Woods","Wilds","Timberland","Greenway","Deepwood"],plains:["Plains","Heartland","Fields","Steppe-Edge","Vale"],coast:["Coast","Strand","Shorelands","Bight","Reach"],steppe:["Steppe","Wastes","Grasslands","Downs"],marsh:["Marshes","Fens","Mire","Wetlands"],isles:["Isles","Archipelago","Shoals","Scatter"]};
+const FAITHS=["the Old Gods","the Tide Mother","the Ashen Flame","the Star-Kin","the Deep Below","the Horned Lord","the Two Serpents","the Grey Fathers"];
+function crownName(r){let s=pick(r,PRE);if(r()<0.75)s+=pick(r,MID);s+=pick(r,END);if(s.length<5)s=pick(r,PRE)+pick(r,MID)+pick(r,END);return s[0].toUpperCase()+s.slice(1);}
+function foundingName(r){return pick(r,GEO)+pick(r,HOLD);}
+function farmName(r){return pick(r,FPRE)+pick(r,FSUF);}
+function ironName(r){return pick(r,IPRE)+pick(r,ISUF);}
+function regionName(r,terr){return "the "+pick(r,REGADJ)+" "+pick(r,REGFEAT[terr]||REGFEAT.plains);}
+
+/* ---- religion generation + doctrine ---- */
+const DEITY=["the Flame","the Deep","the Dawn","the Silent Star","the World-Tree","the Turning Wheel","the Unmoved","the Radiance","the Ashen Mother","the Ninefold","the Tide","the Ever-Burning","the Hidden Sun","the Grey Between","the First Word","the Long Dark","the Bright Accord","the Thousand Eyes","the Sky-Father","the Deep Root","the Wandering Star","the Pale Sister","the Kindled Word","the Vast Quiet"];
+const RFORM=["Faith","Way","Creed","Covenant","Communion","Order","Path","Cult","Church"];
+const RBOOK=["Codex","Scrolls","Testament","Canticles","Verses","Tablets","Litanies","Chronicle","Book"];
+const SIGIL=["a rayed sun","a coiled serpent","an open eye","a nine-pointed star","a rising flame","a silver tree","a turning wheel","a pale crescent","a golden hand","a black sun","a winged disc","a single tear"];
+const EPITHET=["Messenger","Voice","Shepherd","Vicar","Hand","Herald","Chosen","Kindler","Warden"];
+function genReligion(r){const d=pick(r,DEITY);return {deity:d,name:`the ${pick(r,RFORM)} of ${d}`,book:`the ${pick(r,RBOOK)} of ${d}`,sigil:pick(r,SIGIL),epithet:`${pick(r,EPITHET)} of ${d}`};}
+const TENETS={
+  sword:{n:"The Drawn Sword",tag:"Militant",d:"Holy war: better odds against rival-faith peoples, who convert swiftly once taken. But restless zealots blunt diplomacy."},
+  hand:{n:"The Open Hand",tag:"Syncretic",d:"Missions win rival-faith and wary peoples far more easily, and converts settle well — at the cost of strict zeal."},
+  ledger:{n:"The Blessed Ledger",tag:"Mercantile",d:"Temples tithe: more trade income, and coin from every temple raised."},
+  spare:{n:"The Spare Path",tag:"Ascetic",d:"Discipline lifts authority and order — but austerity slows the people's growth."},
+  crown:{n:"The Living Crown",tag:"Ruler-cult",d:"You are held divine: strong authority and near-immunity to schism — yet should authority ever crash, faith crashes with it."},
+  works:{n:"The Great Works",tag:"Monumental",d:"Grand temples raise faith and authority beyond the ordinary, though they cost more to build."},
+};
+const STANCES={
+  subservient:{n:"Crown-led priesthood",d:"The clergy serve the throne. +authority; priests gather power only slowly; schism is unlikely."},
+  autonomous:{n:"Independent priesthood",d:"A clergy of its own mind. Faith spreads faster — but the priesthood grows powerful and schism looms."},
+};
+function hasTenet(k){return S.religion&&S.religion.tenets&&S.religion.tenets.includes(k);}
+function stanceIs(k){return S.religion&&S.religion.stance===k;}
+
+/* ================= world generation ================= */
+const KM_PER_UNIT=0.42;
+const SIZES={small:{w:1900,h:1360,reg:5},medium:{w:2400,h:1720,reg:7},large:{w:3000,h:2150,reg:9},vast:{w:3700,h:2650,reg:12}};
+const DENS={sparse:[2,3],balanced:[3,5],crowded:[5,8]};
+const ISLES={none:0,few:1,some:2,many:4};
+const TEMP={peaceful:{hostile:.12,wary:.2},mixed:{hostile:.3,wary:.28},hostile:{hostile:.5,wary:.28}};
+const CULT_MART={hostile:1.25,wary:1.05,neutral:0.9,peaceful:0.7,devout:1.0};
+
+function settlementType(r,terr){
+  if(terr==="mtn")return chance(r,.55)?"hilltribe":"town";
+  if(terr==="forest")return chance(r,.5)?"foresttribe":"village";
+  if(terr==="steppe")return chance(r,.6)?"nomad":"village";
+  if(terr==="coast")return chance(r,.35)?"port":(chance(r,.5)?"fishing":"city");
+  if(terr==="marsh")return chance(r,.5)?"village":"town";
+  if(terr==="isles")return chance(r,.5)?"island-village":"island-port";
+  // plains/heartland
+  const x=r();return x<.15?"city":x<.45?"town":"village";
+}
+const TYPE_POP={city:[3000,8000],port:[2000,5000],town:[1000,3000],village:[200,900],fishing:[300,1200],hilltribe:[500,1600],foresttribe:[400,1400],nomad:[500,1800],"island-village":[200,800],"island-port":[1200,3500]};
+function typePop(r,t){const[a,b]=TYPE_POP[t]||[300,1000];return Math.round(a+r()*(b-a));}
+function typeName(r,t){
+  if(t==="hilltribe"||t==="foresttribe")return ironName(r);
+  if(t==="nomad")return pick(r,NOMAD);
+  if(t==="village"||t==="fishing"||t==="island-village")return chance(r,.6)?farmName(r):crownName(r);
+  return crownName(r);
+}
+function cultureFor(r,t,temp){
+  const T=TEMP[temp];
+  if(t==="hilltribe"||t==="foresttribe"||t==="nomad")return chance(r,T.hostile+.15)?"hostile":chance(r,.5)?"wary":"neutral";
+  if(t==="city"||t==="port"||t==="island-port")return chance(r,.3)?"devout":chance(r,.5)?"neutral":"wary";
+  return chance(r,T.hostile)?"hostile":chance(r,T.wary)?"wary":chance(r,.55)?"peaceful":"neutral";
+}
+const TERRAINS=["mtn","forest","plains","coast","steppe","marsh"];
+function terrainForAngle(r,ang,rad,maxR){
+  // west->mtn, north->forest, south/east near edge->coast, mid->plains/steppe/marsh
+  const deg=(ang*180/Math.PI+360)%360;
+  if(rad>maxR*0.72){ if(deg>300||deg<60)return "coast"; }
+  if(deg>=110&&deg<=250)return chance(r,.6)?"mtn":"steppe";        // west
+  if(deg>250&&deg<330)return chance(r,.6)?"forest":"plains";        // north-ish
+  if(deg<40||deg>320)return chance(r,.5)?"coast":"plains";          // east
+  return chance(r,.5)?"plains":pick(r,["steppe","marsh","forest"]);
+}
+
+function genWorld(seed,cfg){
+  const r=mulberry(seed>>>0);
+  const SZ=SIZES[cfg.size]||SIZES.medium, W={seed,cfg,w:SZ.w,h:SZ.h,set:{},regions:[],faiths:[],river:"",mtns:[],trees:[]};
+  const cx=SZ.w*0.42+(r()-.5)*120, cy=SZ.h*0.5+(r()-.5)*120;
+  W.cap={x:cx,y:cy};
+  // rival faiths
+  const nf=1+Math.floor(r()*2); const fs=FAITHS.slice(); const faiths=[]; for(let i=0;i<nf;i++){faiths.push(fs.splice(Math.floor(r()*fs.length),1)[0]);} W.faiths=faiths;
+  // regions ring around capital
+  const maxR=Math.min(SZ.w,SZ.h)*0.46;
+  const nReg=SZ.reg;
+  const dens=DENS[cfg.density]||DENS.balanced;
+  let idx=0;
+  // heartland (capital region)
+  addRegion("plains", cx, cy, true);
+  for(let i=0;i<nReg-1;i++){
+    const ang=(i/(nReg-1))*Math.PI*2 + (r()-.5)*0.5;
+    const rad=maxR*(0.42+r()*0.55);
+    const terr=terrainForAngle(r,ang,rad,maxR);
+    const rx=clamp(cx+Math.cos(ang)*rad,140,SZ.w-140), ry=clamp(cy+Math.sin(ang)*rad,120,SZ.h-120);
+    addRegion(terr,rx,ry,false);
+  }
+  // islands
+  const nIsle=ISLES[cfg.islands]||0;
+  for(let i=0;i<nIsle;i++){const ix=SZ.w*(0.72+r()*0.24), iy=SZ.h*(0.68+r()*0.28);addRegion("isles",clamp(ix,160,SZ.w-120),clamp(iy,160,SZ.h-120),false);}
+
+  function addRegion(terr,rx,ry,isCap){
+    const reg={id:idx++,terr,x:rx,y:ry,rad:Math.min(SZ.w,SZ.h)*(0.10+r()*0.05),name:isCap?"the Heartland":regionName(r,terr),discovered:isCap};
+    W.regions.push(reg);
+    const [lo,hi]=dens; let count=isCap?3:(lo+Math.floor(r()*(hi-lo+1)));
+    for(let s=0;s<count;s++){
+      const a=r()*Math.PI*2, dd=reg.rad*(0.25+r()*0.9);
+      let x=clamp(rx+Math.cos(a)*dd,90,SZ.w-90), y=clamp(ry+Math.sin(a)*dd,80,SZ.h-80);
+      const t=settlementType(r,terr);
+      const key="s"+Object.keys(W.set).length;
+      const pop=typePop(r,t);
+      const cult=cultureFor(r,t,cfg.temperament);
+      const hasFaith=(t==="city"||t==="port"||cult==="devout"||chance(r,.3));
+      W.set[key]={key,type:t,region:reg.id,terr,x,y,name:typeName(r,t),pop,
+        culture:cult, faith: hasFaith? pick(r,faiths):null, conv:0,
+        mart:CULT_MART[cult]||1, status:"hidden"};
+    }
+  }
+  // pick the capital settlement inside heartland (closest to cap point)
+  let capKey=null,best=1e9; for(const k in W.set){const p=W.set[k];const d=Math.hypot(p.x-cx,p.y-cy);if(W.regions[p.region].terr==="plains"&&d<best){best=d;capKey=k;}}
+  if(!capKey){capKey=Object.keys(W.set)[0];}
+  const cap=W.set[capKey]; cap.type="city"; cap.name=null; cap.culture="peaceful"; cap.faith="light"; cap.conv=100; cap.status="capital"; cap.pop=500; W.capKey=capKey;
+  W.cap={x:cap.x,y:cap.y};
+  // founding + crown names
+  W.founding=foundingName(r); W.crown=crownName(r); cap.name=W.founding;
+  // tag signature roles among generated settlements (for milestone flavor), best-effort
+  W.roles={};
+  W.roles.hill = nearestType(cap,["hilltribe"]) || nearestType(cap,["foresttribe","nomad"]);
+  W.roles.coastcity = nearestType(cap,["city","port"], s=>s.terr==="coast") || nearestType(cap,["port","city"]);
+  function nearestType(from,types,extra){let bk=null,bd=1e9;for(const k in W.set){const s=W.set[k];if(k===capKey)continue;if(!types.includes(s.type))continue;if(extra&&!extra(s))continue;const d=Math.hypot(s.x-from.x,s.y-from.y);if(d<bd){bd=d;bk=k;}}return bk;}
+  // distances (km) from capital
+  for(const k in W.set){const p=W.set[k];p.distKm=Math.round(Math.hypot(p.x-cx,p.y-cy)*KM_PER_UNIT);}
+  // reveal capital region settlements + nearest region
+  W.regions[0].discovered=true;
+  for(const k in W.set){if(W.set[k].region===0)W.set[k].status=W.set[k].status==="capital"?"capital":initStatus(W.set[k]);}
+  // reveal a couple of nearest settlements outside heartland so map isn't empty
+  const outs=Object.values(W.set).filter(s=>s.region!==0).sort((a,b)=>a.distKm-b.distKm).slice(0,3);
+  outs.forEach(s=>{s.status=initStatus(s);W.regions[s.region].discovered=true;});
+  function initStatus(s){return s.culture==="hostile"?"hostile":"known";}
+  // river through capital
+  const rp=(x,y)=>({x:clamp(x+(r()-.5)*80,40,SZ.w-40),y:clamp(y+(r()-.5)*70,20,SZ.h-20)});
+  const a1=rp(cx-60,60),b1=rp(cx-30,cy*0.5),c1={x:cx,y:cy},d1=rp(cx+SZ.w*0.18,cy+SZ.h*0.28),e1=rp(SZ.w*0.9,SZ.h*0.95);
+  W.river=`M ${a1.x} ${a1.y} C ${b1.x} ${b1.y}, ${c1.x-60} ${c1.y-100}, ${c1.x} ${c1.y} S ${d1.x} ${d1.y}, ${e1.x} ${e1.y}`;
+  // terrain glyphs per region
+  for(const reg of W.regions){
+    if(reg.terr==="mtn"){for(let i=0;i<10;i++){const a=r()*6.28,dd=reg.rad*r();W.mtns.push({x:reg.x+Math.cos(a)*dd,y:reg.y+Math.sin(a)*dd,s:16+r()*18});}}
+    if(reg.terr==="forest"){for(let i=0;i<16;i++){const a=r()*6.28,dd=reg.rad*r();W.trees.push({x:reg.x+Math.cos(a)*dd,y:reg.y+Math.sin(a)*dd,s:8+r()*7});}}
+  }
+  return W;
+}
+
+/* ================= engine ================= */
+const K={r0:0.02,k_m:80,ration:1,buffer:1,taxRate:0.015,tradeBase:20,routeGain:0.15,sUp:0.02,aUp:8,trainBase:60,distPenalty:0.0013,mission:15};
+const ERAS=[[8,"Founding & Survival"],[16,"Consolidation"],[25,"Regional Expansion"],[34,"The Provincial State"],[43,"Professionalization"],[53,"Expansion by Faith & Sword"],[9999,"Consolidation of the Realm"]];
+const eraFor=y=>ERAS.find(e=>y<=e[0])[1];
+const FOCI={
+  trade:{name:"Trade",desc:"Work river & coast. Fills the treasury.",req:()=>true},
+  infra:{name:"Infrastructure",desc:"Roads, walls, granaries.",req:()=>true},
+  agri:{name:"Agriculture",desc:"Farms & canals. Feeds the people.",req:()=>true},
+  army:{name:"Military",desc:"Drill spears, bows & horse.",req:()=>true},
+  navy:{name:"Naval Power",desc:"Warships — reach the isles.",req:s=>s.flags.shipyard,lock:"Needs a shipyard"},
+  diplo:{name:"Diplomacy",desc:"Envoys & tribute cool hostility.",req:()=>true},
+  faith:{name:"The Faith",desc:"Spread devotion, raise temples, send missions to your target.",req:s=>s.flags.codex,lock:"Found the faith first"},
+  intel:{name:"Intelligence",desc:"Scouts reveal the lands beyond.",req:()=>true},
+  roads:{name:"Roads & Logistics",desc:"Bind provinces; ease far campaigns.",req:()=>true},
+  campaign:{name:"Campaign",desc:"March on your selected target.",req:s=>s.military>=250,lock:"Needs 250+ soldiers"},
+};
+let W=null,S=null,cam={k:1,x:0,y:0},selected=null,dragMoved=false;
+
+function newState(seed,cfg){
+  W=genWorld(seed>>>0,cfg);
+  const cap=W.set[W.capKey];
+  return {seed,cfg,year:1,name:W.founding,crown:W.crown,renamed:false,
+    pop:500,gran:1000,food:55,treasury:60,military:0,retinue:0,retinueName:null,navy:0,
+    faith:0,authority:55,infra:8,culture:5,integ:70,logistics:0,
+    merchants:0,tradeFleet:0,guilds:0,quality:1.0,farmland:0,irrigation:0,granaryCap:1400,livestock:0,depot:false,
+    buildings:{},mode:{},intel:{dir:"E"},
+    religion:null,orthodoxy:0,priesthood:0,temples:0,unity:100,pendingFound:false,pendingDecision:null,
+    openRoutes:1,navalYears:0,relFrontier:-30,
+    selected:[],lastFoci:[],target:null,
+    flags:{codex:false,walls:false,shipyard:false,strongNavy:false,southTrade:false,frontierPeace:false,retinue:false,firstConv:false,firstConq:false,onIsle:false},
+    pendingRetinue:false,
+    done:{},projWalls:0,justRevealed:[],chronicle:[],over:false};
+}
+function setStatus(k,st){W.set[k].status=st;}
+function held(){return Object.values(W.set).filter(s=>s.status==="owned"||s.status==="capital").length;}
+function converted(){return Object.values(W.set).filter(s=>s.status==="vassal").length;}
+function distKm(k){return W.set[k].distKm||0;}
+let _er=null;function rngE(){if(!_er)_er=mulberry((S.seed^0x51ed)+S.year*2654435761);return _er();}
+
+/* ---- odds calculators (shared by info panel + resolution) ---- */
+const TERR_ATK={plains:1.1,coast:1.0,steppe:1.05,marsh:0.8,forest:0.85,mtn:0.7,isles:0.75};
+const TERR_DEF={plains:1.0,coast:1.05,steppe:0.95,marsh:1.2,forest:1.25,mtn:1.6,isles:1.35};
+function militaryOdds(k){
+  const t=W.set[k], d=distKm(k), isIsle=(t.terr==="isles");
+  const supply=clamp(1-d*K.distPenalty/(1+(S.infra+S.logistics)/120),0.35,1);
+  const tAtk=TERR_ATK[t.terr]||1, tDef=TERR_DEF[t.terr]||1;
+  const canReach=!isIsle || S.navy>0;
+  const rivalFaith=(t.faith&&t.faith!=="light");
+  const holy=(hasTenet("sword")&&rivalFaith)?1.15:1;
+  const eff=(S.military*(S.quality||1)+(S.retinue||0)*1.6)*supply*tAtk*(isIsle?(S.navy>0?0.85:0):1)*holy;
+  const def=Math.max(1,t.pop*t.mart*tDef*(t.status==="hostile"?1.1:1));
+  const cChance=canReach?clamp(Math.round(100*eff/(eff+def*0.9))):0;
+  const mods=[
+    ["Your host",`${fmt(S.military)}${(S.retinue||0)?` incl. ${S.retinue} ${S.retinueName||"retinue"}`:''}`,0],
+    ["Distance / supply",`${d} km · ${Math.round(supply*100)}%`,supply<0.8?-1:0],
+    [t.terr+" terrain",`atk ×${tAtk} · def ×${tDef}`,tDef>1?-1:1],
+    ["Their strength",`${fmt(t.pop)} · ${t.culture}`,-1],
+  ];
+  if(holy>1)mods.push(["Holy war (Drawn Sword)","+15% vs "+t.faith,1]);
+  if(isIsle)mods.push(["Across the sea",S.navy>0?"fleet ready":"needs a fleet",S.navy>0?-1:-2]);
+  return {chance:cChance,canReach,mods};
+}
+function faithOdds(k){
+  const t=W.set[k];
+  let cultM={peaceful:1.35,neutral:1.0,wary:0.75,hostile:0.5,devout:0.45}[t.culture]||1;
+  const sizeM=clamp(1200/t.pop,0.4,1.7);
+  const rivalFaith=(t.faith&&t.faith!=="light");
+  let rivalM=rivalFaith?(hasTenet("hand")?0.95:0.6):1.0;
+  if(hasTenet("hand"))cultM=Math.min(1.6,cultM*1.25);
+  const distM=clamp(1-distKm(k)*0.0005,0.5,1);
+  const orthoM=1+(S.orthodoxy-50)/160;                    // strict doctrine spreads faster
+  const clergyM=stanceIs("autonomous")?1.25:(stanceIs("subservient")?0.9:1);
+  let gain=Math.max(1,Math.round(K.mission*(0.4+S.faith/90)*cultM*sizeM*rivalM*distM*orthoM*clergyM));
+  let absorb=t.conv>=55?clamp(Math.round((t.conv-45)*1.1*cultM*(hasTenet("hand")?1.2:1))):0;
+  const mods=[
+    ["Their culture",t.culture,cultM>=1?1:-1],
+    ["Their size",fmt(t.pop),sizeM>=1?1:-1],
+    ["Rival faith",rivalFaith?t.faith:"none",rivalM<1?-1:1],
+    ["Distance",distKm(k)+" km",distM<1?-1:0],
+    ["Doctrine · clergy",`ortho ${S.orthodoxy} · ${stanceIs("autonomous")?"clergy-led":"crown-led"}`,(orthoM*clergyM>=1)?1:-1],
+  ];
+  return {gain,absorb,conv:t.conv,mods};
+}
+
+/* ================= specializations (per-priority modes) ================= */
+const dirName=d=>({N:"north",E:"east",S:"south",W:"west"}[d]||d);
+const angleTo=s=>(Math.atan2(s.y-W.cap.y,s.x-W.cap.x)*180/Math.PI+360)%360;
+function recruit(res,label,n,q,gold){
+  const wf=Math.floor(S.pop*0.55), room=Math.max(0,Math.floor(wf*0.82)-S.military), take=Math.min(n,room);
+  S.treasury=Math.max(0,S.treasury-gold);
+  if(take<=0){res.push([label,`There are too few free hands to raise more troops — nearly all the working folk are already under arms. Grow the population or free some to the fields first.`]);return;}
+  S.quality=(S.quality*S.military+q*take)/(S.military+take); S.military+=take;
+  res.push([label,`Recruits muster from the population. <b>Result:</b> +${take} soldiers${take<n?" (all the free hands there were)":""}; army quality now ×${S.quality.toFixed(2)}.`]);
+}
+function intelCands(dir,range){
+  const dirAng={N:270,E:0,S:90,W:180}[dir], maxKm=Math.hypot(W.w,W.h)*KM_PER_UNIT;
+  const band=range==="near"?[0,maxKm*0.33]:range==="mid"?[maxKm*0.30,maxKm*0.66]:[maxKm*0.6,maxKm*3];
+  return Object.values(W.set).filter(s=>{if(s.status!=="hidden")return false;let dd=Math.abs(angleTo(s)-dirAng);if(dd>180)dd=360-dd;return dd<=55&&s.distKm>=band[0]&&s.distKm<=band[1];}).sort((a,b)=>a.distKm-b.distKm);
+}
+const intelP=r=>r==="near"?0.85:r==="mid"?0.6:0.4;
+function doIntel(res){
+  const dir=S.intel.dir||"E", range=S.mode.intel||"near", p=intelP(range);
+  S.treasury=Math.max(0,S.treasury-(range==="far"?14:range==="mid"?8:4));
+  const cands=intelCands(dir,range);
+  if(!cands.length){res.push(["Scouts",`Scouts range ${dirName(dir)} at ${range} reach but find only empty country in that quarter.`]);return;}
+  const found=[];for(const s of cands){if(found.length>=2)break;if(chance(rngE,p)){s.status=s.culture==="hostile"?"hostile":"known";S.justRevealed.push(s.key);W.regions[s.region].discovered=true;found.push(s);}}
+  if(found.length)res.push(["Scouts",`Ranging ${dirName(dir)} (${range} reach), scouts bring word of ${found.map(s=>`<b>${s.name}</b> — ${s.distKm} km`).join(", ")}.`]);
+  else res.push(["Scouts",`Scouts press ${dirName(dir)} at ${range} reach; there is something out there, but nothing is confirmed this year (${Math.round(p*100)}% odds — press again).`]);
+}
+function seaExplore(res){
+  const cands=Object.values(W.set).filter(s=>s.status==="hidden"&&(s.terr==="isles"||s.terr==="coast")).sort((a,b)=>a.distKm-b.distKm);
+  if(!cands.length){res.push(["Sea scouts","The captains find no new shore or isle this year."]);return;}
+  const found=cands.slice(0,2);found.forEach(s=>{s.status=s.culture==="hostile"?"hostile":"known";S.justRevealed.push(s.key);W.regions[s.region].discovered=true;});
+  res.push(["Sea scouts",`Ships trace the coast and the isles, finding ${found.map(s=>`<b>${s.name}</b>`).join(", ")}.`]);
+}
+function tradeBoon(res){
+  const cost=30; if(S.treasury<cost){res.push(["Ventures","The coffers cannot spare coin for foreign ventures this year."]);return;}
+  S.treasury-=cost; const p=clamp(0.3+S.merchants*0.012+S.guilds*0.1,0.1,0.9);
+  if(chance(rngE,p)){
+    const boons=[
+      ()=>{S.quality=Math.min(2.4,S.quality+0.12);return "a foreign master-smith's secrets — army quality rises";},
+      ()=>{S.farmland+=90;return "a hardy new crop from distant lands — farmland widens";},
+      ()=>{S.irrigation=Math.min(0.6,S.irrigation+0.05);return "a water-lifting engine — irrigation improves";},
+      ()=>{const g=Math.round(60+rngE()*90);S.treasury+=g;return `a shrewd resale worth ${g} coin`;},
+      ()=>{S.guilds+=1;return "a charter binding a new merchant guild";},
+      ()=>{if(S.flags.codex){S.faith=clamp(S.faith+8);return "a holy relic that stirs devotion";}S.infra=clamp(S.infra+5);return "lost engineering knowledge — works advance";},
+    ];
+    res.push(["Ventures",`Your factors succeed (${Math.round(p*100)}% odds): ${pick(rngE,boons)()}.`]);
+  } else res.push(["Ventures",`Your factors gamble on goods and lore but come away empty-handed (${Math.round(p*100)}% odds). The coin is spent.`]);
+}
+
+/* MODES[focus] = ordered list; each: key,name,desc,req(s)?,lock?,meta(s)?,run(res) */
+const MODES={
+  trade:[
+    {key:"land",name:"Land caravans",desc:"Build caravans and merchants; profit grows with the merchants you keep.",meta:s=>`merchants ${s.merchants} · +${Math.round(s.merchants*0.9*(1+s.guilds*0.12)*(s.integ/100))+8} coin`,
+      run(res){const dm=6+Math.floor(S.infra/22);S.merchants+=dm;const inc=Math.round(S.merchants*0.9*(1+S.guilds*0.12)*(S.integ/100))+8;S.treasury+=inc;res.push(["Caravans",`New caravans take the roads. <b>Result:</b> +${dm} merchants (now ${S.merchants}); +${inc} coin.`]);}},
+    {key:"sea",name:"Sea trade",req:s=>s.tradeFleet>0||s.flags.shipyard,lock:"Needs merchant ships",desc:"Work the sea lanes; profit grows with your merchant fleet — the great late-game earner.",meta:s=>`ships ${s.tradeFleet} · +${Math.round((6+s.tradeFleet*2.4)*s.openRoutes*(1+s.guilds*0.12))} coin`,
+      run(res){const inc=Math.round((6+S.tradeFleet*2.4)*S.openRoutes*(1+S.guilds*0.12));S.treasury+=inc;res.push(["Sea trade",`Merchantmen work the lanes. <b>Result:</b> +${inc} coin${S.tradeFleet===0?" (build a merchant fleet to grow this)":""}.`]);}},
+    {key:"mixed",name:"Mixed trade",desc:"A balance of caravan and quay — modest growth in both.",meta:s=>`+few merchants · steady coin`,
+      run(res){S.merchants+=3;const inc=Math.round(S.merchants*0.5+(6+S.tradeFleet*1.4)*S.openRoutes)+6;S.treasury+=inc;res.push(["Trade",`Caravan and quay both worked. <b>Result:</b> +3 merchants; +${inc} coin.`]);}},
+    {key:"acquire",name:"Buy goods & knowledge",desc:"Spend 30 coin to seek a boon — a craft, crop, relic or windfall. Chance rises with merchants and guilds.",meta:s=>`cost 30 · ${Math.round(clamp(0.3+s.merchants*0.012+s.guilds*0.1,0.1,0.9)*100)}% success`,
+      run(res){tradeBoon(res);}},
+  ],
+  infra:[
+    {key:"roads",name:"Roads & causeways",desc:"Bind the realm; infrastructure and a little logistics.",meta:()=>"+infra +logistics",
+      run(res){const i=6+Math.floor(rngE()*3);S.infra=clamp(S.infra+i);S.logistics=clamp(S.logistics+2);res.push(["Works",`Roads and causeways rise. <b>Result:</b> infrastructure +${i}, logistics +2.`]);}},
+    {key:"walls",name:"Walls & fortifications",desc:"Raise the walls; wards against raids and stiffens defence.",meta:()=>"+walls progress",
+      run(res){const labor=Math.max(20,S.pop*0.35-S.military);S.projWalls+=labor*0.7;S.infra=clamp(S.infra+2);res.push(["Walls",`Masons raise the ramparts. <b>Result:</b> the walls advance; infrastructure +2.`]);}},
+    {key:"granaries",name:"Granaries & storehouses",desc:"Store the surplus; steadies food against bad years.",meta:s=>`granary cap ${fmt(s.granaryCap)} → ${fmt(s.granaryCap+500)}`,
+      run(res){S.granaryCap+=500;S.gran=Math.min(S.granaryCap,S.gran+200);S.food=clamp(S.food+3);res.push(["Granaries",`New storehouses ring the city. <b>Result:</b> storage grows; food steadied (+3).`]);}},
+    {key:"aqueduct",name:"◆ Aqueduct",req:s=>s.pop>=1500,lock:"Needs 1,500 people",desc:"A great work: fresh water lifts food capacity and growth. Costs 60 coin.",meta:()=>"once · cost 60 · +food capacity",
+      run(res){if(S.buildings.aqueduct){res.push(["Aqueduct","It already carries its water."]);return;}if(S.treasury<60){res.push(["Aqueduct","Not enough coin (60 needed)."]);return;}S.treasury-=60;S.buildings.aqueduct=true;S.food=clamp(S.food+6);res.push(["✦ Aqueduct",`The aqueduct is completed — clean water reaches every ward. <b>Result:</b> food capacity and growth rise for good.`]);}},
+    {key:"citadel",name:"◆ Citadel",req:s=>s.military>=250,lock:"Needs 250 soldiers",desc:"A fortress-barracks: army quality and defence. Costs 70 coin.",meta:()=>"once · cost 70 · +quality",
+      run(res){if(S.buildings.citadel){res.push(["Citadel","It already looms over the city."]);return;}if(S.treasury<70){res.push(["Citadel","Not enough coin (70 needed)."]);return;}S.treasury-=70;S.buildings.citadel=true;S.quality=Math.min(2.4,S.quality+0.15);S.projWalls+=80;res.push(["✦ Citadel",`A citadel rises over ${S.name}. <b>Result:</b> army quality ×${S.quality.toFixed(2)}; the walls advance.`]);}},
+    {key:"bazaar",name:"◆ Grand Bazaar",req:s=>s.merchants>=40,lock:"Needs 40 merchants",desc:"A vast market: a guild and richer trade. Costs 60 coin.",meta:()=>"once · cost 60 · +guild",
+      run(res){if(S.buildings.bazaar){res.push(["Bazaar","It already thrives."]);return;}if(S.treasury<60){res.push(["Bazaar","Not enough coin (60 needed)."]);return;}S.treasury-=60;S.buildings.bazaar=true;S.guilds+=1;res.push(["✦ Grand Bazaar",`The Grand Bazaar opens its arcades. <b>Result:</b> a merchant guild is chartered; all trade grows.`]);}},
+    {key:"palace",name:"◆ Palace",req:s=>s.pop>=2500,lock:"Needs 2,500 people",desc:"A seat of state: authority and integration. Costs 80 coin.",meta:()=>"once · cost 80 · +authority",
+      run(res){if(S.buildings.palace){res.push(["Palace","It already stands in splendour."]);return;}if(S.treasury<80){res.push(["Palace","Not enough coin (80 needed)."]);return;}S.treasury-=80;S.buildings.palace=true;S.authority=clamp(S.authority+8);S.integ=clamp(S.integ+8);res.push(["✦ Palace",`A palace crowns the capital. <b>Result:</b> authority and integration rise for good.`]);}},
+    {key:"temple",name:"◆ Great Temple",req:s=>s.flags.codex&&s.faith>=45,lock:"Needs the faith · devotion 45",desc:"A monument to your god: devotion and authority. Costs 50 coin.",meta:()=>"cost 50 · +faith +temples",
+      run(res){if(S.treasury<50){res.push(["Temple","Not enough coin (50 needed)."]);return;}S.treasury-=50;S.temples++;S.faith=clamp(S.faith+8);S.authority=clamp(S.authority+4);res.push(["✦ Great Temple",`A great temple to ${S.religion?S.religion.deity:"your god"} is consecrated (${S.temples} temples). <b>Result:</b> devotion +8, authority +4.`]);}},
+  ],
+  agri:[
+    {key:"farms",name:"Break new farmland",desc:"Clear and plough new land — raises the ceiling on food.",meta:s=>`farmland +120`,
+      run(res){S.farmland+=120;S.food=clamp(S.food+3);res.push(["Fields",`New land is broken to the plough. <b>Result:</b> farmland widens; food +3.`]);}},
+    {key:"canals",name:"Canals & irrigation",desc:"Water the fields — each farmer yields more (efficiency).",meta:s=>`yield ×${(1+s.irrigation).toFixed(2)} → ×${(1+Math.min(0.6,s.irrigation+0.08)).toFixed(2)}`,
+      run(res){S.irrigation=Math.min(0.6,S.irrigation+0.08);S.food=clamp(S.food+4);res.push(["Canals",`The canals are cut deeper. <b>Result:</b> each farmer feeds more mouths; food +4.`]);}},
+    {key:"livestock",name:"Herds & livestock",desc:"Raise herds — steady food and a little trade good.",meta:()=>"+food ceiling +coin",
+      run(res){S.livestock+=110;const c=8;S.treasury+=c;S.food=clamp(S.food+3);res.push(["Herds",`The herds are grown out. <b>Result:</b> food and hides (+${c} coin).`]);}},
+    {key:"hunting",name:"Hunting & foraging",desc:"Work the wilds for a quick fill of the stores — little late-game scaling.",meta:()=>"+immediate stores",
+      run(res){S.gran=Math.min(S.granaryCap,S.gran+220);S.food=clamp(S.food+6);res.push(["Foraging",`Hunters and gatherers work the wilds. <b>Result:</b> the granaries fill (food +6 this year).`]);}},
+  ],
+  army:[
+    {key:"light-inf",name:"Light infantry",desc:"Skirmishers and spear-levies raised quickly and cheaply from the folk. Many, but lightly armed.",meta:s=>`+~${80+Math.floor(s.pop*0.02)} · q1.0 · 10 coin`,
+      run(res){recruit(res,"Light infantry",80+Math.floor(S.pop*0.02),1.0,10);}},
+    {key:"heavy-inf",name:"Heavy infantry",req:s=>s.infra>=18,lock:"Needs infrastructure 18",desc:"Armoured shield-line — fewer, far steadier in a stand-up fight.",meta:()=>"+~55 · q1.5 · 20 coin",
+      run(res){recruit(res,"Heavy infantry",55,1.5,20);}},
+    {key:"light-cav",name:"Light cavalry",req:s=>s.infra>=22,lock:"Needs infrastructure 22",desc:"Fast horse for flanking and pursuit.",meta:()=>"+~40 · q1.6 · 26 coin",
+      run(res){recruit(res,"Light cavalry",40,1.6,26);}},
+    {key:"cav-archer",name:"Cavalry archers",req:s=>s.infra>=28,lock:"Needs infrastructure 28",desc:"Horse-bowmen who harry and wheel — costly to train, deadly in the open.",meta:()=>"+~32 · q1.8 · 32 coin",
+      run(res){recruit(res,"Cavalry archers",32,1.8,32);}},
+    {key:"heavy-cav",name:"Heavy cavalry",req:s=>s.infra>=34||s.buildings.citadel,lock:"Needs infra 34 or a citadel",desc:"Armoured shock horse — few, dear, and shattering on the charge.",meta:()=>"+~26 · q2.0 · 40 coin",
+      run(res){recruit(res,"Heavy cavalry",26,2.0,40);}},
+    {key:"retinue",name:s=>"◆ "+(S.retinueName||"Retinue"),desc:"Your personal retinue of special units — the most training and coin, the finest troops in the realm. You name them when first they are raised.",meta:()=>"+~18 · q2.4 · 55 coin",req:s=>s.flags.retinue,lock:"Raise a retinue first (Year of the Retinue)",
+      run(res){if(S.treasury<55){res.push([S.retinueName||"Retinue","Not enough coin (55 needed)."]);return;}S.treasury-=55;const wf=Math.floor(S.pop*0.55),room=Math.max(0,Math.floor(wf*0.82)-S.military);const take=Math.min(18,room);if(take<=0){res.push([S.retinueName||"Retinue","Too few free hands to swell the retinue."]);return;}S.military+=take;S.retinue+=take;S.quality=(S.quality*(S.military-take)+2.4*take)/S.military;res.push([S.retinueName||"Retinue",`${S.retinueName||"The retinue"} takes in ${take} new sworn warriors. <b>Result:</b> elite numbers grow; army quality now ×${S.quality.toFixed(2)}.`]);}},
+  ],
+  navy:[
+    {key:"warships",name:"Warships",desc:"Build hulls of war — reach the isles and command the sea.",meta:s=>`fleet ${s.navy} → ${s.navy+1}`,
+      run(res){S.navalYears++;S.treasury=Math.max(0,S.treasury-16);S.navy+=1;res.push(["Shipyard",`New warships take the water. <b>Result:</b> the war-fleet grows to ${S.navy}.`]);}},
+    {key:"merchant",name:"Merchant fleet",desc:"Build trading ships — the engine of sea trade.",meta:s=>`merchant ships ${s.tradeFleet} → ${s.tradeFleet+2}`,
+      run(res){S.treasury=Math.max(0,S.treasury-14);S.tradeFleet+=2;res.push(["Merchant fleet",`New merchantmen are launched. <b>Result:</b> the merchant fleet grows to ${S.tradeFleet} — sea trade profits more.`]);}},
+    {key:"patrol",name:"Patrol & blockade",desc:"Guard the lanes; if a coastal target is marked, blockade and weaken it before a landing.",meta:()=>"+routes / weaken target",
+      run(res){const t=S.target?W.set[S.target]:null;if(t&&(t.terr==="coast"||t.terr==="isles")&&!["owned","vassal","capital"].includes(t.status)){t.pop=Math.round(t.pop*0.94);res.push(["Blockade",`The fleet blockades <b>${t.name}</b>. <b>Result:</b> its strength is worn down before any assault.`]);}else{S.authority=clamp(S.authority+2);S.openRoutes+=0;res.push(["Patrol",`Warships patrol the lanes. <b>Result:</b> the routes are kept safe; authority +2.`]);}}},
+    {key:"explore",name:"Sea exploration",desc:"Send ships to trace unknown coasts and isles.",meta:()=>"reveal coast/isles",
+      run(res){seaExplore(res);}},
+  ],
+  diplo:[
+    {key:"envoys",name:"Envoys & gifts",desc:"Send envoys — raises authority and cools the frontier.",meta:()=>"+authority",
+      run(res){S.authority=clamp(S.authority+4);S.treasury=Math.max(0,S.treasury-10);S.relFrontier=clamp(S.relFrontier+30,-100,100);res.push(["Envoys",`Gifts and careful words go out. <b>Result:</b> authority +4, war-risk cools.`]);}},
+    {key:"tribute",name:"Pay tribute",desc:"Buy peace with coin — strongest cooling of hostility.",meta:()=>"cost 18 · big war-risk drop",
+      run(res){S.treasury=Math.max(0,S.treasury-18);S.relFrontier=clamp(S.relFrontier+55,-100,100);res.push(["Tribute",`Tribute is carried to the frontier. <b>Result:</b> hostility falls sharply.`]);}},
+    {key:"marriage",name:"Dynastic marriage",req:s=>s.year>=6,lock:"Needs Year 6+",desc:"Bind a neighbour by blood — integration and authority.",meta:()=>"+integration +authority",
+      run(res){S.integ=clamp(S.integ+5);S.authority=clamp(S.authority+3);res.push(["Marriage",`A marriage binds a neighbouring house to yours. <b>Result:</b> integration +5, authority +3.`]);}},
+  ],
+  faith:[
+    {key:"missions",name:"Missions to your target",desc:"Send missionaries to the settlement you have marked — convert its people.",meta:s=>S.target&&W.set[S.target]&&!["owned","vassal","capital"].includes(W.set[S.target].status)?`→ ${W.set[S.target].name} · +${faithOdds(S.target).gain}%`:"select a target on the map",
+      run(res){doFaith(res);}},
+    {key:"preach",name:"Preaching & the Codex",desc:"Deepen devotion across the whole realm — raises faith and authority.",meta:()=>"+faith +authority",
+      run(res){const f=7+Math.floor(rngE()*4);S.faith=clamp(S.faith+f);S.authority=clamp(S.authority+3);res.push(["The Faith",`Preachers carry ${S.religion?S.religion.book:"the scripture"} through the wards. <b>Result:</b> devotion +${f}, authority +3.`]);}},
+    {key:"temples",name:"Raise temples",req:s=>s.faith>=40,lock:"Needs devotion 40",desc:"Consecrate new temples — lasting devotion and order.",meta:s=>`temples ${s.temples} → ${s.temples+1}`,
+      run(res){S.temples++;S.faith=clamp(S.faith+4);S.authority=clamp(S.authority+2);res.push(["Temples",`A new temple to ${S.religion?S.religion.deity:"your god"} is raised (${S.temples} in all). <b>Result:</b> devotion +4, authority +2.`]);}},
+    {key:"purge",name:"Purge a rival faith",req:s=>s.faith>=50,lock:"Needs devotion 50",desc:"Send the faith hard against your target's rival cult — clears the way for conversion, but strains order.",meta:()=>"target · -rival faith · -authority",
+      run(res){const t=S.target?W.set[S.target]:null;if(!t||["owned","vassal","capital"].includes(t.status)){res.push(["Purge","No target of a rival faith is marked."]);return;}t.conv=clamp(t.conv+10);S.authority=clamp(S.authority-3);S.integ=clamp(S.integ-2);if(t.faith&&t.faith!=="light"&&chance(rngE,0.4)){t.faith=null;res.push(["Purge",`The rival cult in <b>${t.name}</b> is broken; its people now waver toward your faith (conv +10). Order strains (authority −3).`]);}else res.push(["Purge",`Preachers and zealots press <b>${t.name}</b> hard against its ${t.faith||"old"} rites (conv +10). Order strains (authority −3).`]);}},
+  ],
+  intel:[
+    {key:"near",name:"Nearby scouting",desc:"Range close, in your chosen direction — high odds of finding what's there.",run(res){doIntel(res);}},
+    {key:"mid",name:"Far expedition",desc:"Reach into the middle distance — takes longer, lower odds.",run(res){doIntel(res);}},
+    {key:"far",name:"Deep expedition",desc:"Press to the edges of the world — many years, lowest odds, greatest reach.",run(res){doIntel(res);}},
+  ],
+  roads:[
+    {key:"trunk",name:"Trunk roads",desc:"Great roads outward — the most logistics, easing far campaigns.",meta:()=>"+logistics 6",
+      run(res){S.logistics=clamp(S.logistics+6);S.infra=clamp(S.infra+1);S.treasury=Math.max(0,S.treasury-12);res.push(["Roads",`Trunk roads and bridges reach outward. <b>Result:</b> logistics +6; far marches ease.`]);}},
+    {key:"depots",name:"Supply depots",req:s=>s.logistics>=15,lock:"Needs logistics 15",desc:"Forward stores that cut the cost of holding distant provinces.",meta:()=>"cheaper far holdings",
+      run(res){S.logistics=clamp(S.logistics+4);S.depot=true;S.integ=clamp(S.integ+1);S.treasury=Math.max(0,S.treasury-14);res.push(["Depots",`Supply depots are stocked along the roads. <b>Result:</b> distant provinces cost less to hold; logistics +4.`]);}},
+    {key:"couriers",name:"Post riders",desc:"A courier network that binds the provinces to the centre.",meta:()=>"+integration +authority",
+      run(res){S.integ=clamp(S.integ+3);S.authority=clamp(S.authority+2);S.treasury=Math.max(0,S.treasury-8);res.push(["Couriers",`Post riders carry the crown's word swiftly. <b>Result:</b> integration +3, authority +2.`]);}},
+  ],
+  campaign:[
+    {key:"assault",name:"Assault",desc:"A direct attack — full odds, but costly in blood.",meta:s=>S.target?`${militaryOdds(S.target).chance}% odds`:"select a target",run(res){doCampaign(res,"assault");}},
+    {key:"siege",name:"Siege",desc:"Invest and starve them out — better odds against walls, cities and hard terrain; slower and dearer.",meta:s=>S.target?`~${Math.min(95,militaryOdds(S.target).chance+15)}% · fewer losses`:"select a target",run(res){doCampaign(res,"siege");}},
+    {key:"raid",name:"Raid",desc:"Don't hold it — plunder its wealth and break its strength for a later blow. Low risk.",meta:()=>"plunder · weaken · no capture",run(res){doCampaign(res,"raid");}},
+  ],
+};
+function availModes(f){return (MODES[f]||[]).filter(m=>!m.req||m.req(S));}
+function chosenMode(f){const list=MODES[f];if(!list)return null;const want=S.mode[f];const m=list.find(x=>x.key===want&&(!x.req||x.req(S)));return m||availModes(f)[0]||list[0];}
+function applyFocus(f,res){const m=chosenMode(f);if(!m){return;}m.run(res);}
+
+/* ---- turn ---- */
+function advance(){
+  if(S.over)return;
+  const foci=S.selected.slice();S.lastFoci=foci;const has=f=>foci.includes(f);
+  const open=snap();const res=[];S.justRevealed=[];
+
+  // each priority applies its chosen specialization
+  foci.forEach(f=>applyFocus(f,res));
+
+  // ---- population as labour: farmers vs soldiers vs merchants ----
+  const wf=Math.floor(S.pop*0.55);
+  const nonFarm=S.military+S.merchants;
+  const farmers=Math.max(0,wf-nonFarm);
+  const yieldPer=2.15*(1+S.irrigation)*(S.buildings.aqueduct?1.15:1);
+  const laborCap=farmers*yieldPer;
+  const landCap=(arableBase()+S.farmland+S.livestock)*(1+S.infra/300)+(S.buildings.aqueduct?400:0);
+  const produced=Math.min(laborCap,landCap);
+  const need=S.pop*K.ration;
+  S.gran=clamp(S.gran+produced-need,0,S.granaryCap);
+  const bufferHelp=Math.min(S.gran,need*0.5);
+  S.food=clamp(Math.round(50+50*Math.tanh((produced-need+bufferHelp)/(need*0.6))));
+  S._labor={wf,farmers,soldiers:S.military,merchants:S.merchants,short:produced<need};
+  // economy upkeep (distance-scaled, eased by supply depots)
+  const tax=Math.round(S.pop*K.taxRate*(S.integ/100)*(S.authority/100));S.treasury+=tax;
+  let remote=0;for(const k in W.set){if(W.set[k].status==="owned")remote+=distKm(k)*(S.depot?0.009:0.015);}
+  const upkeep=Math.round(S.military*K.sUp+held()*K.aUp+remote);S.treasury=Math.max(0,S.treasury-upkeep);
+  // population growth
+  const phi=clamp(S.food/50,0.3,1.5),sigma=0.5+S.authority/200;let g=K.r0*phi*sigma*(S.buildings.aqueduct?1.1:1);if(hasTenet("spare"))g*=0.85;const migr=Math.round(K.k_m*((S.authority-50)/50)*phi);
+  S.pop=Math.round(S.pop*(1+g)+migr);
+  if(S.faith>60)S.authority=clamp(S.authority+1);
+  if(S.food<25)S.authority=clamp(S.authority-3);else if(S.authority<48&&S.food>=40)S.authority=clamp(S.authority+2);
+  // ---- religion subsystem (yearly) ----
+  if(S.religion){
+    // doctrine / stance passive authority
+    if(stanceIs("subservient"))S.authority=clamp(S.authority+2);
+    if(hasTenet("spare"))S.authority=clamp(S.authority+2);
+    if(hasTenet("crown")){S.authority=clamp(S.authority+4);if(S.authority<25)S.faith=clamp(S.faith-5);}
+    // temple yields
+    if(S.temples>0){if(hasTenet("ledger"))S.treasury+=Math.round(S.temples*1.5);if(hasTenet("works")){S.authority=clamp(S.authority+Math.min(3,S.temples*0.4));S.faith=clamp(S.faith+1);}S.faith=clamp(S.faith+Math.min(2,S.temples*0.2));}
+    // religious unity across the realm
+    const dominion=Object.values(W.set).filter(s=>["capital","owned","vassal"].includes(s.status));
+    const aligned=dominion.filter(s=>s.faith==="light").length;
+    S.unity=dominion.length?Math.round(100*aligned/dominion.length):100;
+    if(S.unity>70){S.authority=clamp(S.authority+1);S.integ=clamp(S.integ+2);}else if(S.unity<40){S.integ=clamp(S.integ-2);}
+    // priesthood gathers power as faith grows
+    if(S.faith>50)S.priesthood=clamp(S.priesthood+(stanceIs("autonomous")?3:1)+(S.faith>75?1:0));
+    // schism when an autonomous, powerful clergy meets a divided realm (unless the ruler is divine)
+    if(!hasTenet("crown")&&!S.pendingDecision&&S.priesthood>=60&&S.faith>=55){S.pendingDecision={type:"schism"};}
+  }
+  // passive conversion drift for revealed peaceful neighbours near the faith
+  if(S.flags.codex){for(const k in W.set){const s=W.set[k];if(["known","hostile"].includes(s.status)&&s.faith!=="light"&&s.conv>0&&s.conv<100)s.conv=clamp(s.conv+ (s.culture==="peaceful"?1:0));}}
+
+  const ev=rollEvent();
+  const miles=fireMilestones(foci);
+
+  S.treasury=Math.max(0,Math.round(S.treasury));S.military=Math.max(0,Math.round(S.military));
+  S.food=Math.round(clamp(S.food));S.authority=Math.round(clamp(S.authority));S.infra=Math.round(clamp(S.infra));S.faith=Math.round(clamp(S.faith));S.integ=Math.round(clamp(S.integ));S.logistics=Math.round(clamp(S.logistics));
+  S.orthodoxy=Math.round(S.orthodoxy);S.priesthood=Math.round(S.priesthood);S.unity=Math.round(S.unity);
+  if(S.authority<=3)S.over=true;
+
+  S.chronicle.push({year:S.year,era:eraFor(S.year),foci:foci.map(f=>FOCI[f].name),open,close:snap(),res,ev,miles});
+  S.year++;S.selected=[];
+  render(miles.length>0);
+  if(miles.length)toast("✦ "+miles.map(m=>m.tag).join(" · "));
+  if(S.over)showModal("The Reign Ends","<p>Authority has collapsed; the realm fractures into quarrelling towns and the flame gutters.</p><div class='toolbar'><button class='btn' onclick='closeModal();openSetup()'>Forge a New World</button></div>");
+  else maybeDecision();
+  persist();
+}
+function maybeDecision(){
+  if(S.pendingFound){openFounding();return;}
+  if(S.pendingRetinue){openRetinue();return;}
+  if(S.pendingDecision&&S.pendingDecision.type==="schism"){openSchism();return;}
+}
+function arableBase(){let a=520;for(const k in W.set){const s=W.set[k];if(s.status==="owned"||s.status==="vassal")a+= (s.terr==="plains"||s.terr==="coast")? s.pop*0.4 : s.pop*0.2;}return a;}
+function snap(){return{name:S.name,pop:S.pop,treasury:S.treasury,food:S.food,military:S.military,retinue:S.retinue,retinueName:S.retinueName,navy:S.navy,authority:S.authority,infra:S.infra,faith:S.faith,codex:S.flags.codex,routes:S.openRoutes};}
+
+function doDiscover(res){
+  // reveal nearest hidden settlements (2-3), and their regions
+  const hidden=Object.values(W.set).filter(s=>s.status==="hidden").sort((a,b)=>a.distKm-b.distKm);
+  if(!hidden.length){res.push(["Scouts","Watchers confirm the shape of the known world."]);return;}
+  const n=2+Math.floor(rngE()*2);const found=hidden.slice(0,n);
+  found.forEach(s=>{s.status=s.culture==="hostile"?"hostile":"known";S.justRevealed.push(s.key);W.regions[s.region].discovered=true;});
+  const names=found.map(s=>`<b>${s.name}</b>`).join(", ");
+  res.push(["Scouts",`Watchers range out and return with word of ${names} — now upon the maps.`]);
+}
+function doFaith(res){
+  const f=6+Math.floor(rngE()*4);S.faith=clamp(S.faith+f);S.authority=clamp(S.authority+2);
+  const k=S.target, t=k?W.set[k]:null;
+  if(t && !["owned","vassal","capital"].includes(t.status)){
+    const o=faithOdds(k); t.conv=clamp(t.conv+o.gain);
+    if(t.conv>=55 && chance(rngE,o.absorb/100)){
+      t.status="vassal";t.faith="light";const g=Math.round(t.pop*0.35);S.pop+=g;S.integ=clamp(S.integ+(hasTenet("hand")?3:1));
+      res.push(["Missions",`The people of <b>${t.name}</b> embrace ${S.religion.name} — a majority won (${t.conv}%). It joins the realm as a converted vassal; +${fmt(g)} souls, willingly.`]);
+    } else {
+      res.push(["Missions",`Missionaries carry ${S.religion.book} to <b>${t.name}</b>. <b>Result:</b> conversion +${o.gain}% (now ${t.conv}%)${t.conv>=55?`, and an absorb attempt failed (${o.absorb}% odds)`:``}.`]);
+    }
+  } else {
+    if(S.faith>40&&chance(rngE,0.55)){S.temples++;res.push(["The Faith",`Devotion deepens and a new temple to ${S.religion.deity} is consecrated (${S.temples} in all). <b>Result:</b> faith +${f}.`]);}
+    else res.push(["The Faith",`Devotion deepens across the realm. <b>Result:</b> faith +${f}. (Select a foreign settlement to send missions there.)`]);
+  }
+}
+function doCampaign(res,tactic){
+  tactic=tactic||"assault";
+  const k=S.target, t=k?W.set[k]:null;
+  if(!t || ["owned","vassal","capital"].includes(t.status)){res.push(["Campaign","The host mustered, but no enemy was marked. Select a target on the map."]);return;}
+  const o=militaryOdds(k);
+  if(!o.canReach){res.push(["Campaign",`<b>${t.name}</b> lies across the sea — a fleet is needed before it can be reached.`]);return;}
+  if(tactic==="raid"){
+    S.treasury=Math.max(0,S.treasury-8);
+    const plunder=Math.round(t.pop*0.02*o.chance/60);S.treasury+=plunder;t.pop=Math.round(t.pop*0.9);
+    S.military=Math.max(0,S.military-Math.round(S.military*0.03));
+    res.push(["Raid",`Riders raid <b>${t.name}</b> — no attempt to hold it. <b>Result:</b> +${plunder} plunder; the ${t.type} is left weaker (easier to take later). Few losses.`]);
+    return;
+  }
+  const isSiege=tactic==="siege";
+  const eff=o.chance + (isSiege? ( (TERR_DEF[t.terr]||1)>1 || t.type==="city"?18:10 ) : 0);
+  const win=chance(rngE,clamp(eff,0,95)/100);
+  S.treasury=Math.max(0,S.treasury-(isSiege?34:20));
+  if(win){
+    t.status="owned";const gain=Math.round(t.pop*0.5);S.pop+=gain;
+    const lossRate=isSiege?0.04:0.08;S.military=Math.max(0,S.military-Math.round(S.military*lossRate));S.military+=Math.round(gain*0.12);
+    S.integ=clamp(S.integ-(isSiege?6:8));
+    const rivalFaith=(t.faith&&t.faith!=="light");
+    if(rivalFaith){if(hasTenet("sword"))t.conv=Math.max(t.conv,40);else{const strain=Math.round(S.orthodoxy/28);S.authority=clamp(S.authority-strain);S.integ=clamp(S.integ-strain);}}
+    else t.conv=Math.max(t.conv,10);
+    if(t.terr==="isles")S.flags.onIsle=true;
+    res.push([isSiege?"Siege":"Assault",`The host ${isSiege?"invests":"storms"} <b>${t.name}</b> ${distKm(k)} km off (${Math.round(clamp(eff,0,95))}% odds). <b>Victory:</b> the ${t.type} falls; +${fmt(gain)} people; ${isSiege?"few losses":"blood spent"}.`]);
+  } else {
+    S.military=Math.max(0,S.military-Math.round(S.military*(isSiege?0.08:0.14)));S.authority=clamp(S.authority-3);
+    res.push([isSiege?"Siege":"Assault",`The host ${isSiege?"sits before":"assails"} <b>${t.name}</b> (${Math.round(clamp(eff,0,95))}% odds) but fails — terrain and distance told. Losses taken; authority −3.`]);
+  }
+}
+
+/* ---- events ---- */
+function rollEvent(){
+  const pool=[],add=(id,w)=>{for(let i=0;i<w;i++)pool.push(id);};
+  add("steady",2);add("migrants",2);add("harvest",S.food>55?3:1);add("drought",S.food<45?3:1);
+  add("raid",(S.military<150&&!S.flags.walls)?3:1);add("windfall",S.flags.southTrade?2:0);
+  add("fervour",S.faith>60?2:0);add("unrest",S.authority<45?3:1);add("rebellion",(S.integ<45&&held()>1)?2:0);
+  const id=pick(rngE,pool);
+  switch(id){
+    case "harvest":S.pop=Math.round(S.pop*1.02);return{text:"A generous flood-season fills the granaries; the midwives are busy."};
+    case "drought":S.food=clamp(S.food-4);return{text:"A dry summer thins the stores; the stewards ration the canals."};
+    case "raid":if(S.military>=150||S.flags.walls)return{text:"Raiders test the frontier and break on the watch — the walls earn their keep."};S.treasury=Math.max(0,S.treasury-30);return{text:"Raiders slip past the thin watch and carry off stores."};
+    case "windfall":{const g=Math.round(40+rngE()*60);S.treasury+=g;return{text:`A caravan of pearl and spice reaches the wharves — ${g} coin.`};}
+    case "fervour":S.authority=clamp(S.authority+3);return{text:`${S.religion?S.religion.book:"The scripture"} is read in every temple square; zeal lifts loyalty.`};
+    case "unrest":S.authority=clamp(S.authority-2);S.integ=clamp(S.integ-2);return{text:"Elders and captains quarrel over burdens; the centre's word carries less far."};
+    case "rebellion":{const owned=Object.values(W.set).filter(s=>s.status==="owned"&&s.conv<40);if(owned.length&&!(S.faith>55)){const t=owned[Math.floor(rngE()*owned.length)];S.integ=clamp(S.integ-3);return{text:`Discontent stirs in <b>${t.name}</b>, lately taken by the sword; garrisons hold it, but the memory lingers.`};}S.integ=clamp(S.integ+2);return{text:"Discontent stirs in the new provinces, but the faith and the garrisons keep the peace."};}
+    case "migrants":{const m=Math.round(60+rngE()*120);S.pop+=m;return{text:`Families drift down the river where grain and order are surest — some ${m} newcomers.`};}
+    default:return{text:"The year passes without upheaval; work advances and the stores are counted."};
+  }
+}
+
+/* ---- milestones (procedural) ---- */
+function fireMilestones(foci){
+  const M=[],y=S.year,d=S.done;
+  if(!d.walls&&S.projWalls>=120){d.walls=true;S.flags.walls=true;M.push({tag:"The Walls Close",text:`The outer walls of ${S.name} close at last; the settlement can weather a shock.`});}
+  if(!d.tribute&&foci.includes("diplo")&&S.relFrontier<25&&y>=2){const hostiles=Object.values(W.set).filter(s=>s.status==="hostile");if(hostiles.length){d.tribute=true;S.flags.frontierPeace=true;M.push({tag:"Tribute & Peace",text:`Envoys carry tribute to the frontier tribes; seeing gain without risk, they accept. A fragile peace is bought.`});}}
+  if(!d.faith&&y>=8){d.faith=true;S.pendingFound=true;}
+  if(!d.retinue&&S.military>=300&&(S.faith>=45||S.buildings.citadel)){d.retinue=true;S.flags.retinue=true;S.retinue=100;S.pendingRetinue=true;}
+  if(!d.firstConv&&converted()>=1){d.firstConv=true;M.push({tag:"The First Conversion",text:`For the first time a foreign people has embraced ${S.religion?S.religion.name:"the faith"} and joined the realm not by the sword but by the word.`});}
+  if(!d.firstConq&&held()>=2){d.firstConq=true;M.push({tag:"The First Conquest",text:`The host has taken its first settlement; the realm learns the weight and the cost of the sword.`});}
+  if(!d.south&&(foci.includes("trade")||foci.includes("intel"))&&y>=11&&W.regions.some(rg=>rg.terr==="coast"&&rg.discovered)){d.south=true;S.flags.southTrade=true;S.openRoutes+=2;M.push({tag:"The Southern Reach",text:`Traders reach the coast; the southern trade opens and coin flows in.`});}
+  if(!d.shipyard&&(held()>=2||converted()>=1)&&Object.values(W.set).some(s=>(s.status==="owned"||s.status==="vassal")&&(s.type==="port"||s.type==="city")&&s.terr==="coast")){d.shipyard=true;S.flags.shipyard=true;M.push({tag:"A Shipyard Rises",text:`A coastal city under the crown lays down slips and yards — the realm can build a fleet.`});}
+  if(!d.sea&&S.flags.shipyard&&S.navalYears>=2){d.sea=true;S.flags.strongNavy=true;M.push({tag:"Command of the Sea",text:`Warships patrol the lanes; the sea is the crown's own road now.`});}
+  if(!d.isle&&S.flags.onIsle){d.isle=true;M.push({tag:"The Island Outpost",text:`An island falls under the crown — a naval outpost of garrison, repair and signal rises in the sea.`});}
+  if(!d.big&&(held()+converted())>=8){d.big=true;M.push({tag:"A Multi-Centred Realm",text:`Eight provinces and more now answer to ${S.name} — a true kingdom of many centres.`});}
+  if(!d.y57&&y>=57){d.y57=true;M.push({tag:"The Canonical Present",text:`The realm reaches Year 57 — a kingdom of the light. From here the chronicle is yours.`});}
+  return M;
+}
+
+/* ================= render ================= */
+function render(flash){
+  document.getElementById("yearLabel").textContent="Year "+S.year;
+  document.getElementById("eraLabel").textContent=eraFor(S.year);
+  document.getElementById("seedChip").textContent="seed "+S.seed;
+  document.getElementById("mapTitle").textContent=S.name+" & the known world";
+  document.getElementById("map").setAttribute("viewBox",`0 0 ${W.w} ${W.h}`);
+  renderMap();renderLedger();renderFocus();renderModePanels();renderChronicle();renderReligion();updateSel();
+  if(selected)selectPlace(selected,true);
+  if(flash){const c=document.querySelector(".mapcard");c.classList.remove("mile-flash");void c.offsetWidth;c.classList.add("mile-flash");}
+  S.justRevealed=[];
+}
+const NODE_COL={capital:"#ef9a3d",owned:"#7fa06a",vassal:"#4a74d6",known:"#9c8449",hostile:"#c05a4e"};
+const TYPE_R={city:13,port:11,"island-port":11,town:9,village:6,fishing:6,hilltribe:8,foresttribe:8,nomad:8,"island-village":6};
+const TERR_FILL={plains:"#1c2744",coast:"#173252",mtn:"#20263f",forest:"#183524",steppe:"#2a2c3f",marsh:"#182b34",isles:"#12395f"};
+function renderMap(){
+  const svg=document.getElementById("map"),cap=W.cap;
+  let defs=`<defs>
+    <radialGradient id="seaG" cx="0.8" cy="0.85" r="1.1"><stop offset="0" stop-color="#123a63"/><stop offset="1" stop-color="#0a1f3c"/></radialGradient>
+    <linearGradient id="rivG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b86e0"/><stop offset="1" stop-color="#2b4fa0"/></linearGradient>
+    <radialGradient id="fogG" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#0a0f22" stop-opacity="0.86"/><stop offset="1" stop-color="#0a0f22" stop-opacity="0.7"/></radialGradient>
+  </defs><rect x="0" y="0" width="${W.w}" height="${W.h}" fill="#101a30"/>`;
+  // sea for coast/isles: draw a sea blob in the far corner + around isles regions
+  let sea=`<path d="M${W.w*0.55},${W.h} C${W.w*0.7},${W.h*0.8} ${W.w*0.85},${W.h*0.75} ${W.w},${W.h*0.55} L${W.w},${W.h} Z" fill="url(#seaG)"/>`;
+  W.regions.filter(r=>r.terr==="isles").forEach(r=>{sea+=`<circle cx="${r.x}" cy="${r.y}" r="${r.rad*1.5}" fill="url(#seaG)"/>`;});
+  // region tints
+  let regs="";W.regions.forEach(r=>{regs+=`<circle cx="${r.x}" cy="${r.y}" r="${r.rad*1.35}" fill="${TERR_FILL[r.terr]||'#1c2744'}" opacity="0.55"/>`;});
+  // terrain glyphs
+  let terr="";
+  W.mtns.forEach(m=>{terr+=`<path d="M${m.x-m.s},${m.y+m.s} L${m.x},${m.y-m.s} L${m.x+m.s},${m.y+m.s} Z" fill="#2b3454" stroke="#3a456e" stroke-width="1"/><path d="M${m.x-m.s*0.4},${m.y-m.s*0.2} L${m.x},${m.y-m.s} L${m.x+m.s*0.4},${m.y-m.s*0.2} Z" fill="#e8eef7" opacity="0.5"/>`;});
+  W.trees.forEach(t=>{terr+=`<circle cx="${t.x}" cy="${t.y}" r="${t.s}" fill="#1f4a2c" opacity="0.7"/>`;});
+  // river
+  terr+=`<path d="${W.river}" fill="none" stroke="url(#rivG)" stroke-width="9" stroke-linecap="round" opacity="0.9"/>`;
+  // roads: from capital to held/vassal/known (once infra>=20)
+  let roads="";
+  if(S.infra>=20){for(const k in W.set){const s=W.set[k];if(k===W.capKey)continue;if(["owned","vassal"].includes(s.status)||(s.status==="known"&&distKm(k)<Math.min(W.w,W.h)*0.4*KM_PER_UNIT)){roads+=`<path d="M${cap.x},${cap.y} L${s.x},${s.y}" stroke="#9c8449" stroke-width="2.6" opacity="0.45" stroke-dasharray="8 8"/>`;}}}
+  // fog veils over undiscovered regions
+  let fog="";W.regions.forEach(r=>{if(!r.discovered)fog+=`<circle cx="${r.x}" cy="${r.y}" r="${r.rad*1.5}" fill="url(#fogG)"/><text x="${r.x}" y="${r.y}" text-anchor="middle" font-family="Cinzel" font-size="${18+ r.rad*0.02}" fill="#5a6486" opacity="0.6">unexplored</text>`;});
+  // nodes
+  let nodes="";
+  for(const k in W.set){const s=W.set[k];if(s.status==="hidden")continue;
+    const col=NODE_COL[s.status]||"#9c8449",isCap=s.status==="capital",r=isCap?15:(TYPE_R[s.type]||8);
+    const rev=S.justRevealed.includes(k)?" reveal":"";
+    const selCls=(selected===k)?" sel":"";
+    const halo=(selected===k)?`<circle cx="${s.x}" cy="${s.y}" r="${r+9}" fill="none" stroke="#ef9a3d" stroke-width="2.5" opacity="0.9"/>`:"";
+    const flame=isCap?`<path d="M${s.x},${s.y-30} q6,10 0,20 q-6,-10 0,-20" fill="#ef9a3d"><animate attributeName="opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite"/></path>`:"";
+    const ripple=S.justRevealed.includes(k)?`<circle cx="${s.x}" cy="${s.y}" r="8" fill="none" stroke="#e7cf94" stroke-width="2"><animate attributeName="r" values="8;70" dur="0.9s"/><animate attributeName="opacity" values="0.9;0" dur="0.9s"/></circle>`:"";
+    // faith mark
+    const fm=(s.faith&&s.faith!=="light"&&!isCap)?`<circle cx="${s.x+r*0.9}" cy="${s.y-r*0.9}" r="3.5" fill="#9a6fd0"/>`:(s.faith==="light"&&!isCap?`<circle cx="${s.x+r*0.9}" cy="${s.y-r*0.9}" r="3.5" fill="#ef9a3d"/>`:"");
+    const showLabel=isCap||["city","port","hilltribe","foresttribe","nomad","town","island-port"].includes(s.type)||cam.k>1.6||selected===k;
+    const label=showLabel?`<text x="${s.x}" y="${s.y+r+16}" text-anchor="middle" font-size="${isCap?16:(TYPE_R[s.type]>=11?14:12)}">${s.name}</text>`:"";
+    nodes+=`<g class="node${selCls}${rev}" data-k="${k}">${halo}<circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${col}" stroke="#0a1024" stroke-width="2.2"/>${fm}${flame}${ripple}${label}</g>`;
+  }
+  svg.innerHTML=defs+`<g id="cam" transform="translate(${cam.x},${cam.y}) scale(${cam.k})">${sea}${regs}${terr}${roads}${fog}${nodes}</g>`;
+  svg.querySelectorAll(".node").forEach(n=>n.addEventListener("click",e=>{e.stopPropagation();if(dragMoved)return;selectPlace(n.dataset.k);}));
+  renderScale();
+}
+function renderScale(){const el=document.getElementById("scalebar"),wrap=document.getElementById("mapwrap");const wpx=(wrap&&wrap.getBoundingClientRect)?wrap.getBoundingClientRect().width:800;const unitsPer100=100/KM_PER_UNIT;const pxPerUnit=cam.k*wpx/W.w;const barPx=Math.max(28,Math.min(wpx*0.5,unitsPer100*pxPerUnit));el.innerHTML=`100 km<div class="track" style="width:${Math.round(barPx)}px"><div></div><div></div><div></div><div></div></div>`;}
+
+function statColor(v){if(v>=66)return"linear-gradient(90deg,#7fa06a,#a8d68a)";if(v>=40)return"linear-gradient(90deg,#c9a24b,#e7cf94)";return"linear-gradient(90deg,#8f3a34,#c05a4e)";}
+function renderLedger(){
+  const bars=[["Food",S.food],["Faith",S.faith],["Authority",S.authority],["Infrastructure",S.infra],["Integration",S.integ],["Logistics",S.logistics]];
+  let h=`<div class="stat"><span class="lab">Treasury</span><span class="bar"><span class="fill" style="width:${Math.min(100,S.treasury)}%;background:${statColor(Math.min(100,S.treasury))}"></span></span><span class="val">${fmt(S.treasury)}</span></div>`;
+  bars.forEach(([l,v])=>{h+=`<div class="stat"><span class="lab">${l}</span><span class="bar"><span class="fill" style="width:${clamp(v)}%;background:${statColor(v)}"></span></span><span class="val">${v}/100</span></div>`;});
+  h+=`<div class="counts"><div class="count"><div class="k">Population</div><div class="v">${fmt(S.pop)}</div></div>
+    <div class="count"><div class="k">Soldiers · quality</div><div class="v">${fmt(S.military)} <small>×${(S.quality||1).toFixed(2)}</small></div></div>
+    <div class="count"><div class="k">Held / converted</div><div class="v">${held()} <small>/ ${converted()}</small></div></div>
+    <div class="count"><div class="k">War fleet · routes</div><div class="v">${S.navy} <small>· ${S.openRoutes}</small></div></div></div>`;
+  const wf=Math.floor(S.pop*0.55),farmers=Math.max(0,wf-S.military-S.merchants),soldierWarn=S.military>wf*0.55;
+  h+=`<div class="labor">
+    <div class="lb"><div class="k">Farmers</div><div class="v">${fmt(farmers)}</div></div>
+    <div class="lb${soldierWarn?" warn":""}"><div class="k">Soldiers</div><div class="v">${fmt(S.military)}</div></div>
+    <div class="lb"><div class="k">Merchants</div><div class="v">${fmt(S.merchants)}</div></div>
+    <div class="lb"><div class="k">Non-working</div><div class="v">${fmt(S.pop-wf)}</div></div></div>`;
+  if(S._labor&&S._labor.short)h+=`<div class="foodwarn">⚠ The fields cannot feed the realm — too few farmers or too little farmland. Ease the levies, break new farms, or cut canals.</div>`;
+  else if(soldierWarn)h+=`<div class="foodwarn">⚠ Over half your working folk are under arms — the granaries will suffer if you press further.</div>`;
+  const assetBits=[];
+  if(S.merchants)assetBits.push(`merchants <b>${S.merchants}</b>`);
+  if(S.guilds)assetBits.push(`guilds <b>${S.guilds}</b>`);
+  if(S.tradeFleet)assetBits.push(`merchant ships <b>${S.tradeFleet}</b>`);
+  if(S.retinue)assetBits.push(`${S.retinueName||"retinue"} <b>${S.retinue}</b>`);
+  assetBits.push(`logistics <b>${S.logistics}</b>`,`farmland <b>+${S.farmland}</b>`,`irrigation <b>×${(1+S.irrigation).toFixed(2)}</b>`);
+  const bld=Object.keys(S.buildings||{});
+  h+=`<div class="assets">${assetBits.join(" · ")}${bld.length?`<br><span style="color:var(--gold-soft)">Great works:</span> ${bld.map(b=>({aqueduct:"Aqueduct",citadel:"Citadel",bazaar:"Grand Bazaar",palace:"Palace"}[b]||b)).join(", ")}`:""}</div>`;
+  document.getElementById("ledgerBody").innerHTML=h;
+}
+function selectPlace(k,keep){
+  selected=k;const s=W.set[k];if(!s){return;}
+  const map={capital:["Capital","p-capital"],owned:["Held province","p-owned"],vassal:["Converted vassal","p-vassal"],known:["Known","p-known"],hostile:["Hostile","p-hostile"]};
+  const [lab,cls]=map[s.status]||["Known","p-known"];
+  const days=Math.max(1,Math.round(s.distKm/28));
+  const typeName={city:"City",port:"Port city",town:"Town",village:"Village",fishing:"Fishing village",hilltribe:"Hill-tribe",foresttribe:"Forest-tribe",nomad:"Nomad tribe","island-village":"Island village","island-port":"Island port"}[s.type]||"Settlement";
+  document.getElementById("infoTitle").textContent=s.name;
+  let h=`<div class="tiprow"><span class="k">Kind · region</span><span class="v">${typeName} · ${W.regions[s.region].name}</span></div>
+    <div class="tiprow"><span class="k">People · terrain</span><span class="v">${fmt(s.pop)} · ${s.terr}</span></div>`;
+  if(s.status!=="capital"){h+=`<div class="tiprow"><span class="k">Culture · faith</span><span class="v">${s.culture} · ${s.faith==="light"?(S.religion?S.religion.name:"your faith"):(s.faith||"animist")}</span></div>
+    <div class="tiprow"><span class="k">Distance</span><span class="v">${s.distKm} km · ~${days}d</span></div>
+    <div class="tiprow"><span class="k">Conversion to your faith</span><span class="v">${Math.round(s.conv)}%</span></div>`;}
+  h+=`<span class="pill ${cls}">${lab}</span>`;
+  // action / odds if a foreign, non-owned settlement
+  if(!["capital","owned","vassal"].includes(s.status)){
+    const mo=militaryOdds(k), fo=S.flags.codex?faithOdds(k):null;
+    const armedC=(S.target===k)?" armed":"";
+    h+=`<div class="odds"><h4>By the Sword <span class="big">${mo.canReach?mo.chance+"%":"—"}</span></h4>${mo.mods.map(m=>`<div class="mod"><span>${m[0]}</span><span class="${m[2]>0?'g':m[2]<0?'b':''}">${m[1]}</span></div>`).join("")}
+      <button class="act${armedC}" data-tk="${k}" data-mode="war">${S.target===k?"◉ ":""}Set as campaign target</button></div>`;
+    if(fo){h+=`<div class="odds"><h4>By the Faith <span class="big">conv ${Math.round(fo.conv)}%</span></h4>${fo.mods.map(m=>`<div class="mod"><span>${m[0]}</span><span class="${m[2]>0?'g':m[2]<0?'b':''}">${m[1]}</span></div>`).join("")}
+      <div class="mod"><span>Yearly conversion</span><span class="g">+${fo.gain}%</span></div><div class="mod"><span>Absorb chance (at ≥55%)</span><span>${fo.absorb}%</span></div>
+      <button class="act${armedC}" data-tk="${k}" data-mode="faith">${S.target===k?"◉ ":""}Send missions here</button></div>`;}
+    else{h+=`<p class="helptext" style="margin-top:8px">Found a faith (Year 8+) to win peoples by conversion.</p>`;}
+  }
+  document.getElementById("infoBody").innerHTML=h;
+  document.querySelectorAll(".act").forEach(b=>b.addEventListener("click",()=>{S.target=b.dataset.tk;const mode=b.dataset.mode;if(mode==="war"&&!S.selected.includes("campaign")&&FOCI.campaign.req(S)){toggleFocus("campaign");}if(mode==="faith"&&!S.selected.includes("faith")&&FOCI.faith.req(S)){toggleFocus("faith");}toast("Target set: "+W.set[b.dataset.tk].name);selectPlace(b.dataset.tk);renderFocus();renderModePanels();}));
+  if(!keep)renderMap();
+}
+function renderFocus(){
+  let h="";
+  for(const f in FOCI){const o=FOCI[f],ok=o.req(S),sel=S.selected.includes(f)?" sel":"",dis=ok?"":"disabled",lock=(!ok&&o.lock)?`<span class="lock">🔒 ${o.lock}</span>`:"";
+    let tgt="";
+    if((f==="campaign"||f==="faith")&&S.target&&W.set[S.target]&&!["owned","vassal","capital"].includes(W.set[S.target].status)){
+      if(f==="campaign"){const mo=militaryOdds(S.target);tgt=`<div class="tgt">→ ${W.set[S.target].name} · ${mo.canReach?mo.chance+"%":"needs fleet"}</div>`;}
+      if(f==="faith"){const fo=faithOdds(S.target);tgt=`<div class="tgt">→ ${W.set[S.target].name} · conv ${Math.round(fo.conv)}%</div>`;}
+    }
+    h+=`<button class="focus${sel}" ${dis} data-f="${f}">${lock}<div class="fname">${o.name}</div><div class="fdesc">${o.desc}</div>${tgt}</button>`;}
+  const g=document.getElementById("focusGrid");g.innerHTML=h;
+  g.querySelectorAll(".focus").forEach(b=>b.addEventListener("click",()=>toggleFocus(b.dataset.f)));
+}
+function toggleFocus(f){const i=S.selected.indexOf(f);if(i>=0)S.selected.splice(i,1);else{if(S.selected.length>=2)S.selected.shift();S.selected.push(f);if(MODES[f]&&!chosenMode(f))S.mode[f]=(availModes(f)[0]||MODES[f][0]).key;else if(MODES[f]&&!S.mode[f])S.mode[f]=(availModes(f)[0]||MODES[f][0]).key;}renderFocus();renderModePanels();updateSel();}
+function renderModePanels(){
+  const host=document.getElementById("modePanels");if(!host)return;
+  let h="";
+  S.selected.forEach(f=>{
+    const list=MODES[f];if(!list){return;}
+    const cur=chosenMode(f);const curKey=cur?cur.key:null;
+    const opts=list.map(m=>{const ok=!m.req||m.req(S);const nm=typeof m.name==="function"?m.name(S):m.name;return `<option value="${m.key}" ${m.key===curKey?"selected":""} ${ok?"":"disabled"}>${nm}${ok?"":" 🔒 "+(m.lock||"locked")}</option>`;}).join("");
+    let extra="";
+    if(f==="intel"){extra=`<div class="dseg" data-intel-dir>${["N","E","S","W"].map(d=>`<button data-dir="${d}" class="${(S.intel.dir||'E')===d?'on':''}">${d}</button>`).join("")}</div>`;
+      const cands=intelCands(S.intel.dir||"E",S.mode.intel||"near");extra+=`<div class="mmeta"><span>${cands.length?`~${Math.round(intelP(S.mode.intel||"near")*100)}% to find`:"nothing sensed"} ${dirName(S.intel.dir||"E")}</span><span>${cands.length?cands.length+" rumoured out there":""}</span></div>`;}
+    const meta=cur&&cur.meta?cur.meta(S):"";
+    h+=`<div class="modepanel"><div class="mh"><span>${FOCI[f].name} — how?</span>${(f==="campaign"||f==="faith")&&S.target&&W.set[S.target]?`<span class="tag">→ ${W.set[S.target].name}</span>`:""}</div>
+      <select data-modef="${f}">${opts}</select>
+      <div class="mdesc">${cur?cur.desc:""}</div>${meta?`<div class="mmeta"><span>${meta}</span></div>`:""}${extra}</div>`;
+  });
+  host.innerHTML=h;
+  host.querySelectorAll("select[data-modef]").forEach(sel=>sel.addEventListener("change",()=>{S.mode[sel.dataset.modef]=sel.value;renderModePanels();renderFocus();}));
+  host.querySelectorAll("[data-intel-dir] button").forEach(b=>b.addEventListener("click",()=>{S.intel.dir=b.dataset.dir;renderModePanels();}));
+}
+function updateSel(){const n=S.selected.length;document.getElementById("selCount").textContent=`${n} of 2 chosen`;document.getElementById("advanceBtn").disabled=(n!==2||S.over);}
+function renderChronicle(){
+  const el=document.getElementById("chronicle");
+  if(!S.chronicle.length){el.innerHTML=`<p class="helptext">No years recorded yet. Choose two priorities and advance to begin the chronicle of ${S.name}.</p>`;return;}
+  const box=st=>`POPULATION  ${fmt(st.pop)}\nTREASURY    ${fmt(st.treasury)} · food ${st.food}/100 · routes ${st.routes}\nMILITARY    ${fmt(st.military)}${st.retinue?` · ${st.retinue} ${st.retinueName||"retinue"}`:``}${st.navy?` · ${st.navy} ships`:``}\nSTATE       authority ${st.authority} · infra ${st.infra}${st.codex?` · faith ${st.faith}`:``}`;
+  let h="";
+  for(let i=S.chronicle.length-1;i>=0;i--){const e=S.chronicle[i],isM=e.miles.length>0;
+    e.miles.forEach(m=>{h+=`<div class="entry mile"><div class="yhead">Year ${e.year} — ✦ ${m.tag}</div><div class="milebox"><div class="t">${m.tag}</div><p>${m.text}</p></div></div>`;});
+    h+=`<div class="entry${isM?" mile":""}"><div class="yhead">Year ${e.year} — ${e.foci.join(" & ")} <span style="color:var(--ivory-dim);font-weight:400;text-transform:none">· ${e.era}</span></div><div class="statline">${box(e.close)}</div>`;
+    e.res.forEach(r=>{h+=`<p class="res"><b>${r[0]}.</b> ${r[1]}</p>`;});
+    h+=`<p class="res"><i>${e.ev.text}</i></p></div>`;}
+  el.innerHTML=h;
+}
+
+/* ================= pan/zoom ================= */
+function clampCam(){cam.k=Math.max(1,Math.min(5,cam.k));}
+function applyCam(){clampCam();const g=document.getElementById("cam");if(g)g.setAttribute("transform",`translate(${cam.x},${cam.y}) scale(${cam.k})`);renderScale();}
+(function(){const wrap=document.getElementById("mapwrap");let drag=false,lx=0,ly=0,dx=0,dy=0;
+  wrap.addEventListener("pointerdown",e=>{drag=true;dragMoved=false;lx=e.clientX;ly=e.clientY;dx=0;dy=0;wrap.classList.add("grabbing");wrap.setPointerCapture(e.pointerId);});
+  wrap.addEventListener("pointermove",e=>{if(!drag)return;const r=wrap.getBoundingClientRect(),sx=W.w/r.width,sy=W.h/r.height;cam.x+=(e.clientX-lx)*sx;cam.y+=(e.clientY-ly)*sy;dx+=Math.abs(e.clientX-lx);dy+=Math.abs(e.clientY-ly);if(dx+dy>6)dragMoved=true;lx=e.clientX;ly=e.clientY;applyCam();});
+  wrap.addEventListener("pointerup",()=>{drag=false;wrap.classList.remove("grabbing");setTimeout(()=>dragMoved=false,50);});
+  wrap.addEventListener("pointercancel",()=>{drag=false;wrap.classList.remove("grabbing");});
+  wrap.addEventListener("wheel",e=>{e.preventDefault();cam.k*=e.deltaY<0?1.15:1/1.15;applyCam();},{passive:false});
+  document.getElementById("zoomIn").onclick=()=>{cam.k*=1.25;applyCam();};
+  document.getElementById("zoomOut").onclick=()=>{cam.k/=1.25;applyCam();};
+  document.getElementById("zoomReset").onclick=()=>{cam={k:1,x:0,y:0};applyCam();};
+})();
+
+/* ================= religion decisions ================= */
+let foundingChoice=null, modalLocked=false;
+function openFounding(){
+  modalLocked=true;
+  if(!foundingChoice){const r=mulberry((S.seed^0x9e37)+S.year);foundingChoice={rel:genReligion(r),tenets:[],stance:null,rng:r};}
+  const fc=foundingChoice, rel=fc.rel;
+  const tbtn=k=>`<button class="fchoice ${fc.tenets.includes(k)?'on':''}" data-t="${k}"><b>${TENETS[k].n}</b> <span style="color:var(--ivory-dim)">· ${TENETS[k].tag}</span><br><span style="font-size:11.5px;color:var(--ivory-dim)">${TENETS[k].d}</span></button>`;
+  const sbtn=k=>`<button class="fchoice ${fc.stance===k?'on':''}" data-s="${k}"><b>${STANCES[k].n}</b><br><span style="font-size:11.5px;color:var(--ivory-dim)">${STANCES[k].d}</span></button>`;
+  showModal("Found a Faith",
+   `<p style="margin-top:0">In the eighth year the people hunger for meaning. You will raise a religion of your own making — and in its honour, rename the capital from <b>${S.name}</b> to <b>${S.crown}</b>.</p>
+    <div class="relcard"><div class="rr">${rel.name}</div><div class="rd">Its god is <b>${rel.deity}</b> · its scripture ${rel.book} · its sigil ${rel.sigil}. You will be known as the ${rel.epithet}.</div>
+    <button class="btn ghost" style="margin-top:8px" id="rerollRel">Reroll the revelation</button></div>
+    <div class="opt-row"><div class="ol">Choose two doctrines</div><div class="fcol">${Object.keys(TENETS).map(tbtn).join("")}</div></div>
+    <div class="opt-row"><div class="ol">The priesthood</div><div class="fcol">${Object.keys(STANCES).map(sbtn).join("")}</div></div>
+    <div class="toolbar"><button class="btn" id="foundBtn" ${(fc.tenets.length===2&&fc.stance)?"":"disabled"}>Proclaim the faith</button></div>
+    <p class="helptext" style="margin-top:6px">${fc.tenets.length}/2 doctrines · ${fc.stance?"priesthood set":"choose a priesthood"}</p>`);
+  document.getElementById("rerollRel").onclick=()=>{fc.rel=genReligion(fc.rng);openFounding();};
+  document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{const k=b.dataset.t;const i=fc.tenets.indexOf(k);if(i>=0)fc.tenets.splice(i,1);else{if(fc.tenets.length>=2)fc.tenets.shift();fc.tenets.push(k);}openFounding();});
+  document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{fc.stance=b.dataset.s;openFounding();});
+  const fb=document.getElementById("foundBtn");if(fb)fb.onclick=()=>applyFounding();
+}
+function applyFounding(){
+  const fc=foundingChoice;if(fc.tenets.length!==2||!fc.stance)return;
+  S.religion={name:fc.rel.name,deity:fc.rel.deity,book:fc.rel.book,sigil:fc.rel.sigil,epithet:fc.rel.epithet,tenets:fc.tenets.slice(),stance:fc.stance};
+  S.flags.codex=true;S.faith=Math.max(S.faith,40);S.temples=1;
+  S.orthodoxy=clamp(50+(hasTenet("sword")?15:0)+(hasTenet("spare")?10:0)-(hasTenet("hand")?22:0));
+  S.priesthood=stanceIs("subservient")?15:35;
+  S.authority=clamp(S.authority+(hasTenet("crown")?12:8));
+  S.renamed=true;const old=S.name;S.name=S.crown;W.set[W.capKey].name=S.crown;
+  document.getElementById("realmName").textContent=S.crown;document.getElementById("realmSub").textContent="Crown Waters, under "+S.religion.name;
+  // attach as a milestone to the year just played
+  const e=S.chronicle[S.chronicle.length-1];
+  if(e)e.miles.push({tag:"Founding of the Faith · the Great Renaming",text:`You proclaim <b>${S.religion.name}</b>, god ${S.religion.deity}, and take up ${S.religion.book} as ${S.religion.epithet}. Its doctrines: <b>${TENETS[fc.tenets[0]].n}</b> and <b>${TENETS[fc.tenets[1]].n}</b>, under ${STANCES[fc.stance].n.toLowerCase()}. In its honour, <b>${old}</b> is renamed <b>${S.crown}</b> — the Crown Waters.`});
+  S.pendingFound=false;foundingChoice=null;modalLocked=false;closeModal();render(true);toast("✦ "+S.religion.name+" is proclaimed");persist();
+}
+function openSchism(){
+  modalLocked=true;
+  showModal("A Schism Threatens",
+   `<p style="margin-top:0">The priesthood of ${S.religion.name} has grown mighty (clergy power ${S.priesthood}). A faction within it preaches its own reading of ${S.religion.book}, and the realm's devotion could fracture. The council awaits your word.</p>
+    <div class="toolbar" style="flex-direction:column">
+      <button class="btn" id="schismSuppress">Assert the crown over the clergy</button>
+      <button class="btn ghost" id="schismConcede">Grant the priesthood its due</button>
+    </div>
+    <p class="helptext" style="margin-top:8px">Suppress: authority +6, clergy power −30, faith −8, unity −5. Concede: authority −6, clergy power −18, faith +8, and swifter conversion for a time.</p>`);
+  document.getElementById("schismSuppress").onclick=()=>resolveSchism("suppress");
+  document.getElementById("schismConcede").onclick=()=>resolveSchism("concede");
+}
+function resolveSchism(mode){
+  const e=S.chronicle[S.chronicle.length-1];
+  if(mode==="suppress"){S.authority=clamp(S.authority+6);S.priesthood=clamp(S.priesthood-30);S.faith=clamp(S.faith-8);S.unity=clamp(S.unity-5);
+    if(e)e.miles.push({tag:"The Schism · the Crown Prevails",text:`You bring the clergy of ${S.religion.name} to heel; the throne's word is doctrine. Authority hardens, though some devotion cools.`});}
+  else{S.authority=clamp(S.authority-6);S.priesthood=clamp(S.priesthood-18);S.faith=clamp(S.faith+8);
+    if(e)e.miles.push({tag:"The Schism · the Clergy Placated",text:`You grant the priesthood its honours and its reading; fervour surges even as the crown yields a measure of its sway.`});}
+  S.pendingDecision=null;modalLocked=false;closeModal();render(true);persist();
+}
+
+/* ================= the retinue ================= */
+const RETINUE_NAMES=["the Immortals","the Deathless","the Gilded Spears","the Eternal Guard","the Ember Guard","the Lion Guard","the Ten Thousand","the Undying","the Faravahar Guard","the Crown's Chosen","the Silent Wall","the Sunspears","the Ashen Guard","the Sworn","the Wardens of the Flame"];
+let retinueSuggest=null;
+function openRetinue(){
+  modalLocked=true;
+  if(!retinueSuggest){const r=mulberry((S.seed^0x7a17)+S.year);retinueSuggest=pick(r,RETINUE_NAMES);}
+  const via=S.buildings.citadel&&!(S.faith>=45)?`From the citadel's finest and the veterans of your wars`:`From the most devoted and hardened of your warriors`;
+  showModal("Raise a Retinue",
+   `<p style="margin-top:0">${via}, you may now raise a standing <b>retinue</b> — special units of the longest training and the highest cost, the finest troops the realm can field. They are yours to name, and history will remember them by it.</p>
+    <div class="opt-row"><div class="ol">Name your retinue</div><input class="seed" id="retName" value="${retinueSuggest}" maxlength="40"/></div>
+    <div class="toolbar"><button class="btn" id="retConfirm">Raise them</button><button class="btn ghost" id="retReroll">Suggest another</button></div>
+    <p class="helptext" style="margin-top:6px">You can recruit more of them each year under the <b>Military</b> priority — at ×2.4 quality, the dearest and best of your host.</p>`);
+  document.getElementById("retReroll").onclick=()=>{const r=mulberry((S.seed^0x7a17)+S.year+Math.floor(Math.random()*9999));retinueSuggest=pick(r,RETINUE_NAMES);openRetinue();};
+  document.getElementById("retConfirm").onclick=()=>{const v=(document.getElementById("retName").value||"").trim();applyRetinue(v||retinueSuggest||"the Retinue");};
+}
+function applyRetinue(name){
+  S.retinueName=name; S.quality=Math.max(S.quality, (S.quality*Math.max(1,S.military-100)+2.4*100)/Math.max(1,S.military));
+  const e=S.chronicle[S.chronicle.length-1];
+  if(e)e.miles.push({tag:`The Retinue · ${name}`,text:`You raise your personal retinue — <b>${name}</b> — special units sworn to the crown${S.religion?` and to ${S.religion.deity}`:""}, marked with ${S.religion?("its sigil ("+S.religion.sigil+")"):"the crown's sign"}. At ×2.4 quality they are the finest troops of the realm, and may be swelled each year at great cost.`});
+  S.pendingRetinue=false;retinueSuggest=null;modalLocked=false;closeModal();render(true);toast("✦ "+name+" — your retinue is raised");persist();
+}
+let setupCfg={size:"medium",density:"balanced",islands:"some",temperament:"mixed"};
+function openSetup(){
+  const seg=(label,key,opts)=>`<div class="opt-row"><div class="ol">${label}</div><div class="seg">${opts.map(o=>`<button data-key="${key}" data-val="${o[0]}" class="${setupCfg[key]===o[0]?'on':''}">${o[1]}</button>`).join("")}</div></div>`;
+  showModal("Forge a New World",
+    `<p style="margin-top:0">Every world is grown from a seed — its regions, its cities, villages and tribes, their cultures and faiths. Shape it, then found your realm.</p>
+    ${seg("World size","size",[["small","Small"],["medium","Medium"],["large","Large"],["vast","Vast"]])}
+    ${seg("Settlements","density",[["sparse","Sparse"],["balanced","Balanced"],["crowded","Crowded"]])}
+    ${seg("Islands","islands",[["none","None"],["few","Few"],["some","Some"],["many","Many"]])}
+    ${seg("Neighbours","temperament",[["peaceful","Peaceable"],["mixed","Mixed"],["hostile","Warlike"]])}
+    <div class="opt-row"><div class="ol">Seed</div><input class="seed" id="seedInput" value="${Math.floor(Math.random()*1e6)}"/></div>
+    <div class="toolbar"><button class="btn" onclick="startWorld()">Found the realm</button><button class="btn ghost" onclick="document.getElementById('seedInput').value=Math.floor(Math.random()*1e6)">Roll seed</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
+  document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{setupCfg[b.dataset.key]=b.dataset.val;openSetup();}));
+}
+function startWorld(){const v=parseInt(document.getElementById("seedInput").value,10);const seed=Number.isFinite(v)?v:Math.floor(Math.random()*1e6);_er=null;S=newState(seed,Object.assign({},setupCfg));selected=null;cam={k:1,x:0,y:0};document.getElementById("realmName").textContent="Crown Waters";document.getElementById("realmSub").textContent="a procedural chronicle";closeModal();render();persist();toast(`${W.founding} is founded — a ${setupCfg.size} world of ${Object.keys(W.set).length} settlements`);}
+function saveDialog(){const code=btoa(unescape(encodeURIComponent(JSON.stringify({S,W,cam}))));showModal("Save Reign",`<p>Auto-saved in this browser. Copy the code to keep it elsewhere.</p><textarea class="save" id="saveArea" readonly>${code}</textarea><div class="toolbar"><button class="btn" onclick="copySave()">Copy code</button><button class="btn ghost" onclick="closeModal()">Close</button></div>`);}
+function copySave(){const t=document.getElementById("saveArea");t.select();try{document.execCommand("copy");}catch(e){}toast("Save code copied");}
+function loadDialog(){showModal("Load Reign",`<p>Paste a saved code.</p><textarea class="save" id="loadArea" placeholder="Paste code..."></textarea><div class="toolbar"><button class="btn" onclick="doLoad()">Restore</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);}
+function doLoad(){try{const o=JSON.parse(decodeURIComponent(escape(atob(document.getElementById("loadArea").value.trim()))));S=o.S;W=o.W;cam=o.cam||{k:1,x:0,y:0};if(S.retinue===undefined&&S.legion!==undefined){S.retinue=S.legion;S.retinueName=S.retinueName||"the Retinue";if(S.flags)S.flags.retinue=S.flags.legion;}if(!S.mode)S.mode={};if(!S.intel)S.intel={dir:"E"};if(!S.buildings)S.buildings={};_er=null;selected=null;closeModal();if(S.renamed){document.getElementById("realmName").textContent=S.crown;document.getElementById("realmSub").textContent="Crown Waters, under "+((S.religion&&S.religion.name)||"the faith");}render();toast("Reign restored");}catch(e){toast("That code could not be read");}}
+async function persist(){try{if(window.storage)await window.storage.set("cw4_save",JSON.stringify({S,W,cam}),false);}catch(e){}}
+async function autoLoad(){try{if(window.storage){const r=await window.storage.get("cw4_save");if(r&&r.value){const o=JSON.parse(r.value);S=o.S;W=o.W;cam=o.cam||{k:1,x:0,y:0};return true;}}}catch(e){}return false;}
+let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2600);}
+function showModal(t,h){document.getElementById("modal").innerHTML=`<div class="mhead">${t}</div><div class="mbody">${h}</div>`;document.getElementById("overlay").classList.add("show");}
+function closeModal(){if(modalLocked)return;document.getElementById("overlay").classList.remove("show");}
+document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay"&&!modalLocked)closeModal();});
+document.getElementById("advanceBtn").addEventListener("click",advance);
+document.getElementById("newBtn").addEventListener("click",openSetup);
+document.getElementById("saveBtn").addEventListener("click",saveDialog);
+document.getElementById("loadBtn").addEventListener("click",loadDialog);
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".pane").forEach(x=>x.classList.remove("active"));t.classList.add("active");document.getElementById("pane-"+t.dataset.pane).classList.add("active");}));
+
+function renderReligion(){
+  const el=document.getElementById("religion");if(!el)return;
+  if(!S.religion){el.innerHTML=`<h3>No Faith Yet</h3><p>Your people have no state religion. In the eighth year you will found one of your own making — its god, its scripture, its doctrines and its priesthood all your choice — and it will become an engine of expansion by conversion, and a force in the realm's politics.</p>`;return;}
+  const R=S.religion, rivals={};
+  Object.values(W.set).forEach(s=>{if(s.status!=="hidden"&&s.faith&&s.faith!=="light")rivals[s.faith]=(rivals[s.faith]||0)+1;});
+  const orthoLabel=S.orthodoxy>=66?"strict / zealous":S.orthodoxy<=40?"tolerant / syncretic":"measured";
+  const clergyLabel=S.priesthood>=60?"powerful — schism looms":S.priesthood>=35?"influential":"subordinate to the crown";
+  el.innerHTML=`
+    <h3>${R.name}</h3>
+    <p>God: <span class="term">${R.deity}</span> · scripture: <span class="term">${R.book}</span> · sigil: ${R.sigil}. You reign as the <span class="term">${R.epithet}</span>, over ${STANCES[R.stance].n.toLowerCase()}.</p>
+    <p>${R.tenets.map(t=>`<span class="tenet-chip">${TENETS[t].n} · ${TENETS[t].tag}</span>`).join("")}</p>
+    <p style="font-size:12.5px;color:var(--ivory-dim)">${R.tenets.map(t=>TENETS[t].d).join(" ")}</p>
+    <h3>The State of the Faith</h3>
+    <div class="rel-stat"><span class="k">Devotion (faith)</span><span class="v">${S.faith}/100</span></div>
+    <div class="rel-stat"><span class="k">Orthodoxy</span><span class="v">${S.orthodoxy} · ${orthoLabel}</span></div>
+    <div class="rel-stat"><span class="k">Priesthood power</span><span class="v">${S.priesthood} · ${clergyLabel}</span></div>
+    <div class="rel-stat"><span class="k">Temples raised</span><span class="v">${S.temples}</span></div>
+    <div class="rel-stat"><span class="k">Religious unity of the realm</span><span class="v">${S.unity}%</span></div>
+    <div class="rel-stat"><span class="k">Peoples converted</span><span class="v">${converted()}</span></div>
+    <h3>Rival Faiths in the Known World</h3>
+    <p>${Object.keys(rivals).length?Object.entries(rivals).map(([f,n])=>`<b>${f}</b> — ${n} settlement${n>1?"s":""}`).join(" · "):"None yet found upon the maps."}</p>
+    <p style="font-size:12.5px;color:var(--ivory-dim)">Higher <span class="term">orthodoxy</span> speeds conversion but breeds unrest when rival-faith peoples are taken by the sword. As <span class="term">devotion</span> rises the <span class="term">priesthood</span> gathers power; left unchecked it can force a <span class="term">schism</span> — unless you rule as a living god. <span class="term">Unity</span> above 70% steadies authority and integration; below 40% it strains them.</p>`;
+}
+function renderCodex(){document.getElementById("codex").innerHTML=`
+  <h3>Your World</h3>
+  <p>Choose <span class="term">size, settlement density, islands and the temper of your neighbours</span> when you found a realm. The world grows into <span class="term">regions</span> — a heartland, mountains, forests, steppe, coast and isles — each holding cities, towns, villages and tribes with their own <span class="term">cultures and faiths</span>. Only your heartland is known at first; the rest lies under fog until your scouts and traders reveal it.</p>
+  <h3>Founding a Faith</h3>
+  <p>In the eighth year you <span class="term">create your own religion</span> — its god, scripture and sigil generated, then shaped by your hand. You pick <span class="term">two doctrines</span> (militant, syncretic, mercantile, ascetic, ruler-cult or monumental), each with real trade-offs, and set the <span class="term">priesthood</span> as crown-led or independent. This drives <span class="term">orthodoxy, priesthood power, temples, unity</span> and the risk of <span class="term">schism</span> — see the Faith tab.</p>
+  <h3>Taking a Settlement — Two Roads</h3>
+  <ul>
+    <li><span class="term">By the Faith.</span> Choose <b>The Faith</b> and send missions to your target. Conversion rises faster on <b>peaceful</b> and small peoples, slower on the <b>hostile</b>, the large, and holders of a <b>rival faith</b> — eased greatly by the <b>syncretic</b> doctrine, a strict orthodoxy, or an independent clergy. Win a majority (≥55%) and they may embrace your faith and join willingly.</li>
+    <li><span class="term">By the Sword.</span> Select a target, choose <b>Campaign</b>, and march. Odds turn on your host and your retinue, the <b>terrain</b>, the settlement's <b>size</b>, and the <b>distance</b> (supply thins with range, eased by roads). The <b>militant</b> doctrine grants a holy-war bonus against rival faiths and converts them swiftly; without it, holding heathen peoples strains a zealous realm. Islands need a <b>fleet</b>.</li>
+  </ul>
+  <h3>Every Priority Has a How</h3>
+  <p>When you pick a priority, a <span class="term">specialization</span> appears beneath it — choose how to pursue it, with higher options <span class="term">unlocked</span> by population, faith, soldiers, infrastructure or gold:</p>
+  <ul>
+    <li><span class="term">Trade</span> — land caravans (profit grows with your <b>merchants</b>), sea trade (grows with your <b>merchant fleet</b> — the great late-game earner), a mix, or <b>buy goods & knowledge</b>: spend coin on a chance at a craft, crop, relic or windfall (odds rise with merchants and guilds).</li>
+    <li><span class="term">Infrastructure</span> — roads, walls, granaries, or great <b>works</b>: the Aqueduct, Citadel, Grand Bazaar, Palace and Great Temple, each gated by prerequisites and paid for in gold, each a permanent boon.</li>
+    <li><span class="term">Agriculture</span> — break new farmland (raises the food ceiling), canals (each farmer yields more), herds, or hunting (a quick fill of the stores).</li>
+    <li><span class="term">Military</span> — light and heavy infantry, light and heavy cavalry, cavalry archers, and a named <b>retinue</b> of special units. Higher tiers cost more gold and training but field far better troops (see <b>army quality</b>). Every soldier is drawn from your people.</li>
+    <li><span class="term">Naval</span> — warships (reach the isles), a merchant fleet (feeds sea trade), patrol & blockade, or exploration by sea.</li>
+    <li><span class="term">Intelligence</span> — choose a <b>direction</b> and a <b>reach</b> (nearby, far, deep). The panel shows the odds of finding something out there; the deeper you press, the lower the odds and the longer it takes.</li>
+    <li><span class="term">Roads, Faith and Campaign</span> also specialize — trunk roads vs supply depots vs couriers; missions vs preaching vs temples vs purging a rival cult; and assault vs siege (better against walls and hard ground) vs raid (plunder and weaken without holding).</li>
+  </ul>
+  <h3>Your People Are Your Labour</h3>
+  <p>Population is <span class="term">farmers by default</span>. Assign them to be <span class="term">soldiers</span> or <span class="term">merchants</span> and fewer remain to work the land. Food comes from whichever is scarcer — <b>farmland</b> or the <b>farmers</b> to work it — so if you put half your folk under arms, the granaries empty and famine drags down authority. Watch the farmers / soldiers / merchants tally in the Ledger, and grow farmland, canals and population to support bigger armies and guilds.</p>
+  <p>Each year choose <span class="term">two priorities</span>; then an event resolves; then milestones and decisions (founding, schism) may arise. Nothing resets. Food, Treasury, Faith, Authority, Infrastructure, Integration and Logistics all shape events. If Authority collapses, the reign ends.</p>
+  <h3>The Spine of History</h3>
+  <p>Whatever the seed, the great beats recur: the walls, the tribute and peace, the founding of your faith and the Great Renaming (Year 8), the raising of your named retinue, your first conversion and first conquest, the reach to the coast and its shipyard, command of the sea, the first island outpost, and a multi-centred realm — to the canonical present at Year 57.</p>`;
+}
+
+/* boot */
+(async function(){const had=await autoLoad();if(had){if(S.renamed){document.getElementById("realmName").textContent=S.crown;document.getElementById("realmSub").textContent="Crown Waters, under "+((S.religion&&S.religion.name)||"the faith");}renderCodex();render();}else{S=newState(Math.floor(Math.random()*1e6),Object.assign({},setupCfg));renderCodex();render();openSetup();}})();
+</script>
+</body>
+</html>
