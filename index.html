@@ -112,18 +112,36 @@ let W=null,S=null,selected=null,origin=null,scoutMode=false,cam={x:0,y:0,z:.43},
 function cellAt(x,y){const c=clamp(Math.floor(x/WORLD.w*WORLD.cols),0,WORLD.cols-1),rr=clamp(Math.floor(y/WORLD.h*WORLD.rows),0,WORLD.rows-1);return W.cells[rr*WORLD.cols+c]}
 function nearRiver(x,y,small=true){return W.rivers.some(rv=>rv.major||small?rv.pts.some(p=>Math.hypot(p.x-x,p.y-y)<(rv.major?100:55)):false)}
 function nearestCoast(x,y){const c=cellAt(x,y);return c&&c.coast}
+const REGION_ADJ=["Ashen","Golden","Iron","Whispering","Sunken","Verdant","Broken","Sable","Crimson","Hollow","Frozen","Shimmering","Wild","Elder","Grey","Amber","Silent","Storm","Emberlit","Thornwood","Weeping","Scorched","Misty","Pale"];
+const REGION_NOUN={desert:["Wastes","Sands","Dunes","Expanse"],steppe:["Steppe","Plains","Marches","Range"],forest:["Woods","Forest","Wilds","Thicket"],rainforest:["Jungle","Green","Canopy","Reaches"],tundra:["Tundra","Frostlands","Waste","Reach"],continental:["Vale","Downs","Heartland","Fields"],wetland:["Fens","Marsh","Mire","Wetlands"],mountains:["Peaks","Highlands","Crags","Spine"],tropical_island:["Isles","Atolls","Shoals","Keys"],tundra_island:["Skerries","Isles","Floes"],continental_island:["Isles","Holms","Cays"]};
+function regionName(r,biome){return `The ${pick(r,REGION_ADJ)} ${pick(r,REGION_NOUN[biome]||["Reach","Country","Lands"])}`}
 function makeWorld(seed,cfg){
  const r=rng(seed),w={seed,cfg,cells:[],continents:[],rivers:[],settlements:[],ruins:[],roads:[],factions:[],history:[],deposits:[],camps:[],aiRoutes:[],armies:[]};W=w;
  const nCont=cfg.size==="small"?2:cfg.size==="large"?4:3;
- for(let i=0;i<nCont;i++){let x=(i+.55)*WORLD.w/nCont+(r()-.5)*240,y=WORLD.h*(.3+r()*.4),rx=330+r()*260,ry=390+r()*280;w.continents.push({id:i,x,y,rx,ry,family:FAMILIES[i%FAMILIES.length]})}
+ for(let i=0;i<nCont;i++){let x=(i+.55)*WORLD.w/nCont+(r()-.5)*240,y=WORLD.h*(.3+r()*.4),rx=330+r()*250,ry=380+r()*270;w.continents.push({id:i,x,y,rx,ry,rot:(r()-.5)*1.1,family:FAMILIES[i%FAMILIES.length]})}
+ // Mountain ridge spines — linear ranges with foothills instead of scattered peaks.
+ let ridges=[];w.continents.forEach(q=>{let nr=1+Math.floor(r()*2);for(let k=0;k<nr;k++){let dir=r()*Math.PI*2,len=q.rx*(.75+r()*.7),steps=9+Math.floor(r()*7),sx=q.x+(r()-.5)*q.rx*.55,sy=q.y+(r()-.5)*q.ry*.55;for(let t=0;t<steps;t++){dir+=(r()-.5)*.6;ridges.push({x:sx+Math.cos(dir)*(len/steps)*t,y:sy+Math.sin(dir)*(len/steps)*t,r:48+r()*34})}}});
  for(let yy=0;yy<WORLD.rows;yy++)for(let xx=0;xx<WORLD.cols;xx++){
   const x=(xx+.5)*WORLD.w/WORLD.cols+(yy%2)*(WORLD.w/WORLD.cols)/2,y=(yy+.5)*WORLD.h/WORLD.rows,lat=Math.abs(y/WORLD.h-.5)*2;let best=-9,cont=-1;
-  w.continents.forEach((q,i)=>{const d=1-Math.sqrt(((x-q.x)/q.rx)**2+((y-q.y)/q.ry)**2)+(Math.sin(x*.021+seed)+Math.cos(y*.018-seed))*0.055;if(d>best){best=d;cont=i}});
-  const land=best>-.03,elev=land?clamp(best*1.8+r()*.34):0,moist=clamp(.25+.55*Math.sin(x*.006+y*.003+seed)+r()*.35,0,1);let biome="ocean";
-  if(land){if(elev>.92)biome="mountains";else if(lat>.76)biome="tundra";else if(lat<.25&&moist>.58)biome="rainforest";else if(moist<.22)biome="desert";else if(moist<.42)biome="steppe";else if(moist>.78)biome="wetland";else if(moist>.62)biome="forest";else biome="continental"}
-  w.cells.push({x,y,xx,yy,land,cont,elev,moist,biome,coast:false});
+  w.continents.forEach((q,i)=>{let dx=x-q.x,dy=y-q.y,ca=Math.cos(q.rot),sa=Math.sin(q.rot),ex=(dx*ca+dy*sa)/q.rx,ey=(-dx*sa+dy*ca)/q.ry;const warp=(Math.sin(x*.021+seed)+Math.cos(y*.018-seed))*.10+(Math.sin(x*.046-seed*1.7)+Math.cos(y*.05+seed*.9))*.05+(Math.sin(x*.093+seed*2.3)+Math.cos(y*.087-seed*1.1))*.026;const d=1-Math.sqrt(ex*ex+ey*ey)+warp;if(d>best){best=d;cont=i}});
+  const land=best>-.03;let elev=land?clamp(.2+Math.min(best,.6)*.9+r()*.16):0;
+  if(land){let up=0;for(const rg of ridges){let dd=Math.hypot(x-rg.x,y-rg.y);if(dd<rg.r)up=Math.max(up,1-dd/rg.r)}elev=clamp(elev+up*.72)}
+  let moist=clamp(.44+.4*Math.sin(x*.006+y*.003+seed)+r()*.22,0,1);
+  w.cells.push({x,y,xx,yy,land,cont,elev,moist,lat,biome:"ocean",coast:false});
  }
- w.cells.filter(c=>c.land).forEach(c=>{c.coast=[[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy])=>{const x=c.xx+dx,y=c.yy+dy;return x<0||y<0||x>=WORLD.cols||y>=WORLD.rows||!w.cells[y*WORLD.cols+x].land});if(c.coast&&c.elev<.22&&(c.xx*17+c.yy*31+seed)%13===0){let ilat=Math.abs(c.y/WORLD.h-.5)*2;c.biome=ilat>.72?"tundra_island":ilat<.28?"tropical_island":"continental_island"}});
+ // Rain shadow — prevailing westerlies dry the leeward (eastern) side of tall ranges.
+ for(const c of w.cells){if(!c.land)continue;let up=0;for(let s=1;s<=3;s++){let q=w.cells[c.yy*WORLD.cols+clamp(c.xx-s,0,WORLD.cols-1)];if(q&&q.land)up=Math.max(up,q.elev-.7)}if(up>0)c.moist=clamp(c.moist-up*1.0)}
+ // Biomes from finalized elevation, latitude and moisture.
+ for(const c of w.cells){if(!c.land)continue;let e=c.elev,lat=c.lat,m=c.moist;if(e>.88)c.biome="mountains";else if(lat>.78)c.biome="tundra";else if(lat<.24&&m>.56)c.biome="rainforest";else if(m<.22)c.biome="desert";else if(m<.4)c.biome="steppe";else if(m>.78)c.biome="wetland";else if(m>.6)c.biome="forest";else c.biome="continental"}
+ const coastPass=()=>w.cells.filter(c=>c.land).forEach(c=>{c.coast=[[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy])=>{const x=c.xx+dx,y=c.yy+dy;return x<0||y<0||x>=WORLD.cols||y>=WORLD.rows||!w.cells[y*WORLD.cols+x].land})});
+ coastPass();
+ w.cells.filter(c=>c.land&&c.coast).forEach(c=>{if(c.elev<.22&&(c.xx*17+c.yy*31+seed)%13===0){let il=c.lat;c.biome=il>.72?"tundra_island":il<.28?"tropical_island":"continental_island"}});
+ // Archipelagos — small island clusters scattered in the shallows off the continents.
+ let arch=nCont*2+2;for(let a=0;a<arch;a++){let cand=w.cells.filter(q=>!q.land&&[[-2,0],[2,0],[0,-2],[0,2],[-3,0],[3,0],[0,3],[0,-3]].some(([dx,dy])=>{let nx=q.xx+dx,ny=q.yy+dy;return nx>=0&&ny>=0&&nx<WORLD.cols&&ny<WORLD.rows&&w.cells[ny*WORLD.cols+nx].land}));if(!cand.length)continue;let base=pick(r,cand),cont=0,bd=1e9;w.continents.forEach((q,i)=>{let d=Math.hypot(base.x-q.x,base.y-q.y);if(d<bd){bd=d;cont=i}});let cnt=1+Math.floor(r()*3);for(let k=0;k<cnt;k++){let cx=clamp(base.xx+(Math.floor(r()*3)-1),0,WORLD.cols-1),cy=clamp(base.yy+(Math.floor(r()*3)-1),0,WORLD.rows-1),cell=k===0?base:w.cells[cy*WORLD.cols+cx];if(!cell||cell.land)continue;cell.land=true;cell.cont=cont;cell.elev=.18+r()*.12;let il=cell.lat;cell.biome=il>.7?"tundra_island":il<.3?"tropical_island":"continental_island"}}
+ coastPass();
+ // Named regions — a few per continent, with land cells assigned to the nearest.
+ w.regions=[];w.continents.forEach((q,ci)=>{let seeds=w.cells.filter(c=>c.land&&c.cont===ci);if(!seeds.length)return;let nreg=2+Math.floor(r()*2);for(let k=0;k<nreg;k++){let c=pick(r,seeds);w.regions.push({name:regionName(r,c.biome),x:c.x,y:c.y,cont:ci})}});
+ w.cells.forEach(c=>{if(!c.land){c.region=-1;return}let bi=-1,bd=1e9;w.regions.forEach((rg,i)=>{if(rg.cont!==c.cont)return;let d=Math.hypot(rg.x-c.x,rg.y-c.y);if(d<bd){bd=d;bi=i}});c.region=bi});
  // Rivers descend from mountain/highland cells toward the nearest lower neighbor.
  let sources=w.cells.filter(c=>c.land&&c.elev>.68).sort(()=>r()-.5).slice(0,nCont*4+3);
  sources.forEach((src,i)=>{let cur=src,pts=[{x:cur.x,y:cur.y}],seen=new Set([cur.yy*WORLD.cols+cur.xx]);for(let k=0;k<38&&!cur.coast;k++){let ns=[];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const x=cur.xx+dx,y=cur.yy+dy;if(x>=0&&y>=0&&x<WORLD.cols&&y<WORLD.rows){const q=w.cells[y*WORLD.cols+x];if(q.land&&!seen.has(y*WORLD.cols+x))ns.push(q)}}if(!ns.length)break;ns.sort((a,b)=>(a.elev+r()*.12)-(b.elev+r()*.12));cur=ns[0];seen.add(cur.yy*WORLD.cols+cur.xx);pts.push({x:cur.x+(r()-.5)*25,y:cur.y+(r()-.5)*20})}if(pts.length>4)w.rivers.push({major:i<nCont+1,pts})});
