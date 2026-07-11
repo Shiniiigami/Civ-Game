@@ -1,7 +1,7 @@
 // Crown Waters service worker — offline support + installable PWA.
 // HTML is network-first so new versions arrive when online; icons/manifest are cache-first.
-const CACHE = "crownwaters-v1";
-const STATIC = ["./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const CACHE = "crownwaters-v2";
+const STATIC = ["./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png", "./favicon-32.png", "./favicon-16.png"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();
