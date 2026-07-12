@@ -114,7 +114,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v14.1 · 2026.07.12 · island-survivors";
+const BUILD="v14.2 · 2026.07.12 · region-pots";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1183,14 +1183,22 @@ function shiftCulture(s,cName,amount){if(!s.cultMix||!s.cultMix.length)s.cultMix
 function hostAcceptRate(h){let ceiling=popCeiling(h),head=clamp((ceiling-h.pop)/Math.max(1,ceiling),0,1),typeF=isNomadType(h)?.2:h.type.includes("city")?.85:h.type==="town"?.65:h.type.includes("village")?.5:.55;return clamp(typeF*(.55+head*.6),.12,.9)}
 function convResist(s){return isNomadType(s)?(s.type&&s.type.includes("tribe")?.45:.3):1}
 function absorbRefugees(h,n,src){if(n<=0)return;h.pop+=n;h.free+=n;let w=clamp(n/Math.max(1,h.pop),0,.5)*70*convResist(h),sf=dominantFaith(src);if(sf)shiftFaith(h,sf,w);if(src.culture)shiftCulture(h,src.culture,w)}
-// Survivor pots are keyed by physical landmass ("L"+id) so islanders pool on their own island and cannot resettle across open water; falls back to cultural continent ("C"+id) when no landmass is resolvable. Bare-number keys from old saves are treated as continent keys.
-function potKeyOf(t){let lm=landmassAt(t.x,t.y);return (lm!=null&&lm>0)?("L"+lm):("C"+t.cont)}
-function potCells(key){key=""+key;if(key[0]==="L"){let lm=+key.slice(1);return W.cells.filter(c=>c.land&&c.landmass===lm)}let ct=+(key[0]==="C"?key.slice(1):key);return W.cells.filter(c=>c.land&&c.cont===ct)}
-// Minimum "far from the ruins" distance for a resettlement — capped by the landmass's own extent so survivors on a small island can still rebuild on it instead of being unable to satisfy a world-scale gap.
+// Survivor pots are keyed by MAP REGION — a wrap-aware grid of sub-quadrants (~40 hexes each). Survivors pool by the region their settlement fell in and resettle on ANY land in that region: the mainland coast AND nearby islands within it, but not across a whole ocean into another region. Grid resolution scales with world size so a region is a consistent real neighborhood.
+function regionDims(){return {sx:Math.max(3,Math.round(WORLD.cols/40)),sy:Math.max(2,Math.round(WORLD.rows/40))}}
+function regionOf(x,y){let d=regionDims(),gx=((Math.floor(wrapX(x)/WORLD.w*d.sx)%d.sx)+d.sx)%d.sx,gy=clamp(Math.floor(y/WORLD.h*d.sy),0,d.sy-1);return {gx,gy,sx:d.sx,sy:d.sy}}
+function potKeyOf(t){let g=regionOf(t.x,t.y);return "R"+g.gx+"_"+g.gy}
+// Candidate resettlement cells for a pot key. Region keys ("R gx_gy") use the sub-quadrant; if it holds too little land they widen to the surrounding quadrant (a 3x3 ring of sub-quadrants, wrapping in x) so a thin coastal region still has room. Legacy landmass ("L") / continent ("C" or bare number) keys from old saves still resolve.
+function potCells(key){key=""+key;
+  if(key[0]==="R"){let p=key.slice(1).split("_"),kgx=+p[0],kgy=+p[1],d=regionDims(),fine=W.cells.filter(c=>{if(!c.land)return false;let g=regionOf(c.x,c.y);return g.gx===kgx&&g.gy===kgy});
+    if(fine.length>=6)return fine;
+    return W.cells.filter(c=>{if(!c.land)return false;let g=regionOf(c.x,c.y),ddx=Math.min(((g.gx-kgx)%d.sx+d.sx)%d.sx,((kgx-g.gx)%d.sx+d.sx)%d.sx);return ddx<=1&&Math.abs(g.gy-kgy)<=1})}
+  if(key[0]==="L"){let lm=+key.slice(1);return W.cells.filter(c=>c.land&&c.landmass===lm)}
+  let ct=+(key[0]==="C"?key.slice(1):key);return W.cells.filter(c=>c.land&&c.cont===ct)}
+// Minimum "far from the ruins" distance for a resettlement — capped by the candidate region's own extent so survivors in a small/thin region can still rebuild there instead of being unable to satisfy a world-scale gap.
 function potSpread(pool,frac){if(!pool.length)return 0;let xs=pool.map(c=>c.x),ys=pool.map(c=>c.y),span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));return Math.min(Math.max(WORLD.w,WORLD.h)*frac,span*.4)}
 function refugeePotOf(cont){S.refugeePot=S.refugeePot||{};return S.refugeePot[cont]=S.refugeePot[cont]||{pop:0,pressure:0,faith:{},culture:{},family:{},x:0,y:0}}
 function addToPot(cont,pop,src,x,y){if(pop<=0)return;let p=refugeePotOf(cont);p.pop+=pop;p.x=x;p.y=y;(src.faithMix||[{name:src.faith,pct:100}]).forEach(m=>p.faith[m.name]=(p.faith[m.name]||0)+m.pct/100*pop);(src.cultMix||[{name:src.culture,pct:100}]).forEach(m=>p.culture[m.name]=(p.culture[m.name]||0)+m.pct/100*pop);if(src.family)p.family[src.family]=(p.family[src.family]||0)+pop}
-function generateRefugees(t){let surv=Math.max(0,Math.round(t.pop||0));if(surv<=0)return;let r=rng(S.seed+S.year*331+S.season*7+Math.round(t.x)),refShare=.4+r()*.2,refugees=Math.round(surv*refShare),potStay=surv-refugees,radius=Math.max(WORLD.w,WORLD.h)*.2,srcLm=landmassAt(t.x,t.y),hosts=W.settlements.filter(s=>!s.ruined&&s.id!==t.id&&(srcLm!=null&&srcLm>0?landmassAt(s.x,s.y)===srcLm:s.cont===t.cont)&&Math.hypot(s.x-t.x,s.y-t.y)<radius),refused=0,accepted=0;
+function generateRefugees(t){let surv=Math.max(0,Math.round(t.pop||0));if(surv<=0)return;let r=rng(S.seed+S.year*331+S.season*7+Math.round(t.x)),refShare=.4+r()*.2,refugees=Math.round(surv*refShare),potStay=surv-refugees,radius=Math.max(WORLD.w,WORLD.h)*.2,srcKey=potKeyOf(t),hosts=W.settlements.filter(s=>!s.ruined&&s.id!==t.id&&potKeyOf(s)===srcKey&&Math.hypot(s.x-t.x,s.y-t.y)<radius),refused=0,accepted=0;
  if(hosts.length&&refugees>0){let weights=hosts.map(h=>isNomadType(h)?.3:h.type.includes("city")?1.4:h.type==="town"?1.2:1),wtot=weights.reduce((n,w)=>n+w,0)||1;hosts.forEach((h,i)=>{let sendN=Math.round(refugees*weights[i]/wtot);if(sendN<=0)return;let take=Math.round(sendN*hostAcceptRate(h));if(take>0){absorbRefugees(h,take,t);accepted+=take}refused+=sendN-take})}else refused=refugees;
  let potPop=potStay+refused;if(potPop>0)addToPot(potKeyOf(t),potPop,t,t.x,t.y);
  if(nearPlayer(t.x,t.y,520))log(`Of ${fmt(surv)} survivors of ${t.name}, <b>${fmt(accepted)}</b> are taken in by nearby settlements${potPop>0?`, while <b>${fmt(potPop)}</b> are cast adrift, seeking a new home`:""}.`)}
