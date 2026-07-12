@@ -114,7 +114,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v11.4 · 2026.07.12 · separated-continents";
+const BUILD="v11.5 · 2026.07.12 · fuller-geologic-worlds";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -214,27 +214,39 @@ const REGION_NOUN={desert:["Wastes","Sands","Dunes","Expanse"],steppe:["Steppe",
 function regionName(r,biome){return `The ${pick(r,REGION_ADJ)} ${pick(r,REGION_NOUN[biome]||["Reach","Country","Lands"])}`}
 const WORLD_DIMS={small:{cols:84,rows:56},medium:{cols:120,rows:80},large:{cols:150,rows:100},vast:{cols:186,rows:124}};
 function setWorldDims(cfg){let d=WORLD_DIMS[cfg.size]||WORLD_DIMS.medium,cw=40,ch=38.75;WORLD.cols=d.cols;WORLD.rows=d.rows;WORLD.w=Math.round(d.cols*cw);WORLD.h=Math.round(d.rows*ch)}
-function buildContinents(w,cfg,r){let terrain=cfg.terrain||"continents",Wd=WORLD,fam=i=>FAMILIES[i%FAMILIES.length],blob=(x,y,rx,ry)=>({x,y,rx,ry,rot:(r()-.5)*1.1}),plan=[];
+function buildContinents(w,cfg,r){let terrain=cfg.terrain||"continents",Wd=WORLD,fam=i=>FAMILIES[i%FAMILIES.length];
  let szN={small:0,medium:1,large:2,vast:3}[cfg.size]||1;
- // Scatter blobs on a jittered grid with enforced spacing so continents stay separated by open ocean.
- let scatter=(n,rxF,ryF,x0,x1,y0,y1)=>{let cols=Math.ceil(Math.sqrt(n)),rows=Math.ceil(n/cols),k=0;for(let gy=0;gy<rows&&k<n;gy++)for(let gx=0;gx<cols&&k<n;gx++,k++){let cx=Wd.w*(x0+(x1-x0)*((gx+.5)/cols)),cy=Wd.h*(y0+(y1-y0)*((gy+.5)/rows)),jx=(r()-.5)*Wd.w*(x1-x0)*(.16/cols),jy=(r()-.5)*Wd.h*(y1-y0)*(.16/rows);plan.push(blob(cx+jx,cy+jy,Wd.w*(x1-x0)*(.5/cols)*rxF*(.86+r()*.28),Wd.h*(y1-y0)*(.5/rows)*ryF*(.86+r()*.28)))}};
- if(terrain==="pangaea"){plan.push(blob(Wd.w*.5,Wd.h*.5,Wd.w*.4,Wd.h*.44));let extra=1+szN;for(let i=0;i<extra;i++)plan.push(blob(Wd.w*(.12+r()*.76),Wd.h*(.14+r()*.72),Wd.w*(.045+r()*.04),Wd.h*(.05+r()*.045)))}
- else if(terrain==="archipelago"){let n=[7,11,15,20][szN];for(let i=0;i<n;i++)plan.push(blob(Wd.w*(.08+r()*.84),Wd.h*(.1+r()*.8),Wd.w*(.03+r()*.055),Wd.h*(.04+r()*.065)))}
- else if(terrain==="earthlike"){plan.push(blob(Wd.w*.24,Wd.h*.4,Wd.w*.155,Wd.h*.3));plan.push(blob(Wd.w*.76,Wd.h*.58,Wd.w*.15,Wd.h*.29));let small=2+szN;for(let i=0;i<small;i++)plan.push(blob(Wd.w*(.12+r()*.76),Wd.h*(.14+r()*.72),Wd.w*(.045+r()*.035),Wd.h*(.05+r()*.04)))}
- else{let nc=[2,3,4,5][szN];scatter(nc,.62,.7,.08,.92,.12,.88)}
- plan.forEach((p,i)=>w.continents.push({id:i,x:p.x,y:p.y,rx:p.rx,ry:p.ry,rot:p.rot,family:fam(i)}))}
+ // A continent is a main ellipse plus offset lobes — giving irregular coasts, peninsulas and gulfs rather than clean blobs.
+ let mk=(x,y,rx,ry,nl)=>{let c={x,y,rx,ry,rot:(r()-.5)*1.0,lobes:[]},lobes=nl==null?(1+Math.floor(r()*2)):nl;for(let k=0;k<lobes;k++){let a=r()*Math.PI*2,off=.36+r()*.36;c.lobes.push({x:x+Math.cos(a)*rx*off,y:y+Math.sin(a)*ry*off,rx:rx*(.38+r()*.32),ry:ry*(.38+r()*.32),rot:(r()-.5)*1.3})}return c};
+ let plan=[],isles=[];
+ // Aspect-correct jittered grid with oversampled slots — always leaving empty cells so open ocean divides the continents.
+ let grid=(n,fill,x0,x1,y0,y1)=>{let aw=x1-x0,ah=y1-y0,aspect=(Wd.w*aw)/(Wd.h*ah),slotN=Math.ceil(n*1.7),cols=Math.max(1,Math.round(Math.sqrt(slotN*aspect))),rows=Math.max(1,Math.ceil(slotN/cols)),slots=[];for(let gy=0;gy<rows;gy++)for(let gx=0;gx<cols;gx++)slots.push([gx,gy]);for(let i=slots.length-1;i>0;i--){let j=Math.floor(r()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]]}slots.slice(0,n).forEach(([gx,gy])=>{let cw=aw/cols,chh=ah/rows,cx=Wd.w*(x0+cw*(gx+.5)),cy=Wd.h*(y0+chh*(gy+.5)),jx=(r()-.5)*Wd.w*cw*.3,jy=(r()-.5)*Wd.h*chh*.3,rx=Wd.w*cw*.5*fill*(.8+r()*.4),ry=Wd.h*chh*.5*fill*(.8+r()*.4);plan.push(mk(cx+jx,cy+jy,rx,ry))})};
+ if(terrain==="pangaea"){plan.push(mk(Wd.w*.5,Wd.h*.5,Wd.w*.38,Wd.h*.42,5));let extra=2+szN;for(let i=0;i<extra;i++)plan.push(mk(Wd.w*(.1+r()*.8),Wd.h*(.12+r()*.76),Wd.w*(.05+r()*.05),Wd.h*(.055+r()*.05),1))}
+ else if(terrain==="archipelago"){let n=[20,34,52,74][szN];for(let i=0;i<n;i++)plan.push(mk(Wd.w*(.05+r()*.9),Wd.h*(.07+r()*.86),Wd.w*(.026+r()*.045),Wd.h*(.032+r()*.055),r()<.3?1:0))}
+ else if(terrain==="earthlike"){plan.push(mk(Wd.w*.2,Wd.h*.42,Wd.w*.155,Wd.h*.3,3));plan.push(mk(Wd.w*.78,Wd.h*.56,Wd.w*.15,Wd.h*.29,3));let small=[7,12,18,26][szN];for(let i=0;i<small;i++)plan.push(mk(Wd.w*(.06+r()*.88),Wd.h*(.08+r()*.84),Wd.w*(.038+r()*.05),Wd.h*(.042+r()*.05),r()<.45?1:0))}
+ else{let big=[2,3,4,6][szN];grid(big,.86,.05,.95,.06,.94);let med=[3,6,10,15][szN];for(let i=0;i<med;i++)plan.push(mk(Wd.w*(.06+r()*.88),Wd.h*(.08+r()*.84),Wd.w*(.04+r()*.045),Wd.h*(.045+r()*.05),1+Math.floor(r()*2)))}
+ // Island chains fill the open ocean between the main landmasses (they add land but are not named continents).
+ if(terrain!=="pangaea"){let ni=[16,30,50,74][szN];for(let i=0;i<ni;i++){let ix=Wd.w*(.04+r()*.92),iy=Wd.h*(.05+r()*.9),irx=Wd.w*(.013+r()*.026),iry=Wd.h*(.016+r()*.03);isles.push({x:ix,y:iy,rx:irx,ry:iry,rot:(r()-.5)*1.4});let chain=Math.floor(r()*2);for(let k=0;k<chain;k++){let a=r()*Math.PI*2,dd=irx*(1.6+r()*1.4);isles.push({x:ix+Math.cos(a)*dd,y:iy+Math.sin(a)*dd*.7,rx:irx*(.5+r()*.45),ry:iry*(.5+r()*.45),rot:(r()-.5)*1.4})}}}
+ plan.forEach((p,i)=>w.continents.push(Object.assign({id:i,family:fam(i)},p)));
+ w.isles=isles}
 function makeWorld(seed,cfg){
  setWorldDims(cfg);
  const r=rng(seed),w={seed,cfg,dim:{w:WORLD.w,h:WORLD.h,cols:WORLD.cols,rows:WORLD.rows},cells:[],continents:[],rivers:[],settlements:[],ruins:[],roads:[],factions:[],history:[],deposits:[],camps:[],aiRoutes:[],armies:[]};W=w;
  buildContinents(w,cfg,r);
  const nCont=w.continents.length;
- // Mountain ridge spines — linear ranges with foothills instead of scattered peaks.
- let ridges=[];w.continents.forEach(q=>{let nr=1+Math.floor(r()*2);for(let k=0;k<nr;k++){let dir=r()*Math.PI*2,len=q.rx*(.75+r()*.7),steps=9+Math.floor(r()*7),sx=q.x+(r()-.5)*q.rx*.55,sy=q.y+(r()-.5)*q.ry*.55;for(let t=0;t<steps;t++){dir+=(r()-.5)*.6;ridges.push({x:sx+Math.cos(dir)*(len/steps)*t,y:sy+Math.sin(dir)*(len/steps)*t,r:48+r()*34})}}});
+ // Mountain ranges follow plate margins: a young, high cordillera hugging one coast, plus older, lower interior ranges.
+ let ridges=[];w.continents.forEach(q=>{let span=Math.hypot(q.rx,q.ry);
+  let marginA=r()*Math.PI*2,rangeA=marginA+Math.PI/2+(r()-.5)*.6,sx=q.x+Math.cos(marginA)*q.rx*.52-Math.cos(rangeA)*q.rx*.7,sy=q.y+Math.sin(marginA)*q.ry*.52-Math.sin(rangeA)*q.ry*.7,steps=12+Math.floor(r()*10),len=span*1.5,dir=rangeA;
+  for(let t=0;t<steps;t++){dir+=(r()-.5)*.36;ridges.push({x:sx+Math.cos(dir)*(len/steps)*t,y:sy+Math.sin(dir)*(len/steps)*t,r:52+r()*44,h:.92+r()*.14})}
+  if(r()<.6){let ia=r()*Math.PI*2,isx=q.x+(r()-.5)*q.rx*.5,isy=q.y+(r()-.5)*q.ry*.5,ist=7+Math.floor(r()*6),il=span*.85,idir=ia;for(let t=0;t<ist;t++){idir+=(r()-.5)*.5;ridges.push({x:isx+Math.cos(idir)*(il/ist)*t,y:isy+Math.sin(idir)*(il/ist)*t,r:40+r()*30,h:.5+r()*.28})}}});
  for(let yy=0;yy<WORLD.rows;yy++)for(let xx=0;xx<WORLD.cols;xx++){
   const x=(xx+.5)*WORLD.w/WORLD.cols+(yy%2)*(WORLD.w/WORLD.cols)/2,y=(yy+.5)*WORLD.h/WORLD.rows,lat=Math.abs(y/WORLD.h-.5)*2;let best=-9,cont=-1;
-  w.continents.forEach((q,i)=>{let dx=x-q.x,dy=y-q.y,ca=Math.cos(q.rot),sa=Math.sin(q.rot),ex=(dx*ca+dy*sa)/q.rx,ey=(-dx*sa+dy*ca)/q.ry;const warp=(Math.sin(x*.021+seed)+Math.cos(y*.018-seed))*.058+(Math.sin(x*.046-seed*1.7)+Math.cos(y*.05+seed*.9))*.03+(Math.sin(x*.093+seed*2.3)+Math.cos(y*.087-seed*1.1))*.016;const d=1-Math.sqrt(ex*ex+ey*ey)+warp;if(d>best){best=d;cont=i}});
-  const land=best>-.03;let elev=land?clamp(.2+Math.min(best,.6)*.9+r()*.16):0;
-  if(land){let up=0;for(const rg of ridges){let dd=Math.hypot(x-rg.x,y-rg.y);if(dd<rg.r)up=Math.max(up,1-dd/rg.r)}elev=clamp(elev+up*.72)}
+  const warp=(Math.sin(x*.021+seed)+Math.cos(y*.018-seed))*.058+(Math.sin(x*.046-seed*1.7)+Math.cos(y*.05+seed*.9))*.03+(Math.sin(x*.093+seed*2.3)+Math.cos(y*.087-seed*1.1))*.016;
+  const ellF=(cx,cy,rx,ry,rot)=>{let dx=x-cx,dy=y-cy,ca=Math.cos(rot),sa=Math.sin(rot),ex=(dx*ca+dy*sa)/rx,ey=(-dx*sa+dy*ca)/ry;return 1-Math.sqrt(ex*ex+ey*ey)};
+  w.continents.forEach((q,i)=>{let inf=ellF(q.x,q.y,q.rx,q.ry,q.rot);if(q.lobes)for(const L of q.lobes){let v=ellF(L.x,L.y,L.rx,L.ry,L.rot);if(v>inf)inf=v}if(inf>best){best=inf;cont=i}});
+  let isleBest=-9;if(w.isles)for(const L of w.isles){let v=ellF(L.x,L.y,L.rx,L.ry,L.rot);if(v>isleBest)isleBest=v}
+  const dCont=best+warp,dIsle=isleBest+warp,land=dCont>-.03||dIsle>-.02;let elev=land?clamp(.2+Math.min(Math.max(dCont,dIsle),.6)*.9+r()*.16):0;
+  if(land){let up=0;for(const rg of ridges){let dd=Math.hypot(x-rg.x,y-rg.y);if(dd<rg.r){let u=(1-dd/rg.r)*(rg.h||1);if(u>up)up=u}}elev=clamp(elev+up*.8)}
   let moist=clamp(.44+.4*Math.sin(x*.006+y*.003+seed)+r()*.22,0,1);
   w.cells.push({x,y,xx,yy,land,cont,elev,moist,lat,biome:"ocean",coast:false});
  }
