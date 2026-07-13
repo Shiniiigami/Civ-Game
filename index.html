@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.30 · 2026.07.13 · AI ruin rebuilds are staged too; restoration map markers";
+const BUILD="v16.31 · 2026.07.13 · khanate government locked to nomads; settled hordes become empires";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -281,16 +281,20 @@ function startGov(s,r){let coastal=s.water||(s.type&&(s.type.includes("port")||s
  return r()<.5?"chiefdom":"monarchy"}
 function govEvolve(){let r=rng(S.seed+S.year*733+17);
  for(const f of W.factions.filter(x=>x.alive)){let lands=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(!lands.length)continue;let cap=lands.find(s=>f.cap&&s.id===f.cap.id)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];let totpop=lands.reduce((n,s)=>n+s.pop,0),coastal=cap.water||cap.type.includes("port");let g=f.gov||startGov(cap,r),ng=g;
-  if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.5)ng="khanate";
+  if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.5&&isNomadType(cap))ng="khanate";
   else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.22)ng="republic";
   else if(g==="monarchy"&&(lands.length>=5||totpop>16000)&&r()<.28)ng="empire";
   else if(g==="chiefdom"&&cap.pop>1800&&r()<.3)ng=coastal?"republic":"monarchy";
   else if(g==="citystate"&&lands.length>=3&&r()<.28)ng="monarchy";
+  else if(g==="khanate"&&!isNomadType(cap)&&r()<.5)ng=(totpop>14000||lands.length>=4)?"empire":"monarchy"; // a horde that has settled into cities is no longer a khanate
   else if(g==="khanate"&&lands.length>=4&&totpop>14000&&r()<.2)ng="empire";
   if(ng!==g){f.gov=ng;cap.gov=ng;if(nearPlayer(cap.x,cap.y,520))log(`<b>${f.name}</b> becomes ${ng==="empire"?"an":"a"} <b>${GOV[ng].n}</b>.`)}}
- for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25)s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}}
+ for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25&&isNomadType(s))s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}
+ // Lock: a khanate is a nomad institution only. A khanate faction that holds more settled towns than camps has settled down — it becomes an Empire/Kingdom; and any stray non-nomad settlement carrying the khanate label sheds it.
+ for(const f of W.factions){if(!f.alive||f.gov!=="khanate")continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined),camps=ls.filter(isNomadType).length,settled=ls.length-camps;if(settled>0&&settled>=camps){f.gov=(ls.length>=4||settled>=2)?"empire":"monarchy";let c0=ls.sort((a,b)=>b.pop-a.pop)[0];if(c0){c0.gov=f.gov;if(nearPlayer(c0.x,c0.y,520))log(`<b>${f.name}</b> settle into their conquered cities and become ${f.gov==="empire"?"an Empire":"a Kingdom"}.`)}}}
+ for(const s of W.settlements){if(!s.ruined&&s.gov==="khanate"&&!isNomadType(s))s.gov=(s.type||"").includes("city")?"monarchy":s.type==="town"?"citystate":"chiefdom"}}
 function playerGovDrift(){if(!owned().length)return;let r=rng(S.seed+S.year*911+3),lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];if(!cap)return;let totpop=ownedPop(),coastal=cap.water||cap.type.includes("port"),g=S.gov,ng=g;
- if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.4)ng="khanate";
+ if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.4&&isNomadType(cap))ng="khanate";
  else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.15)ng="republic";
  else if(g==="monarchy"&&(lands.length>=6||totpop>18000)&&r()<.2)ng="empire";
  else if(g==="chiefdom"&&cap.pop>1800&&r()<.25)ng=coastal?"republic":"monarchy";
