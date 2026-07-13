@@ -114,7 +114,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.15 · 2026.07.12 · biomes, snow & fog";
+const BUILD="v16.16 · 2026.07.13 · army pathfinding (A* land routes)";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1462,7 +1462,63 @@ function fleetLaden(f){return fleetCarried(f)>0||!!f.settlerCargo}
 function computeLandmasses(w){if(!w||!w.cells)return;let comp=0,cells=w.cells;for(const c of cells)c.landmass=-1;for(const start of cells){if(!start.land||start.landmass>=0)continue;comp++;let stack=[start];start.landmass=comp;while(stack.length){let c=stack.pop();for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;let ny=c.yy+dy;if(ny<0||ny>=WORLD.rows)continue;let nx=((c.xx+dx)%WORLD.cols+WORLD.cols)%WORLD.cols;let q=cells[ny*WORLD.cols+nx];if(q&&q.land&&q.landmass<0){q.landmass=comp;stack.push(q)}}}}}
 function landmassAt(x,y){let c=cellAt(x,y);if(c&&c.land)return c.landmass;for(const d of [[-40,0],[40,0],[0,-38],[0,38],[40,38],[-40,-38],[40,-38],[-40,38]]){let q=cellAt(x+d[0],y+d[1]);if(q&&q.land)return q.landmass}return null}
 // Land movement that refuses to step onto open water — mirror of sailStep. Deflects along the coast toward the goal; returns "blocked" if hemmed in by sea so the caller can hold.
-function landStep(a,gx,gy,sp){let dx=dxWrap(gx,a.x),dy=gy-a.y,d=Math.hypot(dx,dy);if(d<1)return"moved";let base=Math.atan2(dy,dx),offs=[0,.45,-.45,.95,-.95,1.5,-1.5,2.15,-2.15];for(const o of offs){let ang=base+o,nx=wrapX(a.x+Math.cos(ang)*sp),ny=a.y+Math.sin(ang)*sp,cc=cellAt(nx,ny);if(!cc||!cc.land||iceCap(cc))continue;a.x=nx;a.y=ny;return"moved"}return"blocked"}
+function cellCenter(c){return {x:(c.xx+.5)/WORLD.cols*WORLD.w,y:(c.yy+.5)/WORLD.rows*WORLD.h};}
+function cellPassable(c){return !!(c&&c.land&&!iceCap(c));}
+// A* land pathfinder over the cell grid: returns cell-centre waypoints from the NEXT cell to the goal
+// cell (never the current cell), or null if no land route exists (different landmass, or search capped).
+// 8-connected with x-wrap, terrain-weighted cost (slow biomes cost more), and NO diagonal corner-cutting
+// across water, so armies route around bays, peninsulas, isthmuses, mountains and ice instead of dead-ending.
+function findLandPath(sx,sy,gx,gy){
+ const cols=WORLD.cols,rows=WORLD.rows,cells=W.cells;
+ let start=cellAt(sx,sy);if(!cellPassable(start)){let nl=nearestLand(sx,sy);if(nl)start=cellAt(nl.x,nl.y)}
+ let goal=cellAt(gx,gy);if(!cellPassable(goal)){let nl=nearestLand(gx,gy);if(nl)goal=cellAt(nl.x,nl.y)}
+ if(!cellPassable(start)||!cellPassable(goal))return null;
+ const si=start.yy*cols+start.xx,gi=goal.yy*cols+goal.xx;
+ if(si===gi)return [];
+ if(start.landmass!==goal.landmass)return null; // separated by sea — needs a fleet, not a march
+ const h=(a,b)=>{let dx=Math.abs(a.xx-b.xx);dx=Math.min(dx,cols-dx);let dy=Math.abs(a.yy-b.yy);return (Math.max(dx,dy)+.41*Math.min(dx,dy))*.9};
+ const g={},came={},closed={},heap=[];
+ const push=(f,i)=>{heap.push([f,i]);let n=heap.length-1;while(n>0){let p=(n-1)>>1;if(heap[p][0]<=heap[n][0])break;[heap[p],heap[n]]=[heap[n],heap[p]];n=p}};
+ const pop=()=>{let top=heap[0],last=heap.pop();if(heap.length){heap[0]=last;let n=0;for(;;){let l=2*n+1,r=l+1,s=n;if(l<heap.length&&heap[l][0]<heap[s][0])s=l;if(r<heap.length&&heap[r][0]<heap[s][0])s=r;if(s===n)break;[heap[s],heap[n]]=[heap[n],heap[s]];n=s}}return top};
+ g[si]=0;push(h(start,goal),si);
+ let exp=0;const CAP=9000;
+ while(heap.length){
+  let ci=pop()[1];if(closed[ci])continue;closed[ci]=1;
+  if(ci===gi){let path=[],cur=gi;while(cur!==si){path.push(cellCenter(cells[cur]));cur=came[cur]}path.reverse();return path}
+  if(++exp>CAP)return null;
+  let c=cells[ci],cx=c.xx,cy=c.yy;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+   if(!dx&&!dy)continue;let ny=cy+dy;if(ny<0||ny>=rows)continue;let nx=((cx+dx)%cols+cols)%cols,nc=cells[ny*cols+nx];
+   if(!cellPassable(nc))continue;
+   if(dx&&dy&&(!cellPassable(cells[cy*cols+((cx+dx)%cols+cols)%cols])||!cellPassable(cells[ny*cols+cx])))continue; // no corner-cut
+   let ni=ny*cols+nx;if(closed[ni])continue;
+   let terr=nc.snow?.4:(TERR_MOVE[nc.biome]!=null?TERR_MOVE[nc.biome]:1),ng=g[ci]+((dx&&dy)?1.414:1)/Math.max(.15,terr);
+   if(g[ni]==null||ng<g[ni]){g[ni]=ng;came[ni]=ci;push(ng+h(nc,goal),ni)}
+  }
+ }
+ return null;
+}
+// Advance a land force toward (gx,gy) by budget sp, following a cached A* route (recomputed when the goal
+// moves more than a cell). Falls back to the old greedy heading-search for sub-cell hops or when A* finds no
+// route. Returns "moved" or "blocked" (blocked -> caller turns the army home).
+function landStep(a,gx,gy,sp){
+ let dx=dxWrap(gx,a.x),dy=gy-a.y,d=Math.hypot(dx,dy);if(d<1)return"moved";
+ let cw=WORLD.w/WORLD.cols;
+ // Recompute the route once per goal (when first sought or the goal moves >1 cell) — NOT every season a
+ // route happens to be null, so a stuck/arriving army doesn't re-run a full A* search each turn.
+ if(!a._rgoal||Math.hypot(dxWrap(a._rgoal.x,gx),a._rgoal.y-gy)>cw){a._route=findLandPath(a.x,a.y,gx,gy);a._rgoal={x:gx,y:gy}}
+ if(a._route&&a._route.length){
+  let budget=sp;
+  while(budget>0&&a._route.length){let wp=a._route[0],wdx=dxWrap(wp.x,a.x),wdy=wp.y-a.y,wd=Math.hypot(wdx,wdy);
+   if(wd<=budget+.001){a.x=wrapX(wp.x);a.y=wp.y;budget-=wd;a._route.shift()}
+   else{let ang=Math.atan2(wdy,wdx);a.x=wrapX(a.x+Math.cos(ang)*budget);a.y=a.y+Math.sin(ang)*budget;budget=0}}
+  if(!a._route.length)a._route=null;
+  return"moved";
+ }
+ let base=Math.atan2(dy,dx),offs=[0,.45,-.45,.95,-.95,1.5,-1.5,2.15,-2.15];
+ for(const o of offs){let ang=base+o,nx=wrapX(a.x+Math.cos(ang)*sp),ny=a.y+Math.sin(ang)*sp,cc=cellAt(nx,ny);if(!cc||!cc.land||iceCap(cc))continue;a.x=nx;a.y=ny;return"moved"}
+ return"blocked";
+}
 // ---- Seas & waters: shallow coastal/archipelago vs deep continental, each a nameable body ----
 function computeSeas(w){if(!w||!w.cells)return;let cells=w.cells,cols=WORLD.cols,rows=WORLD.rows;
  for(const c of cells){if(c.land){c.deep=false;c.sea=-1;continue}c.sea=-1;let near=false;for(let dy=-3;dy<=3&&!near;dy++)for(let dx=-3;dx<=3;dx++){let nx=c.xx+dx,ny=c.yy+dy;if(nx<0||ny<0||nx>=cols||ny>=rows)continue;let q=cells[ny*cols+nx];if(q&&q.land){near=true;break}}c.deep=!near}
