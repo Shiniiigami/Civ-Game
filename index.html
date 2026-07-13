@@ -1504,7 +1504,9 @@ function findLandPath(sx,sy,gx,gy){
 function landStep(a,gx,gy,sp){
  let dx=dxWrap(gx,a.x),dy=gy-a.y,d=Math.hypot(dx,dy);if(d<1)return"moved";
  let cw=WORLD.w/WORLD.cols;
- if(!a._route||!a._rgoal||Math.hypot(dxWrap(a._rgoal.x,gx),a._rgoal.y-gy)>cw){a._route=findLandPath(a.x,a.y,gx,gy);a._rgoal={x:gx,y:gy}}
+ // Recompute the route once per goal (when first sought or the goal moves >1 cell) — NOT every season a
+ // route happens to be null, so a stuck/arriving army doesn't re-run a full A* search each turn.
+ if(!a._rgoal||Math.hypot(dxWrap(a._rgoal.x,gx),a._rgoal.y-gy)>cw){a._route=findLandPath(a.x,a.y,gx,gy);a._rgoal={x:gx,y:gy}}
  if(a._route&&a._route.length){
   let budget=sp;
   while(budget>0&&a._route.length){let wp=a._route[0],wdx=dxWrap(wp.x,a.x),wdy=wp.y-a.y,wd=Math.hypot(wdx,wdy);
