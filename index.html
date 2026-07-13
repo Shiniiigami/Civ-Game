@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.34 · 2026.07.13 · CK3-style reforms: govs & succession laws gated by requirements + bonuses, changeable once per decade or on a new reign";
+const BUILD="v16.35 · 2026.07.13 · tribes (like hordes) can absorb a beaten camp toward a confederacy; settled powers only scatter camps";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -2032,15 +2032,19 @@ function spawnNomadResettle(key,p,newPop,r){let base0=potCells(key),pool=base0.f
  return false}
 function disbandNomadTarget(a,t,r){a.loot=a.loot||{gold:0,res:{},slaves:0};let ens=Math.floor(t.free*(.05+r()*.1));if(ens>0){t.free-=ens;t.pop-=ens;a.loot.slaves+=ens}aiLootTake(a,t,r,.7);let nm=t.name;scatterNomads(t,a.name||"raiders");if(nearPlayer(t.x,t.y,480))log(`The <b>${nm}</b> are broken and scattered by the ${a.name}${ens?`, ${fmt(ens)} taken as slaves`:""}. Nomads cannot be held — they disperse.`)}
 // One horde swallows a rival horde: the beaten camp's riders ride on under the victor's standard, the rest scatter. Three such conquests and the winning horde unites into a Khanate.
-function nomadAbsorbCamp(camp,t,a,r){if(!camp||camp.ruined)return disbandNomadTarget(a,t,r);a.loot=a.loot||{gold:0,res:{},slaves:0};
+// A mounted people (camp or tribe) that beats a nomad camp doesn't hold it — it drives the survivors under its own standard. Camps build toward a khanate, tribes toward a confederacy.
+function nomadAbsorbCamp(camp,t,a,r){if(!camp||camp.ruined)return disbandNomadTarget(a,t,r);a.loot=a.loot||{gold:0,res:{},slaves:0};let isT=(camp.type||"").includes("tribe");
  let join=Math.round(t.free*(.35+r()*.25)),enslaved=Math.round(t.free*.12);camp.free+=join;camp.pop+=join;if(enslaved>0){camp.slaves+=enslaved;camp.pop+=enslaved}
  t.units.forEach(u=>{let n=Math.round(u.count*.4);if(n>0){let same=camp.units.find(x=>x.type===u.type&&!x.slave);same?same.count+=n:camp.units.push({type:u.type,count:n,slave:false})}});
  aiLootTake(a,t,r,.5);camp.campsTaken=(camp.campsTaken||0)+1;let nm=t.name;scatterNomads(t,camp.name);
- if(nearPlayer(camp.x,camp.y,520)||nearPlayer(t.x,t.y,520))log(`The <b>${camp.name}</b> break the ${nm} and drive their riders under one standard — ${fmt(join)} join the horde${camp.owner?"":` (${camp.campsTaken}/2 toward a khanate)`}.`);
- if(camp.campsTaken>=2&&!camp.owner)formKhanate(camp,r)}
+ if(nearPlayer(camp.x,camp.y,520)||nearPlayer(t.x,t.y,520))log(`The <b>${camp.name}</b> break the ${nm} and drive their riders under one standard — ${fmt(join)} join the ${isT?"tribe":"horde"}${camp.owner?"":` (${camp.campsTaken}/2 toward a ${isT?"confederacy":"khanate"})`}.`);
+ if(camp.campsTaken>=2&&!camp.owner)(isT?formConfederacy:formKhanate)(camp,r)}
 function formKhanate(camp,r){r=r||rng(S.seed+S.year*97+Math.round(camp.x));let khanName=pick(r,NAMEBANK.Steppe.m)+" Khanate",f={id:"f"+(W._fseq=(W._fseq||W.factions.length)+1),name:khanName,cap:camp,treasury:60,authority:58,temper:"warlike",alive:true,gov:"khanate"};newFactionRuler(f,r);W.factions.push(f);camp.owner=f.id;camp.gov="khanate";camp.intel=Math.max(camp.intel||0,1);camp.garrisonIntel=Math.max(camp.garrisonIntel||0,1);
  W.settlements.forEach(s=>{if(s!==camp&&!s.ruined&&s.type==="nomad camp"&&!s.owner&&s.family===camp.family&&distW(s.x,s.y,camp.x,camp.y)<440&&r()<.5){s.owner=f.id;s.gov="khanate";s.intel=Math.max(s.intel||0,1)}});
  log(`<b>⚑ A Khanate rises!</b> The ${camp.family} hordes are welded into one under a single khan — the <b>${khanName}</b>, seated at ${camp.name}. The settled realms would do well to fear the steppe.`,"world")}
+function formConfederacy(camp,r){r=r||rng(S.seed+S.year*103+Math.round(camp.x));let cName=`${camp.name} Confederacy`,f={id:"f"+(W._fseq=(W._fseq||W.factions.length)+1),name:cName,cap:camp,treasury:50,authority:54,temper:"warlike",alive:true,nomad:true,confederacy:true,gov:"tribal",succession:"cognatic"};newFactionRuler(f,r);W.factions.push(f);camp.owner=f.id;camp.gov="tribal";camp.intel=Math.max(camp.intel||0,1);camp.garrisonIntel=Math.max(camp.garrisonIntel||0,1);
+ W.settlements.forEach(s=>{if(s!==camp&&!s.ruined&&(s.type||"").includes("tribe")&&!s.owner&&s.family===camp.family&&distW(s.x,s.y,camp.x,camp.y)<440&&r()<.4){s.owner=f.id;s.gov="tribal";s.intel=Math.max(s.intel||0,1)}});
+ log(`<b>⚑ A Confederacy rises!</b> The ${camp.family} tribes bind together under one war-council — the <b>${cName}</b>, seated at ${camp.name}.`,"world")}
 function disbandNomadByPlayer(a,t){let r=rng(S.seed+S.year*151+S.season*3+Math.round(t.x)),ens=Math.floor(t.free*(.05+r()*.1));if(ens>0){t.free-=ens;t.pop-=ens;S.captives=(S.captives||0)+ens}let g=Math.round(15+t.pop*.01);S.treasury+=g;lootResources(t,.6);let nm=t.name;scatterNomads(t,S.realmName||"the crown");if(a&&S.armies.includes(a))armyReturnHome(a);log(`Your host scatters the <b>${nm}</b> — ${ens?fmt(ens)+" taken captive, ":""}${g} gold in plunder. Nomads cannot be annexed; they disperse into the wilds.`)}
 function razeToRuin(t){let g=Math.round(t.pop*.02)+30;S.treasury+=g;lootResources(t,1.2);razeOrScatter(t,S.realmName||"the crown");log(`<b>${t.name} is ${isNomadType(t)?"broken and scattered":"razed to the ground"}</b>, its last wealth carried off (+${g}g).`)}
 // ---- AI conquest: nomads, tribes, and kingdoms may capture, raze, or incorporate ----
@@ -2053,7 +2057,7 @@ function aiOccupy(a,t,r){if(t.type==="nomad camp")return disbandNomadTarget(a,t,
 function maybeAiCapture(a,t){if(a.rebel||a.order!=="attack"||t.ruined)return;if(t.owner==="player"){if(S.year<6)return;if(owned().length<=1){let hc=W.settlements.find(s=>s.id===a.homeId);if(!a.owner||isNomadType(hc)||S.year<15)return}}let garrison=t.units.reduce((n,u)=>n+u.count,0),capThresh=isNomadType(t)?Math.max(8,t.pop*.13):Math.max(4,t.pop*.004);if(garrison>capThresh)return;let _wasP=t.owner==="player",camp=W.settlements.find(s=>s.id===a.homeId),r=rng(S.seed+S.year*271+S.season*5+Math.round(t.x)+Math.round(a.y)),nomadCamp=camp&&camp.type==="nomad camp",tribe=camp&&camp.type&&camp.type.includes("tribe"),organized=a.owner&&camp&&!isNomadType(camp);
  // Conquerors more often HOLD what they take than burn it — the world keeps its cities instead of drowning in ruins.
  if(nomadCamp||tribe){
-  if(isNomadType(t)){if(nomadCamp&&t.type==="nomad camp")nomadAbsorbCamp(camp,t,a,r);else aiRazeSettlement(a,t,r)} // horde swallows a rival horde — the road to a khanate
+  if(isNomadType(t)){if(t.type==="nomad camp")nomadAbsorbCamp(camp,t,a,r);else aiRazeSettlement(a,t,r)} // a horde or tribe swallows a rival camp — the road to a khanate/confederacy; settled powers only scatter it
   else{let roll=r();if(roll<.10)aiRazeSettlement(a,t,r);else if(roll<.26)aiEnslaveDepart(a,t,r);else nomadSubjugate(a,t,r)}}
  else if(organized){let ag=factionAggr(faction(a.owner)),diff=cultureDiff(camp,t),cap=(.02+ag*.08)+diff*.34;if(r()<cap){if(diff>.55&&r()<(.18+ag*.3))aiRazeSettlement(a,t,r);else aiOccupy(a,t,r)}}
  // Losing a settlement to the enemy shakes the whole realm's faith in the crown.
