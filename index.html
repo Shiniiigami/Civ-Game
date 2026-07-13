@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.50 · 2026.07.13 · Phase 2: Khanate/Confederacy are EARNED by binding holdings, inherited across ruler deaths, splinter far less, and revert only after a grace period; more same-biome nomad wars so camps consolidate; camps can reach their split threshold. Fixes: subjugated towns no longer double-listed; overlord tributary count shows the whole band; refugees no longer instant-settle onto ruins. Admin console: add/remove pop, add troops, cycle settlements largest-first";
+const BUILD="v16.51 · 2026.07.13 · razing a town you hold no longer deletes your garrison (the men march to your nearest holding); rebuilding a ruin now lets you pick which holding sends settlers and how many";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1168,14 +1168,27 @@ function resettleRuin(cat){if(!selected||selected.kind!=="ruin")return toast("Se
  if(!hasTech("masonry"))return toast("Restoring ancient stonework needs the Masonry technology — research it first");
  if(!((rr.intel||0)>0||(rr.explored||0)>0))return toast("These ruins are unexplored — send a scouting party to survey them before you can rebuild");
  let P=ruinProfile(rr),lm=landmassAt(rr.x,rr.y);
- let src=owned().filter(s=>(s.free||0)>=P.settlers&&(lm==null||landmassAt(s.x,s.y)===lm)).sort((a,b)=>distW(a.x,a.y,rr.x,rr.y)-distW(b.x,b.y,rr.x,rr.y))[0];
- if(!src)return toast(`No holding of yours on this land can spare the ${fmt(P.settlers)} settlers to raise the ${P.n} anew`);
+ let elig=owned().filter(s=>(s.free||0)>=P.settlers&&(lm==null||landmassAt(s.x,s.y)===lm)).sort((a,b)=>distW(a.x,a.y,rr.x,rr.y)-distW(b.x,b.y,rr.x,rr.y));
+ if(!elig.length)return toast(`No holding of yours on this land can spare the ${fmt(P.settlers)} settlers to raise the ${P.n} anew`);
  let down=Math.round(P.gold*.35),downStone=Math.round(P.stone*.35);
  if(S.treasury<down||(S.resources.stone||0)<downStone)return toast(`Beginning the restoration needs ${down} gold and ${downStone} stone up front`);
- S.treasury-=down;S.resources.stone-=downStone;src.free-=P.settlers;src.pop-=P.settlers;
- S.ruinRestore={ruinId:rr.id,tier:rr._tier,x:rr.x,y:rr.y,biome:rr.biome,cont:rr.cont,srcId:src.id,settlers:P.settlers,seasonsLeft:P.seasons,total:P.seasons,name:(rr.name||"Ruins").replace("Ruins of ",""),srcCulture:src.culture,srcFamily:src.family,srcGov:src.gov,srcFaith:src.faith,srcSect:src.sect};
- rr.restoring=true;
- use(cat,`Work begins to raise <b>${S.ruinRestore.name}</b> from the ${P.n} ruins — <b>${fmt(P.settlers)} settlers</b> from ${src.name} and <b>${P.seasons} seasons</b> of stone, timber, and labor lie ahead.`)}
+ openResettleModal(rr,P,elig,cat)}
+// Ruin-restoration picker: the player chooses WHICH holding sends settlers and HOW MANY (a larger column raises a larger settlement).
+function openResettleModal(rr,P,elig,cat){window._resCtx={ruinId:rr.id,min:P.settlers,cat};
+ let opts=elig.map(s=>`<option value="${s.id}">${s.name} — ${fmt(s.free||0)} free · ${Math.round(distW(s.x,s.y,rr.x,rr.y))} away</option>`).join(""),s0=elig[0],max0=Math.max(P.settlers,s0.free||0),down=Math.round(P.gold*.35),downStone=Math.round(P.stone*.35);
+ showModal(`<h2>Raise the ${P.n} anew</h2><p class="muted">Choose which holding sends settlers, and how many — a larger column raises a larger settlement. Up front: <b>${down}g</b> + <b>${downStone} stone</b>; the work takes about <b>${P.seasons}</b> seasons.</p>
+  <div class="options"><div class="mini"><label>Settlers come from</label><select id="resSrc" onchange="resSrcChange()" style="width:100%;background:#091127;color:#e8d8af;border:1px solid #455579;border-radius:6px;padding:7px">${opts}</select></div>
+  <div class="mini" style="display:flex;align-items:center;gap:8px;margin-top:10px"><span style="flex:1">Settlers to send</span><input type="range" id="resNum" min="${P.settlers}" max="${max0}" value="${P.settlers}" oninput="resTally()" style="flex:1.6"><span id="resNumN" style="width:90px;text-align:right"><b>${fmt(P.settlers)}</b></span></div></div>
+  <div class="notice" id="resTally"></div><div class="footerbar"><button class="btn" id="resConfirm" onclick="doResettleRuin()">Send settlers</button><button class="btn alt" onclick="closeModal()">Cancel</button></div>`);resTally()}
+function resSrcChange(){let s=W.settlements.find(x=>x.id===(($("resSrc")||{}).value));if(!s)return;let sl=$("resNum");if(sl){sl.max=Math.max(window._resCtx.min,s.free||0);if(+sl.value>+sl.max)sl.value=sl.max}resTally()}
+function resTally(){let ctx=window._resCtx;if(!ctx)return;let sl=$("resNum"),v=sl?clamp(Math.round(+sl.value||0),ctx.min,+sl.max):ctx.min,n=$("resNumN");if(n)n.innerHTML=`<b>${fmt(v)}</b>`;let t=$("resTally");if(t)t.innerHTML=`A column of <b>${fmt(v)}</b> settlers — the new settlement begins at about <b>${fmt(v)}</b> souls.`;let b=$("resConfirm");if(b){b.disabled=v<ctx.min;b.style.opacity=v<ctx.min?.5:1}}
+function doResettleRuin(){let ctx=window._resCtx;if(!ctx){closeModal();return}let rr=(W.ruins||[]).find(x=>x.id===ctx.ruinId);if(!rr||rr.resettled){closeModal();return toast("These ruins are gone")}let src=W.settlements.find(x=>x.id===(($("resSrc")||{}).value));if(!src||src.owner!=="player")return toast("Choose one of your holdings");let P=ruinProfile(rr),sl=$("resNum"),num=clamp(Math.round(sl?+sl.value:P.settlers),P.settlers,src.free||0);
+ if((src.free||0)<num)return toast("That holding cannot spare so many settlers");
+ let down=Math.round(P.gold*.35),downStone=Math.round(P.stone*.35);if(S.treasury<down||(S.resources.stone||0)<downStone)return toast(`Beginning the restoration needs ${down} gold and ${downStone} stone up front`);
+ S.treasury-=down;S.resources.stone-=downStone;src.free-=num;src.pop-=num;
+ S.ruinRestore={ruinId:rr.id,tier:rr._tier,x:rr.x,y:rr.y,biome:rr.biome,cont:rr.cont,srcId:src.id,settlers:num,seasonsLeft:P.seasons,total:P.seasons,name:(rr.name||"Ruins").replace("Ruins of ",""),srcCulture:src.culture,srcFamily:src.family,srcGov:src.gov,srcFaith:src.faith,srcSect:src.sect};
+ rr.restoring=true;closeModal();window._resCtx=null;
+ use(ctx.cat,`Work begins to raise <b>${S.ruinRestore.name}</b> from the ${P.n} ruins — <b>${fmt(num)} settlers</b> from ${src.name} and <b>${P.seasons} seasons</b> of stone, timber, and labor lie ahead.`)}
 // Each season the active restoration draws materials + nearby builders and advances, or stalls when it can't be supplied.
 function processRuinRestore(){if(!S.ruinRestore)return;let R=S.ruinRestore,P=RUIN_TIERS[R.tier];
  let rr=W.ruins.find(q=>q.id===R.ruinId);if(!rr||rr.resettled){S.ruinRestore=null;return}
@@ -2245,7 +2258,10 @@ function formConfederacy(camp,r){r=r||rng(S.seed+S.year*103+Math.round(camp.x));
  W.settlements.forEach(s=>{if(s!==camp&&!s.ruined&&(s.type||"").includes("tribe")&&!s.owner&&s.family===camp.family&&distW(s.x,s.y,camp.x,camp.y)<440&&r()<.4){s.owner=f.id;s.gov="confederacy";s.intel=Math.max(s.intel||0,1)}});
  log(`<b>⚑ A Confederacy rises!</b> The ${camp.family} tribes bind together under one war-council — the <b>${cName}</b>, seated at ${camp.name}.`,"world")}
 function disbandNomadByPlayer(a,t){let r=rng(S.seed+S.year*151+S.season*3+Math.round(t.x)),ens=Math.floor(t.free*(.05+r()*.1));if(ens>0){t.free-=ens;t.pop-=ens;S.captives=(S.captives||0)+ens}let g=Math.round(15+t.pop*.01);S.treasury+=g;lootResources(t,.6);let nm=t.name;scatterNomads(t,S.realmName||"the crown");if(a&&S.armies.includes(a))armyReturnHome(a);log(`Your host scatters the <b>${nm}</b> — ${ens?fmt(ens)+" taken captive, ":""}${g} gold in plunder. Nomads cannot be annexed; they disperse into the wilds.`)}
-function razeToRuin(t){let g=Math.round(t.pop*.02)+30;S.treasury+=g;lootResources(t,1.2);razeOrScatter(t,S.realmName||"the crown");log(`<b>${t.name} is ${isNomadType(t)?"broken and scattered":"razed to the ground"}</b>, its last wealth carried off (+${g}g).`)}
+function razeToRuin(t){let g=Math.round(t.pop*.02)+30;S.treasury+=g;lootResources(t,1.2);
+ // Your garrison isn't lost when a town you hold is razed — the men march out to the nearest of your holdings as it burns.
+ if(t.owner==="player"){let keep=(t.units||[]).filter(u=>!u.slave&&!u.overlordGarrison&&(u.count||0)>0),home=owned().filter(s=>s!==t&&!s.ruined).sort((a,b)=>distW(a.x,a.y,t.x,t.y)-distW(b.x,b.y,t.x,t.y))[0];if(keep.length&&home){keep.forEach(u=>{let ex=(home.units=home.units||[]).find(x=>x.type===u.type&&!x.slave&&!x.elite);ex?ex.count+=u.count:home.units.push({type:u.type,count:u.count,slave:false})});t.units=[];log(`Your garrison marches out of <b>${t.name}</b> to <b>${home.name}</b> as the town burns.`)}}
+ razeOrScatter(t,S.realmName||"the crown");log(`<b>${t.name} is ${isNomadType(t)?"broken and scattered":"razed to the ground"}</b>, its last wealth carried off (+${g}g).`)}
 // ---- AI conquest: nomads, tribes, and kingdoms may capture, raze, or incorporate ----
 function cultureDiff(src,t){if(!src)return 0;let d=0;if(src.family&&t.family&&src.family!==t.family)d+=.4;let sf=dominantFaith(src),tf=dominantFaith(t);if(sf&&tf&&sf!==tf)d+=.35;d+=Math.min(.25,Math.abs(techTier(src)-techTier(t))*.1);return clamp(d,0,1)}
 function aiLootTake(a,t,r,mult){a.loot=a.loot||{gold:0,res:{},slaves:0};let g=Math.round((15+t.pop*.015)*mult);if(t.owner==="player"){let s=Math.min(g,S.treasury);S.treasury-=s;a.loot.gold+=s}else if(t.owner){let f=faction(t.owner);if(f){let s=Math.min(g,f.treasury||0);f.treasury-=s;a.loot.gold+=s}}else a.loot.gold+=Math.round(g*.4);Object.keys(t.stores).forEach(k=>{if(k==="food"||k==="gold")return;let take=Math.floor((t.stores[k]||0)*.25*mult);if(take>0){t.stores[k]-=take;a.loot.res[k]=(a.loot.res[k]||0)+take}})}
