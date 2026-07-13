@@ -16,9 +16,11 @@ restates last time's findings, it did not do its job.
 ## 0. How the user drives this
 1. `setup` — once (builds + runs the simulation harness, generates all data).
 2. `audit <domain>` — any domain, any order, any time (writes/updates that domain's report).
-3. `discover` / `ideas` — hunt for uncovered mechanics and improvement opportunities.
-4. `synthesis` — cross-domain interactions (run after several domain audits).
-5. `verify <finding-id>` — confirm a fix landed and didn't regress anything.
+3. `ui` — visual + interaction audit of the real rendered game on desktop AND mobile (§4.12); the
+   headless sim harness no-ops rendering, so this is the only pass that sees layout/touch/console bugs.
+4. `discover` / `ideas` — hunt for uncovered mechanics and improvement opportunities.
+5. `synthesis` — cross-domain interactions (run after several domain audits).
+6. `verify <finding-id>` — confirm a fix landed and didn't regress anything.
 
 Commit after every command. Everything lives in `./audit_out/`.
 
@@ -309,6 +311,45 @@ audit should measure the current system against and the Opportunities section sh
 **Sections:** 1 Event catalogue & triggers · 2 Frequency/severity over 100y · 3 Player agency in events · 4 Event UI/UX · 5 Balance (swinginess) · 6 Bugs · 7 Archetype comparison (who gets hammered).
 **Flag:** events with no choice/impact · events too frequent/rare · unrecoverable disaster spirals · ruler events that always resolve the same · achievements that never/always fire.
 **Improvement angles:** do events feel authored and dramatic, or like random stat noise? Do they respect the player's state (kick you when down = bad)? Are choices real dilemmas? Propose event chains or reactive events that create story, and flag swingy RNG that feels unfair.
+
+---
+
+## 4.12 Command: `ui`  (visual + interaction audit — the eyes the sim harness lacks)
+
+The `setup` harness runs headless and **no-ops all rendering**, so it is blind to visual and touch
+bugs. `ui` fills that gap: it drives the **real rendered game** with Playwright (already set up in
+this repo) across desktop browsers AND emulated mobile devices, walks every major surface and modal,
+screenshots each, and runs automated checks. The game is **mobile-first**, so treat mobile as the
+primary target and desktop as secondary.
+
+Run it with: `node civgame_ui_audit.js`
+
+**Load on both browser and mobile:**
+- **Desktop:** Chromium at 1280×800 and 1920×1080. (Firefox/WebKit are attempted only if their
+  browser binaries are present — in this environment only Chromium is installed, so cross-browser is
+  Chromium + Chromium-based mobile emulation; the report says so.)
+- **Mobile:** real device emulation via `playwright.devices` (mobile UA, `hasTouch:true`,
+  `isMobile:true`, correct `deviceScaleFactor` and viewport — not a resized window): **iPhone 13
+  portrait + landscape, Pixel 7 portrait, iPhone SE** (small-screen cramped-layout check).
+
+**On each device/browser it:**
+1. Loads `index.html`, boots a developed mid-game realm (founds a faith, scouts a neighbour, advances
+   ~8 seasons) so mid-game UI is exercised.
+2. Walks the surfaces and opens each major panel/modal: map (terrain + realms views), Chronicle,
+   Court, Realm, Faith, Codex; the Seasonal Council (every tab); and the key action modals — build/
+   trade/research/recruit/levy/faith/law/scouting/mercs — plus a **battle** and a **siege** (and
+   conquest) modal, triggered with representative data.
+3. Screenshots each surface (`audit_out/ui/<device>/<surface>.png`) and checks for: layout overflow /
+   horizontal scroll on mobile / off-screen / clipped text; tap targets under ~44×44px; broken
+   display values (`NaN`, `undefined`, `[object Object]`, `Infinity`); console errors & pageerrors;
+   modals that fail to open.
+4. Applies the Section 2 UX-judgment lenses as human-eye pointers (legibility — is the authority/
+   treasury death-spiral surfaced?; tap-count/friction per season; discoverability; mobile
+   ergonomics), noting on the report **where to look** in the screenshots.
+
+**Output:** `audit_out/report_ui.md` (findings ranked major→minor, mobile-only called out, console
+errors, modal-open failures, UX notes) · `audit_out/ui/findings.json` (raw, per device×surface) ·
+screenshots under `audit_out/ui/<device>/`. Commit. Re-run after any UI change to `index.html`.
 
 ---
 
