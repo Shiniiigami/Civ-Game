@@ -1,10 +1,15 @@
-// Civ-Game headless harness — step 1a: base harness + 3-archetype divergence smoke.
-// Runs the REAL engine under a stubbed DOM in Node's vm (no browser). Drives real council
-// actions per season, then advanceSeason(). Proves the archetypes diverge.
-//   node civgame_harness.js            -> smoke (passive/merchant/conquest x seeds 7,42 -> yr100)
+// Civ-Game headless harness — README_AUDIT.md setup 1b/1c.
+// Runs the REAL engine under a stubbed DOM in Node's vm (no browser). Each season a per-archetype
+// policy issues real council actions, then advanceSeason(), then a phased combat resolver drives
+// every pending siege/conquest/spoils modal to conclusion (modals are no-op'd, so we call the
+// resolver functions directly). Emits one CSV per domain, all keyed on archetype,seed,year.
+//   node civgame_harness.js          -> validation smoke (seeds 7,42 -> yr100)
+//   node civgame_harness.js --full   -> frozen campaign (10 archetypes x 5 seeds x 100y) + master/meta
 const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
+const crypto = require('crypto');
+const { execSync } = require('child_process');
 
 const HTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const gameSrc = HTML.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -73,15 +78,29 @@ sandbox.window.matchMedia = ()=>({matches:false,addEventListener(){},addListener
 sandbox.window.devicePixelRatio = 1; sandbox.window.innerWidth = 1024; sandbox.window.innerHeight = 768;
 sandbox.window.storage = undefined;
 
+// Config passed in from Node so the driver can branch on validation vs full campaign.
+const FULL = process.argv.includes('--full');
+const FROZEN_SEEDS = [7,19,42,88,101,256,777,1337,4242,9001];
+sandbox.__CFG = {
+  full: FULL,
+  arches: ['passive','conquest','faith','merchant','nomad','builder','isolationist','expansionist','balanced','exploit-hunter'],
+  seeds: FULL ? FROZEN_SEEDS.slice(0,5) : [7,42],
+  years: 100
+};
+
 // ---------- driver (runs in game scope) ----------
 const driver = `
 ;(function(){
   ['renderAll','drawMap','renderInfo','renderPanes','renderStats','renderActions','toast',
-   'showModal','closeModal','snapshotSeason','showConquestModal','showSiegeModal',
-   'showBattleModal','checkAchievements','fitWorld'].forEach(fn=>{ try{ eval(fn+'=()=>{};'); }catch(e){} });
+   'showModal','closeModal','snapshotSeason','showConquestModal_render','showSiegeModal_render',
+   'showBattleModal','checkAchievements','fitWorld','openSpoilsModal'].forEach(fn=>{ try{ eval(fn+'=()=>{};'); }catch(e){} });
+  // Keep the REAL showConquestModal (it advances the pendingConquest queue into S._curConquest); only
+  // its showModal() call is neutered above. Same for showSiegeModal. Render/persist are no-ops.
   try{ showRulerEvent=()=>{ try{S.pendingEvent=null;}catch(_){} }; }catch(e){}
+  try{ resolveRulerEvent=()=>{ try{S.pendingEvent=null;}catch(_){} }; }catch(e){}
   try{ autoPersist=async()=>{}; }catch(e){}
 
+  const CFG = __CFG;
   const cap = ()=> (typeof owned==='function' && owned().length) ? (owned().find(s=>s.capital)||owned()[0]) : null;
   const known = id => { try{ return hasTech(id); }catch(e){ return true; } };
   const avail = id => { try{ return techAvailable(id); }catch(e){ return false; } };
@@ -92,40 +111,183 @@ const driver = `
   }
   const canAct = c => !(S.actions && S.actions[c]);
   const mark   = c => { if(!S.actions) S.actions={}; S.actions[c]=true; };
+  function ensureBuilders(c,b){ try{ if(builders(c)<b) setJob(c.id,'builders',(c.jobs.builders||0)+(b-builders(c))+4); }catch(_){} }
+  function tryBuild(c,key,g,b,res){ ensureBuilders(c,b); try{ return !!build(c,key,g,b,res||{}); }catch(_){ return false; } }
+  function levy(c,n){ __INPUTS.levyNum=String(n); try{ doRaiseLevy(c.id,'military'); return true; }catch(_){ return false; } }
+  function recruit(c,type,n){ __INPUTS.recruitNumber=String(n); __INPUTS.recruitRange__max=String(n);
+    try{ placeRecruitOrder(c.id,type,false,'military'); return true; }catch(_){ return false; } }
+  function sellSurplus(c){
+    const e=Object.entries(S.resources||{}).filter(([k,v])=>Math.floor(v)>=8 && k!=='gold').sort((a,b)=>b[1]-a[1]);
+    if(!e.length) return false; const [k,v]=e[0];
+    __INPUTS.sellRes=k; __INPUTS.sellQty=String(Math.min(30,Math.floor(v*0.5)));
+    try{ doSellGoods(c.id,'trade'); return true; }catch(_){ return false; }
+  }
+  function foreignBuy(c){
+    let t=W.settlements.find(s=>s.owner!=='player'&&!s.ruined&&(s.intel||0)>=2&&Object.keys(s.resources||{}).length);
+    if(!t) return false; let k=Object.keys(t.resources)[0];
+    __INPUTS.ftRes=k; __INPUTS.ftQty='12';
+    try{ doForeignTrade(t.id,'trade'); return true; }catch(_){ return false; }
+  }
+  // Muster ~80% of the capital's standing troops into a field army aimed at the nearest weak
+  // same-landmass neighbour. order 'raid' -> armyRaid (fast loot+captives); anything else -> siege -> conquer.
+  function sendWarband(c, order){
+    if((S.armies||[]).filter(a=>!a.settler).length >= 2) return false;
+    let force=c.units.filter(u=>u.type!=='settler').reduce((n,u)=>n+u.count,0);
+    if(force < 60) return false;
+    let cands=W.settlements.filter(s=>!s.ruined && s.owner!=='player' && s.type!=='nomad camp'
+      && sameLandmass(c,s) && distW(c.x,c.y,s.x,s.y)<650);
+    if(!cands.length) return false;
+    cands.sort((a,b)=> a.units.reduce((n,u)=>n+u.count,0)-b.units.reduce((n,u)=>n+u.count,0)
+      || distW(c.x,c.y,a.x,a.y)-distW(c.x,c.y,b.x,b.y));
+    let t=cands[0], take=[];
+    c.units.forEach(u=>{ if(u.type==='settler')return; let n=Math.floor(u.count*0.8);
+      if(n>0){ take.push({type:u.type,count:n,slave:u.slave,elite:u.elite,merc:u.merc,name:u.name}); u.count-=n; }});
+    c.units=c.units.filter(u=>u.count>0);
+    if(!take.reduce((n,u)=>n+u.count,0)) return false;
+    S.armies.push({id:"a"+(S._aseq=(S._aseq||0)+1),x:c.x,y:c.y,units:take,order:order,dest:null,
+      targetId:t.id,targetArmy:null,home:c.id,cont:c.cont,name:"Host of "+c.name});
+    return true;
+  }
+  // Launch a settler column to unoccupied same-landmass land (bypasses the map-click UI).
+  function foundColony(c){
+    if((c.free||0) < 330) return false;
+    if((S.armies||[]).filter(a=>a.settler).length >= 2) return false;
+    let baseLm=landmassAt(c.x,c.y), rr=rng(S.seed+S.year*53+Math.round(c.x));
+    for(let ring=150; ring<=540; ring+=90){
+      for(let k=0;k<8;k++){
+        let ang=rr()*6.283, x=Math.round(c.x+Math.cos(ang)*ring), y=Math.round(c.y+Math.sin(ang)*ring);
+        let cc=cellAt(x,y);
+        if(!cc||!cc.land||cc.biome==='ice') continue;
+        if(landmassAt(x,y)!==baseLm) continue;
+        if(W.settlements.some(s=>!s.ruined && distW(s.x,s.y,x,y)<120)) continue;
+        __INPUTS.esFree=String(Math.min(Math.floor(c.free),320));
+        __INPUTS.esSlave='0';
+        __INPUTS.esFood=String(Math.floor(Math.min((c.stores.food||0),400)));
+        __INPUTS.esName='';
+        try{ launchSettler(c.id,x,y,'settle'); return true; }catch(_){ return false; }
+      }
+    }
+    return false;
+  }
+  // Found an organized state faith directly (openFaith's confirm handler is DOM-bound and never fires headless).
+  function foundFaith(c){
+    if(S.faith) return false;
+    try{
+      S.faith={name:"Way of the Sacred Flame",deity:"the Sacred Flame",clergy:"crown",doctrines:["militant","monumental"]};
+      S.faithTier=S.faithTier||{}; S.faithTier[S.faith.name]="organized"; S.faithPower=18;
+      c.infra.temple=(c.infra.temple||0)+1; c.jobs.priests=Math.max(2,c.jobs.priests||0);
+      shiftFaith(c,S.faith.name,85); c.conversion=100; mark('faith');
+      return true;
+    }catch(_){ return false; }
+  }
 
   function playSeason(arch){
-    const c = cap(); if(!c) return;
+    const c=cap(); if(!c) return;
+    if(arch==='passive') return;
+
     if(arch==='merchant'){
-      research(['currency','masonry','irrigation','accounting','banking','bureaucracy','philosophy','scriptoria']);
-      if(canAct('trade')){
-        const e=Object.entries(S.resources||{}).filter(([k,v])=>Math.floor(v)>=8 && k!=='gold').sort((a,b)=>b[1]-a[1]);
-        if(e.length){ const [k,v]=e[0];
-          __INPUTS.sellRes=k; __INPUTS.sellQty=String(Math.min(30,Math.floor(v*0.5)));
-          try{ doSellGoods(c.id,'trade'); }catch(_){}
-          mark('trade');
-        }
-      }
-      if(canAct('infra') && S.treasury>180){
-        const key=(c.infra.bazaar||0)<2?'bazaar':'workshop';
-        try{ if(build(c,key,50,0,{timber:8})) mark('infra'); }catch(_){}
-      }
-      if(canAct('agri') && c.jobs && (c.jobs.merchants||0) < c.pop*0.05){
-        try{ setJob(c.id,'merchants',(c.jobs.merchants||0)+Math.max(1,Math.round(c.pop*0.01))); mark('agri'); }catch(_){}
-      }
+      research(['currency','masonry','irrigation','accounting','banking','bureaucracy','philosophy','scriptoria','guilds']);
+      if(canAct('trade') && (sellSurplus(c)||foreignBuy(c))) mark('trade');
+      if(canAct('infra') && S.treasury>170){ if(tryBuild(c,(c.infra.bazaar||0)<2?'bazaar':'workshop',90,24,{timber:10,brick:6})) mark('infra'); }
+      if(canAct('agri') && (c.jobs.merchants||0) < c.pop*0.05){ try{ setJob(c.id,'merchants',(c.jobs.merchants||0)+Math.max(1,Math.round(c.pop*0.01))); mark('agri'); }catch(_){} }
     }
     else if(arch==='conquest'){
-      research(['smelting','metallurgy','horsemanship','engineering','bureaucracy','masonry']);
-      if(canAct('military') && S.treasury>60){
-        __INPUTS.levyNum='40';
-        try{ doRaiseLevy(c.id,'military'); }catch(_){}
-        mark('military');
+      research(['smelting','metallurgy','horsemanship','engineering','bureaucracy','masonry','ironworking','steel','doctrine']);
+      if(canAct('military') && S.treasury>60){ levy(c,40); mark('military'); }
+      if(canAct('infra') && S.treasury>150){ if(tryBuild(c,(c.infra.barracks||0)<2?'barracks':'walls',75,25,{timber:12,iron:4,stone:20})) mark('infra'); }
+      if(canAct('rule') && (S.captives||0)>0){ try{ settleCaptives(c.id); }catch(_){} }
+      // Mostly raid (armyRaid feeds S.captives + loot funds the war); periodically press an assault so
+      // the siege -> conquest -> spoils resolvers are exercised too.
+      sendWarband(c, ((S.year+S.season)%3===0) ? 'attack' : 'raid');
+    }
+    else if(arch==='faith'){
+      research(['writing','masonry','philosophy','scriptoria','bureaucracy']);
+      if(canAct('faith')){ if(!S.faith) foundFaith(c); else if(S.treasury>90 && tryBuild(c,'temple',75,20,{stone:14})){ try{ c.jobs.priests=(c.jobs.priests||0)+1; }catch(_){} mark('faith'); } }
+      if(canAct('rule') && S.gov!=='theocracy' && (S.lawChanges||0)<1){ try{ setPlayerGov('theocracy'); }catch(_){} }
+      if(canAct('infra') && S.treasury>150){ if(tryBuild(c,'academy',140,30,{brick:20})) mark('infra'); }
+    }
+    else if(arch==='nomad'){
+      research(['horsemanship','smelting','metallurgy','stirrups','composite']);
+      if(canAct('military') && S.treasury>50){ levy(c,30); mark('military'); }
+      if(canAct('scout')){ let dep=(W.deposits||[]).find(d=>!d.camp && owned().some(s=>Math.hypot(s.x-d.x,s.y-d.y)<160)); if(dep){ try{ establishCamp(dep.id,'scout'); }catch(_){} } }
+      sendWarband(c,'raid');
+    }
+    else if(arch==='builder'){
+      research(['masonry','engineering','irrigation','bureaucracy','accounting','universities','grandarch']);
+      if(canAct('infra') && S.treasury>120){
+        let order=[['bazaar',90,{timber:10,brick:6}],['workshop',75,{timber:12,brick:6}],['aqueduct',130,{stone:25}],['academy',140,{brick:20}],['walls',80,{stone:20}]];
+        for(const [k,g,res] of order){ if(tryBuild(c,k,g,25,res)){ mark('infra'); break; } }
       }
-      if(canAct('infra') && S.treasury>150){
-        const key=(c.infra.barracks||0)<2?'barracks':'walls';
-        try{ if(build(c,key,55,0,{timber:8,stone:6})) mark('infra'); }catch(_){}
+      if(!S.wonderBuild){ let wid=(typeof WONDERS==='object')?Object.keys(WONDERS)[0]:null; if(wid){ ensureBuilders(c,26); try{ startWonder(c.id,wid); }catch(_){} } }
+    }
+    else if(arch==='isolationist'){
+      research(['irrigation','masonry','engineering','philosophy']);
+      if(canAct('agri') && S.treasury>60){ if(tryBuild(c,'granary',55,20,{brick:12})) mark('agri'); }
+      if(canAct('infra') && S.treasury>90){ if(tryBuild(c,(c.infra.walls||0)<2?'walls':'fishery',80,20,{stone:20})) mark('infra'); }
+      if(canAct('military') && S.treasury>50 && freeSoldiers(c) < c.pop*0.03){ levy(c,25); mark('military'); }
+    }
+    else if(arch==='expansionist'){
+      research(['masonry','irrigation','currency','engineering','horsemanship']);
+      if(canAct('settle')){ if(foundColony(c)) mark('settle'); }
+      if(canAct('agri') && S.treasury>40){ if(tryBuild(c,'farms',25,12,{timber:8})) mark('agri'); }
+      if(canAct('infra') && S.treasury>90){ if(tryBuild(c,'roads',35,16,{stone:8})) mark('infra'); }
+    }
+    else if(arch==='balanced'){
+      research(['writing','currency','masonry','smelting','irrigation','bureaucracy','engineering','philosophy']);
+      let turn=(S.year*4+S.season)%5;
+      if(turn===0 && canAct('trade') && sellSurplus(c)) mark('trade');
+      else if(turn===1 && canAct('infra') && S.treasury>120){ if(tryBuild(c,(c.infra.bazaar||0)<1?'bazaar':'barracks',80,24,{timber:12})) mark('infra'); }
+      else if(turn===2 && canAct('military') && S.treasury>60){ levy(c,25); mark('military'); }
+      else if(turn===3 && canAct('settle')){ if(foundColony(c)) mark('settle'); }
+      else if(turn===4 && canAct('agri') && S.treasury>50){ if(tryBuild(c,'granary',55,20,{brick:12})) mark('agri'); }
+    }
+    else if(arch==='exploit-hunter'){
+      research(['currency','accounting','banking','guilds','masonry','metallurgy','bureaucracy']);
+      if(canAct('trade') && (sellSurplus(c)||foreignBuy(c))) mark('trade');
+      if(canAct('infra') && S.treasury>150){ if(tryBuild(c,(c.infra.bazaar||0)<3?'bazaar':'workshop',90,24,{timber:10,brick:6})) mark('infra'); }
+      if(canAct('military') && S.treasury>60){ levy(c,35); mark('military'); }
+      if(canAct('rule') && (S.captives||0)>0){ try{ settleCaptives(c.id); }catch(_){} }
+      sendWarband(c,'raid');
+    }
+  }
+
+  // Phased combat resolver: drive every pending siege/conquest/spoils to conclusion. Modals are
+  // no-op'd, so we call the resolver functions directly, mirroring the modal onclick flow.
+  function resolveModals(arch, run){
+    // --- Sieges: drain locally so siegeAct's trailing showSiegeModal has nothing to silently eat.
+    if(S.pendingSieges && S.pendingSieges.length){
+      let sieges=S.pendingSieges.slice(); S.pendingSieges=[];
+      for(const s of sieges){
+        if(s.fell) continue; // city already fell -> conquer() queued it in pendingConquest
+        let a=S.armies.find(x=>x.id===s.armyId), t=W.settlements.find(x=>x.id===s.tId);
+        if(!a||!t||t.owner==='player'||t.ruined) continue;
+        let act=((s.progress||0)>=55 || (s.garrison||0) <= t.pop*0.01) ? 'assault' : 'maintain';
+        try{ siegeAct(s.armyId, s.tId, act); }catch(_){}
       }
     }
-    // passive: issue nothing
+    // --- Conquests: showConquestModal shifts the next pending fall into S._curConquest; step each.
+    if(S.pendingConquest && S.pendingConquest.length && !S._curConquest){ try{ showConquestModal(); }catch(_){} }
+    let guard=0;
+    while(S._curConquest && guard++<120){
+      let cur=S._curConquest, t=W.settlements.find(x=>x.id===cur.tId);
+      if(!t || t.owner!=='player' || t.ruined){
+        S._curConquest=null;
+        if(S.pendingConquest && S.pendingConquest.length){ try{ showConquestModal(); }catch(_){} }
+        continue;
+      }
+      let act=(arch==='conquest'||arch==='exploit-hunter') ? 'sack'
+             :(arch==='nomad') ? 'enslave'
+             :'occupy'; // faith/builder/merchant/etc keep the city intact (avoid razeslave's distribute modal)
+      try{ conquestChoose(t.id, act); run.conquests++; }
+      catch(_){ S._curConquest=null; continue; }
+      // If allies helped, conquestChoose left _curConquest set (same tId) awaiting a spoils decision.
+      if(S._curConquest && S._curConquest.tId===t.id){
+        try{ spoilsChoose(t.id, (arch==='conquest') ? 'poor' : 'even'); }
+        catch(_){ S._curConquest=null; }
+      }
+      // conquestChoose->conquestNext->showConquestModal has already advanced _curConquest to the next fall.
+    }
+    S._curConquest=null; S.battleReports=[]; S.pendingEvent=null;
   }
 
   function troops(){
@@ -134,67 +296,146 @@ const driver = `
     try{ (S.armies||[]).forEach(a=>(a.units||[]).forEach(u=>n+=u.count||0)); }catch(e){}
     return n;
   }
-  function snap(arch,seed,year,acc){
-    const own=(typeof owned==='function')?owned():[];
-    const food=own.reduce((n,s)=>n+((s.stores&&s.stores.food)||0),0);
-    return { archetype:arch, seed, year,
-      pop:(typeof ownedPop==='function')?ownedPop():0, settlements:own.length,
-      treasury:Math.round(S.treasury||0), food:Math.round(food), troops:troops(),
-      tax:Math.round(acc.tax), trade:Math.round(acc.trade), upkeep:Math.round(acc.upkeep),
-      net:Math.round(acc.tax+acc.trade-acc.upkeep),
-      unity:Math.round((S.unity||0)*10)/10, authority:Math.round((S.authority||0)*10)/10,
-      techs:(S.tech||[]).length, research:(S.research&&S.research.active)||'',
-      captives:S.captives||0, faithPower:Math.round(S.faithPower||0) };
+  function sumInfra(own,k){ return own.reduce((n,s)=>n+((s.infra&&s.infra[k])||0),0); }
+  function snapWide(arch,seed,year,acc,run){
+    let live=W.settlements.filter(s=>!s.ruined), own=owned();
+    let slaves=own.reduce((n,s)=>n+(s.slaves||0),0), free=own.reduce((n,s)=>n+(s.free||0),0);
+    let jobsTot=own.reduce((n,s)=>n+Object.values(s.jobs||{}).reduce((m,v)=>m+v,0),0);
+    let infraTot=own.reduce((n,s)=>n+Object.values(s.infra||{}).reduce((m,v)=>m+v,0),0);
+    let ceil=0; try{ ceil=own.reduce((n,s)=>n+popCeiling(s),0); }catch(_){}
+    let sieges=live.filter(t=>t.siege && (S.armies||[]).some(a=>a.id===t.siege.by)).length;
+    let ds=S.diploState||{}, dv=Object.values(ds);
+    let wars=dv.filter(v=>v==='war').length, allies=dv.filter(v=>v==='alliance').length, pacts=dv.filter(v=>v==='pact').length;
+    let organized=Object.values(S.faithTier||{}).filter(v=>v==='organized').length;
+    let distinctF=new Set(live.map(dominantFaith)).size;
+    let seen=0,tot=0; for(const cc of W.cells){tot++; if(cc.seen)seen++;}
+    let res=S.resources||{}, resTot=Object.values(res).reduce((n,v)=>n+v,0);
+    let sp=0; try{ sp=scholarPool(); }catch(_){}
+    let fs2=0; try{ fs2=freeSpies(); }catch(_){}
+    let atd=0; try{ atd=allTechDone()?1:0; }catch(_){}
+    return {
+      archetype:arch, seed, year,
+      treasury:Math.round(S.treasury||0), tax:Math.round(acc.tax), trade:Math.round(acc.trade), upkeep:Math.round(acc.upkeep),
+      net:Math.round(acc.tax+acc.trade-acc.upkeep), routes:(S.routes||[]).length, resTotal:Math.round(resTot),
+      gold:Math.round(res.gold||0), iron:Math.round(res.iron||0), timber:Math.round(res.timber||0), horses:Math.round(res.horses||0),
+      pop:(typeof ownedPop==='function')?ownedPop():0, settlements:own.length, captivesNow:S.captives||0,
+      capturedCum:Math.round(run.capturedCum), slaves, freePop:free, jobsTotal:jobsTot, popCeiling:Math.round(ceil),
+      troops:troops(), armies:(S.armies||[]).length, warArmies:(S.armies||[]).filter(a=>!a.settler).length,
+      sieges, conquestsCum:run.conquests, warsActive:wars,
+      faithPower:Math.round(S.faithPower||0), hasFaith:S.faith?1:0, organizedFaiths:organized, distinctFaiths:distinctF,
+      infraTotal:infraTot, temples:sumInfra(own,'temple'), barracks:sumInfra(own,'barracks'), walls:sumInfra(own,'walls'),
+      markets:sumInfra(own,'bazaar')+sumInfra(own,'market'), wonders:(S.wonders||[]).length, wonderInProgress:S.wonderBuild?1:0,
+      techs:(S.tech||[]).length, researchActive:(S.research&&S.research.active)||'', scholars:sp, allTechDone:atd,
+      gov:S.gov||'', authority:Math.round((S.authority||0)*10)/10, unity:Math.round((S.unity||0)*10)/10,
+      prestige:Math.round((S.prestige||0)*10)/10, lawChanges:S.lawChanges||0, taxRate:S.taxRate||'',
+      relations:Object.keys(S.relations||{}).length, allies, pacts, tributes:Object.keys(S.tributes||{}).length, claims:Object.keys(S.claims||{}).length,
+      seenPct:tot?Math.round(seen/tot*1000)/10:0, fleets:(S.fleets||[]).length, settlers:(S.armies||[]).filter(a=>a.settler).length, scoutRadius:S.scoutRadius||0,
+      spyPosts:(S.spyPosts||[]).length, freeSpies:fs2, spyTech:known('espionage')?1:0,
+      over:S.over?1:0, ruins:(W.ruins||[]).length, factionsAlive:(W.factions||[]).filter(f=>f.alive).length,
+      conquestsYear:run.conquests-run.prevConq, capturedYear:Math.round(run.capturedCum-run.prevCapCum)
+    };
   }
 
-  const ARCHES=['passive','merchant','conquest'];
-  const SEEDS=[7,42];
-  const YEARS=100;
-  const out=[];
-  for(const arch of ARCHES){
-    for(const seed of SEEDS){
+  const rows=[], ends=[];
+  for(const arch of CFG.arches){
+    for(const seed of CFG.seeds){
       const cfg={size:'medium',terrain:'continents',density:'balanced',ai:3,difficulty:'normal',
         start:'village',rulerName:'Rasa',dynasty:'Crownwater',realmName:'Audit',
         capitalName:'Riverhold',startAt:null,_seed:seed};
       S=newState(seed,cfg);
       let acc={tax:0,trade:0,upkeep:0}, guard=0;
-      while(S.year<=YEARS && !S.over && guard<(YEARS*4+20)){
+      let run={capturedCum:0, prevCaptives:S.captives||0, conquests:0, prevConq:0, prevCapCum:0};
+      while(S.year<=CFG.years && !S.over && guard<(CFG.years*4+40)){
         guard++;
         const py=S.year;
         try{ playSeason(arch); }catch(e){ /* keep simulating */ }
-        advanceSeason();
+        try{ advanceSeason(); }catch(e){ break; }
+        try{ resolveModals(arch, run); }catch(e){}
+        // Accumulate captures as positive deltas in S.captives (raid/sack/enslave add; settle removes).
+        run.capturedCum += Math.max(0, (S.captives||0) - run.prevCaptives); run.prevCaptives=S.captives||0;
         acc.tax+=(S.econ&&S.econ.tax)||0; acc.trade+=(S.econ&&S.econ.trade)||0; acc.upkeep+=(S.econ&&S.econ.upkeep)||0;
-        if(S.year!==py){ out.push(snap(arch,seed,py,acc)); acc={tax:0,trade:0,upkeep:0}; }
+        if(S.year!==py){ rows.push(snapWide(arch,seed,py,acc,run)); acc={tax:0,trade:0,upkeep:0}; run.prevConq=run.conquests; run.prevCapCum=run.capturedCum; }
       }
-      out.push({__end:true, archetype:arch, seed, endedYear:S.year, over:!!S.over,
-        pop:(typeof ownedPop==='function')?ownedPop():0, treasury:Math.round(S.treasury||0)});
+      ends.push({archetype:arch, seed, endedYear:S.year, over:!!S.over,
+        pop:(typeof ownedPop==='function')?ownedPop():0, treasury:Math.round(S.treasury||0),
+        capturedCum:Math.round(run.capturedCum), conquests:run.conquests, settlements:owned().length});
     }
   }
-  globalThis.__ROWS = out;
+  globalThis.__ROWS=rows; globalThis.__ENDS=ends;
 })();
 `;
 
+const t0 = Date.now();
 vm.createContext(sandbox);
 try { vm.runInContext(gameSrc + '\n' + driver, sandbox, { filename:'civgame.js' }); }
-catch(e){ console.error('RUNTIME ERROR:', e && e.stack ? e.stack.split('\n').slice(0,8).join('\n') : e); process.exit(2); }
+catch(e){ console.error('RUNTIME ERROR:', e && e.stack ? e.stack.split('\n').slice(0,10).join('\n') : e); process.exit(2); }
+const runtimeMs = Date.now() - t0;
 
-const all = sandbox.__ROWS || [];
-const ends = all.filter(r=>r.__end);
-const rows = all.filter(r=>!r.__end);
+const rows = sandbox.__ROWS || [];
+const ends = sandbox.__ENDS || [];
 if(!rows.length){ console.error('No rows produced'); process.exit(3); }
 
-const cols=['archetype','seed','year','pop','settlements','treasury','food','troops','tax','trade','upkeep','net','unity','authority','techs','research','captives','faithPower'];
-const lines=[cols.join(',')];
-for(const r of rows) lines.push(cols.map(k=>r[k]).join(','));
-fs.writeFileSync(path.join(OUT,'civgame_archetype_smoke.csv'), lines.join('\n'));
-fs.writeFileSync(path.join(OUT,'civgame_archetype_smoke.json'), JSON.stringify(rows,null,1));
-
-console.log('OK — rows:', rows.length);
-console.log('\nEnded (year reached / collapse):');
-ends.forEach(e=> console.log(`  ${e.archetype.padEnd(9)} seed ${e.seed}: ended yr ${String(e.endedYear).padStart(3)}${e.over?' (CROWN FELL)':' (survived to 100)'} | pop ${e.pop} treasury ${e.treasury}`));
-console.log('\nFinal-year snapshot per archetype/seed:');
-for(const arch of ['passive','merchant','conquest']) for(const seed of [7,42]){
-  const rs=rows.filter(r=>r.archetype===arch&&r.seed===seed); if(!rs.length) continue;
-  const l=rs[rs.length-1];
-  console.log(`  ${arch.padEnd(9)} s${seed} yr${String(l.year).padStart(3)} | pop ${String(l.pop).padStart(6)} | treasury ${String(l.treasury).padStart(6)} | troops ${String(l.troops).padStart(4)} | techs ${l.techs} | authority ${l.authority}`);
+// ---------- per-domain CSVs (all share leading keys archetype,seed,year) ----------
+const KEYS = ['archetype','seed','year'];
+const DOMAINS = {
+  economy:        ['treasury','tax','trade','upkeep','net','routes','resTotal','gold','iron','timber','horses'],
+  population:     ['pop','settlements','captivesNow','capturedCum','slaves','freePop','jobsTotal','popCeiling'],
+  war:            ['troops','armies','warArmies','sieges','conquestsCum','warsActive','capturedCum'],
+  faith:          ['faithPower','hasFaith','organizedFaiths','distinctFaiths'],
+  infrastructure: ['infraTotal','temples','barracks','walls','markets','wonders','wonderInProgress'],
+  tech:           ['techs','researchActive','scholars','allTechDone'],
+  governance:     ['gov','authority','unity','prestige','lawChanges','taxRate'],
+  diplomacy:      ['relations','allies','pacts','tributes','claims','warsActive'],
+  exploration:    ['seenPct','fleets','settlers','settlements','scoutRadius'],
+  espionage:      ['spyPosts','freeSpies','spyTech'],
+  events:         ['over','ruins','factionsAlive','conquestsYear','capturedYear']
+};
+function csvCell(v){ let s=String(v==null?'':v); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+for(const [domain, cols] of Object.entries(DOMAINS)){
+  const header = [...KEYS, ...cols];
+  const lines = [header.join(',')];
+  for(const r of rows) lines.push(header.map(k=>csvCell(r[k])).join(','));
+  fs.writeFileSync(path.join(OUT, domain + '.csv'), lines.join('\n') + '\n');
 }
+fs.writeFileSync(path.join(OUT, 'master.json'), JSON.stringify(rows));
+
+// ---------- RUN_META.json ----------
+let gitSha = 'unknown';
+try { gitSha = execSync('git rev-parse HEAD', { cwd: __dirname }).toString().trim(); } catch(e){}
+const scriptHash = crypto.createHash('sha256').update(gameSrc).digest('hex').slice(0,16);
+const collapses = ends.filter(e=>e.over).map(e=>({archetype:e.archetype, seed:e.seed, year:e.endedYear}));
+const meta = {
+  generated_utc: new Date().toISOString(),
+  mode: FULL ? 'full' : 'validation',
+  index_git_sha: gitSha,
+  index_script_sha256_16: scriptHash,
+  runtime_ms: runtimeMs,
+  archetypes: sandbox.__CFG.arches,
+  seeds: sandbox.__CFG.seeds,
+  years: sandbox.__CFG.years,
+  runs: ends.length,
+  year_rows: rows.length,
+  collapses,
+  domains: Object.keys(DOMAINS)
+};
+fs.writeFileSync(path.join(OUT, 'RUN_META.json'), JSON.stringify(meta, null, 1));
+
+// ---------- console summary + validation asserts ----------
+console.log(`OK — ${rows.length} year-rows across ${ends.length} runs · ${(runtimeMs/1000).toFixed(1)}s · mode=${FULL?'full':'validation'}`);
+console.log(`CSVs: ${Object.keys(DOMAINS).map(d=>d+'.csv').join(', ')}`);
+console.log('\nEnded (year reached / collapse):');
+for(const e of ends){
+  console.log(`  ${e.archetype.padEnd(14)} s${String(e.seed).padStart(4)}: yr ${String(e.endedYear).padStart(3)}${e.over?' (CROWN FELL)':' (survived)'} | pop ${String(e.pop).padStart(6)} | treas ${String(e.treasury).padStart(6)} | sett ${e.settlements} | captured ${e.capturedCum} | conquests ${e.conquests}`);
+}
+
+// Validation gates (README 1b): all 10 archetypes produce rows; conquest takes captives;
+// every CSV shares identical archetype,seed,year keys.
+const archesSeen = new Set(rows.map(r=>r.archetype));
+const missingArch = sandbox.__CFG.arches.filter(a=>!archesSeen.has(a));
+const conquestCaptured = Math.max(0, ...ends.filter(e=>e.archetype==='conquest').map(e=>e.capturedCum));
+const keySig = f => fs.readFileSync(path.join(OUT,f),'utf8').split('\n')[0].split(',').slice(0,3).join(',');
+const keysOk = Object.keys(DOMAINS).every(d => keySig(d+'.csv') === 'archetype,seed,year');
+console.log('\nValidation:');
+console.log(`  all 10 archetypes present: ${missingArch.length===0 ? 'YES' : 'NO ('+missingArch.join(',')+')'}`);
+console.log(`  conquest took captives:    ${conquestCaptured>0 ? 'YES ('+conquestCaptured+')' : 'NO'}`);
+console.log(`  all CSVs share keys:       ${keysOk ? 'YES' : 'NO'}`);

@@ -1,0 +1,121 @@
+{
+ "generated_utc": "2026-07-13T01:05:07.884Z",
+ "mode": "validation",
+ "index_git_sha": "db97a7ebb0cf9da7fbfa63b36e6f2b7f73df2166",
+ "index_script_sha256_16": "4075d3270dbab183",
+ "runtime_ms": 272676,
+ "archetypes": [
+  "passive",
+  "conquest",
+  "faith",
+  "merchant",
+  "nomad",
+  "builder",
+  "isolationist",
+  "expansionist",
+  "balanced",
+  "exploit-hunter"
+ ],
+ "seeds": [
+  7,
+  42
+ ],
+ "years": 100,
+ "runs": 20,
+ "year_rows": 933,
+ "collapses": [
+  {
+   "archetype": "passive",
+   "seed": 7,
+   "year": 26
+  },
+  {
+   "archetype": "passive",
+   "seed": 42,
+   "year": 46
+  },
+  {
+   "archetype": "conquest",
+   "seed": 7,
+   "year": 39
+  },
+  {
+   "archetype": "conquest",
+   "seed": 42,
+   "year": 26
+  },
+  {
+   "archetype": "faith",
+   "seed": 7,
+   "year": 19
+  },
+  {
+   "archetype": "faith",
+   "seed": 42,
+   "year": 27
+  },
+  {
+   "archetype": "nomad",
+   "seed": 7,
+   "year": 26
+  },
+  {
+   "archetype": "nomad",
+   "seed": 42,
+   "year": 29
+  },
+  {
+   "archetype": "builder",
+   "seed": 7,
+   "year": 31
+  },
+  {
+   "archetype": "isolationist",
+   "seed": 7,
+   "year": 24
+  },
+  {
+   "archetype": "isolationist",
+   "seed": 42,
+   "year": 24
+  },
+  {
+   "archetype": "expansionist",
+   "seed": 7,
+   "year": 23
+  },
+  {
+   "archetype": "expansionist",
+   "seed": 42,
+   "year": 25
+  },
+  {
+   "archetype": "balanced",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "exploit-hunter",
+   "seed": 7,
+   "year": 61
+  },
+  {
+   "archetype": "exploit-hunter",
+   "seed": 42,
+   "year": 100
+  }
+ ],
+ "domains": [
+  "economy",
+  "population",
+  "war",
+  "faith",
+  "infrastructure",
+  "tech",
+  "governance",
+  "diplomacy",
+  "exploration",
+  "espionage",
+  "events"
+ ]
+}
