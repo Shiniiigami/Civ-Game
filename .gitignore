@@ -7,3 +7,5 @@ audit_out/ui/**/*.png
 # master.json is the 17MB wide record; it is fully redundant with the 11 per-domain CSVs (which JOIN
 # on archetype,scenario,seed,year to reconstruct it) and regenerable via `node civgame_harness.js --full`.
 audit_out/master.json
+# Harness verify/quick runs (non --full) write here so they never clobber the committed dataset.
+audit_out/_verify/
