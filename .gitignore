@@ -4,3 +4,6 @@ audit_out/*.log
 # UI-audit screenshots are large (~65MB) and fully regenerable via `node civgame_ui_audit.js`.
 # The actionable artifacts (report_ui.md, ui/findings.json) are committed; the PNGs are not.
 audit_out/ui/**/*.png
+# master.json is the 17MB wide record; it is fully redundant with the 11 per-domain CSVs (which JOIN
+# on archetype,scenario,seed,year to reconstruct it) and regenerable via `node civgame_harness.js --full`.
+audit_out/master.json

@@ -1,9 +1,9 @@
 {
- "generated_utc": "2026-07-13T01:05:07.884Z",
- "mode": "validation",
- "index_git_sha": "db97a7ebb0cf9da7fbfa63b36e6f2b7f73df2166",
+ "generated_utc": "2026-07-13T03:42:27.893Z",
+ "mode": "full",
+ "index_git_sha": "62523dc0f0b808f4501acf35acf074d3f9acf36f",
  "index_script_sha256_16": "4075d3270dbab183",
- "runtime_ms": 272676,
+ "runtime_ms": 6825240,
  "archetypes": [
   "passive",
   "conquest",
@@ -14,95 +14,906 @@
   "isolationist",
   "expansionist",
   "balanced",
-  "exploit-hunter"
+  "exploit-hunter",
+  "diplomat",
+  "spymaster",
+  "thalassocrat",
+  "slaver",
+  "techlord",
+  "survivor"
+ ],
+ "scenarios": [
+  "baseline",
+  "archipelago",
+  "pangaea",
+  "easy",
+  "hard",
+  "kingdom"
  ],
  "seeds": [
   7,
+  19,
   42
  ],
  "years": 100,
- "runs": 20,
- "year_rows": 933,
+ "runs": 288,
+ "year_rows": 18718,
  "collapses": [
   {
    "archetype": "passive",
+   "scenario": "baseline",
    "seed": 7,
    "year": 26
   },
   {
    "archetype": "passive",
+   "scenario": "baseline",
    "seed": 42,
    "year": 46
   },
   {
    "archetype": "conquest",
+   "scenario": "baseline",
    "seed": 7,
    "year": 39
   },
   {
    "archetype": "conquest",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "baseline",
    "seed": 42,
    "year": 26
   },
   {
    "archetype": "faith",
+   "scenario": "baseline",
    "seed": 7,
    "year": 19
   },
   {
    "archetype": "faith",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "faith",
+   "scenario": "baseline",
    "seed": 42,
    "year": 27
   },
   {
    "archetype": "nomad",
+   "scenario": "baseline",
    "seed": 7,
    "year": 26
   },
   {
    "archetype": "nomad",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 22
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "baseline",
    "seed": 42,
-   "year": 29
+   "year": 26
   },
   {
    "archetype": "builder",
+   "scenario": "baseline",
    "seed": 7,
    "year": 31
   },
   {
    "archetype": "isolationist",
+   "scenario": "baseline",
    "seed": 7,
-   "year": 24
+   "year": 23
   },
   {
    "archetype": "isolationist",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 22
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "baseline",
    "seed": 42,
    "year": 24
   },
   {
    "archetype": "expansionist",
+   "scenario": "baseline",
    "seed": 7,
    "year": 23
   },
   {
    "archetype": "expansionist",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 21
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "baseline",
    "seed": 42,
-   "year": 25
+   "year": 24
   },
   {
    "archetype": "balanced",
+   "scenario": "baseline",
    "seed": 42,
    "year": 23
   },
   {
    "archetype": "exploit-hunter",
+   "scenario": "baseline",
    "seed": 7,
    "year": 61
   },
   {
    "archetype": "exploit-hunter",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 45
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "baseline",
    "seed": 42,
    "year": 100
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "baseline",
+   "seed": 19,
+   "year": 25
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "baseline",
+   "seed": 7,
+   "year": 28
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "baseline",
+   "seed": 42,
+   "year": 34
+  },
+  {
+   "archetype": "techlord",
+   "scenario": "baseline",
+   "seed": 42,
+   "year": 39
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "baseline",
+   "seed": 7,
+   "year": 30
+  },
+  {
+   "archetype": "passive",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 26
+  },
+  {
+   "archetype": "passive",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 35
+  },
+  {
+   "archetype": "faith",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 18
+  },
+  {
+   "archetype": "faith",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 18
+  },
+  {
+   "archetype": "faith",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 27
+  },
+  {
+   "archetype": "merchant",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 24
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 32
+  },
+  {
+   "archetype": "builder",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 31
+  },
+  {
+   "archetype": "builder",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 23
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 20
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 22
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 24
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 22
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 64
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 56
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 26
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 87
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 37
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "slaver",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 26
+  },
+  {
+   "archetype": "techlord",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "techlord",
+   "scenario": "archipelago",
+   "seed": 42,
+   "year": 52
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "archipelago",
+   "seed": 7,
+   "year": 27
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "archipelago",
+   "seed": 19,
+   "year": 33
+  },
+  {
+   "archetype": "passive",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 27
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 31
+  },
+  {
+   "archetype": "faith",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 19
+  },
+  {
+   "archetype": "faith",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 35
+  },
+  {
+   "archetype": "faith",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 22
+  },
+  {
+   "archetype": "merchant",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 38
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 33
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 33
+  },
+  {
+   "archetype": "builder",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 35
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 22
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 27
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 23
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 19
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 25
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 49
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 29
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 61
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "pangaea",
+   "seed": 19,
+   "year": 63
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 35
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 34
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 31
+  },
+  {
+   "archetype": "slaver",
+   "scenario": "pangaea",
+   "seed": 7,
+   "year": 94
+  },
+  {
+   "archetype": "slaver",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 35
+  },
+  {
+   "archetype": "techlord",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 37
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "pangaea",
+   "seed": 42,
+   "year": 33
+  },
+  {
+   "archetype": "passive",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 25
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 30
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 26
+  },
+  {
+   "archetype": "faith",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 20
+  },
+  {
+   "archetype": "faith",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 25
+  },
+  {
+   "archetype": "faith",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 22
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 21
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 25
+  },
+  {
+   "archetype": "builder",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 24
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 19
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 22
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 20
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 19
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 21
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 22
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 26
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "easy",
+   "seed": 7,
+   "year": 54
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 50
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "easy",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 23
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "easy",
+   "seed": 42,
+   "year": 28
+  },
+  {
+   "archetype": "passive",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 27
+  },
+  {
+   "archetype": "passive",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 24
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 28
+  },
+  {
+   "archetype": "faith",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 19
+  },
+  {
+   "archetype": "faith",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 20
+  },
+  {
+   "archetype": "faith",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 27
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 28
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 23
+  },
+  {
+   "archetype": "nomad",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 33
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 24
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 21
+  },
+  {
+   "archetype": "isolationist",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 24
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 25
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "hard",
+   "seed": 19,
+   "year": 21
+  },
+  {
+   "archetype": "expansionist",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 25
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 29
+  },
+  {
+   "archetype": "balanced",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 37
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 94
+  },
+  {
+   "archetype": "diplomat",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 28
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 28
+  },
+  {
+   "archetype": "spymaster",
+   "scenario": "hard",
+   "seed": 42,
+   "year": 40
+  },
+  {
+   "archetype": "thalassocrat",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 27
+  },
+  {
+   "archetype": "slaver",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 91
+  },
+  {
+   "archetype": "techlord",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 48
+  },
+  {
+   "archetype": "survivor",
+   "scenario": "hard",
+   "seed": 7,
+   "year": 30
+  },
+  {
+   "archetype": "conquest",
+   "scenario": "kingdom",
+   "seed": 42,
+   "year": 42
+  },
+  {
+   "archetype": "faith",
+   "scenario": "kingdom",
+   "seed": 19,
+   "year": 68
+  },
+  {
+   "archetype": "exploit-hunter",
+   "scenario": "kingdom",
+   "seed": 42,
+   "year": 98
   }
  ],
  "domains": [
