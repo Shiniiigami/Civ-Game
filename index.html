@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.31 · 2026.07.13 · khanate government locked to nomads; settled hordes become empires";
+const BUILD="v16.32 · 2026.07.13 · tributaries taken & rebel; crushed risings often razed, first-conquest raze made rare for bands";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1272,10 +1272,13 @@ function nomadSubjugate(a,t,r){let camp=W.settlements.find(s=>s.id===a.homeId);i
  a.units=a.units.filter(u=>u.count>0);
  if(t.owner==="player"||nearPlayer(t.x,t.y,520))log(`The <b>${camp.name}</b> bring <b>${t.name}</b> under their yoke as a <b>tributary</b>${stay-need>0?`, leaving ${fmt(stay-need)} riders to watch it`:""}. It keeps its own rule but must pay them each season.`)}
 // A tributary rises against its overlord's garrison — freedom on victory, a tighter yoke on defeat.
-function tributaryRebel(t,camp,r){let garr=(t.units||[]).filter(u=>u.overlordGarrison),own=(t.units||[]).filter(u=>!u.overlordGarrison),cst=t.coast||cellAt(t.x,t.y)?.coast,gp=fieldPower(garr,t.biome,cst),op=fieldPower(own,t.biome,cst)+t.pop*.02;
+function tributaryRebel(t,camp,r){let rel=t.tributeRel||0,garr=(t.units||[]).filter(u=>u.overlordGarrison),own=(t.units||[]).filter(u=>!u.overlordGarrison),cst=t.coast||cellAt(t.x,t.y)?.coast,gp=fieldPower(garr,t.biome,cst),op=fieldPower(own,t.biome,cst)+t.pop*(rel<22?.06:rel<38?.035:.02);
  if(op>gp*(.8+r()*.5)){t.units=own.filter(u=>u.count>0);t.overlord=null;t.tributeRel=0;if(t.owner==="player"||nearPlayer(t.x,t.y,520))log(`<b>${t.name} throws off the yoke of the ${camp?camp.name:"horde"}!</b> Its people cut down the garrison and reclaim their freedom.`);return true}
- own.forEach(u=>u.count=Math.round(u.count*.5));t.units=(t.units||[]).filter(u=>u.count>0);t.tributeRel=clamp((t.tributeRel||0)+25,0,100);if(t.owner==="player"||nearPlayer(t.x,t.y,520))log(`${t.name}'s bid for freedom is crushed by the ${camp?camp.name:"horde"}'s garrison; the yoke tightens.`);return false}
-function canThrowYoke(t){if(!isTributary(t))return false;let camp=overlordCamp(t),cst=t.coast||cellAt(t.x,t.y)?.coast,garr=fieldPower(ovlGarrisonUnits(t),t.biome,cst),own=fieldPower((t.units||[]).filter(u=>!u.overlordGarrison),t.biome,cst)+t.pop*.02,campStr=camp?unitsPowerRaw(camp):0;return own>garr*1.2&&((t.tributeRel||0)<45||own>campStr*.9)}
+ // Crushed. The garrison butchers the ringleaders — and a failed rising is far more often answered with the torch than a first conquest ever is.
+ own.forEach(u=>u.count=Math.round(u.count*.4));t.units=(t.units||[]).filter(u=>u.count>0);let dead=Math.round(t.pop*(.03+r()*.05));t.pop=Math.max(20,t.pop-dead);t.free=Math.max(0,t.free-dead);
+ if(r()<.35){let nm=t.name;razeOrScatter(t,camp?camp.name:"the horde");if(t.owner==="player"||nearPlayer(t.x,t.y,520))log(`<b>${nm}'s rising is crushed and the ${camp?camp.name:"horde"} put it to the torch</b> — a ruin now marks where it defied them.`);return false}
+ t.tributeRel=clamp((t.tributeRel||0)+22,0,100);if(t.owner==="player"||nearPlayer(t.x,t.y,520))log(`${t.name}'s bid for freedom is crushed by the ${camp?camp.name:"horde"}'s garrison; the yoke tightens.`);return false}
+function canThrowYoke(t){if(!isTributary(t))return false;let camp=overlordCamp(t),cst=t.coast||cellAt(t.x,t.y)?.coast,rel=t.tributeRel||0,pf=t.pop*(rel<22?.06:rel<38?.035:.02),garr=fieldPower(ovlGarrisonUnits(t),t.biome,cst),own=fieldPower((t.units||[]).filter(u=>!u.overlordGarrison),t.biome,cst)+pf,campStr=camp?unitsPowerRaw(camp):0;return own>garr*(rel<22?.85:1.2)&&(rel<45||own>campStr*.9)}
 function tributaryPanel(s){if(!isTributary(s))return"";let nm=overlordName(s),rel=Math.round(s.tributeRel||0),able=canThrowYoke(s),garr=ovlGarrison(s);return `<div class="section"><h3>⚑ Under the yoke</h3><div class="chips" style="margin-bottom:6px"><span class="chip bad">Tributary of ${nm}</span><span class="chip">their garrison ${fmt(garr)}</span><span class="chip">standing with them ${rel}%</span></div><div class="meter"><i style="width:${rel}%"></i></div><div class="muted" style="margin:5px 0">${s.name} pays ${nm} a <b>${S.tributeRate}</b> tribute of food and coin each season for protection. Muster more of your own troops than their garrison, or wait for relations to sour, then cast off the yoke — a failed rising is crushed.</div><button class="btn ${able?'':'alt '}small"${able?'':' disabled style=opacity:.5'} onclick="act('settle','throw_yoke')">${able?'Throw off the yoke':'Not strong enough to rise yet'}</button></div>`}
 // Each season tributaries pay food + coin to their overlord camp, their loyalty drifts, and weak-yoked ones may rebel.
 function processTributaries(){if(!W)return;let r=rng(S.seed+S.year*331+S.season*17),rate=tributeRate();
@@ -1974,7 +1977,7 @@ function maybeAiCapture(a,t){if(a.rebel||a.order!=="attack"||t.ruined)return;if(
  // Conquerors more often HOLD what they take than burn it — the world keeps its cities instead of drowning in ruins.
  if(nomadCamp||tribe){
   if(isNomadType(t)){if(nomadCamp&&t.type==="nomad camp")nomadAbsorbCamp(camp,t,a,r);else aiRazeSettlement(a,t,r)} // horde swallows a rival horde — the road to a khanate
-  else{let roll=r();if(roll<.28)aiRazeSettlement(a,t,r);else if(roll<.52)aiEnslaveDepart(a,t,r);else nomadSubjugate(a,t,r)}}
+  else{let roll=r();if(roll<.10)aiRazeSettlement(a,t,r);else if(roll<.26)aiEnslaveDepart(a,t,r);else nomadSubjugate(a,t,r)}}
  else if(organized){let ag=factionAggr(faction(a.owner)),diff=cultureDiff(camp,t),cap=(.02+ag*.08)+diff*.34;if(r()<cap){if(diff>.55&&r()<(.18+ag*.3))aiRazeSettlement(a,t,r);else aiOccupy(a,t,r)}}
  // Losing a settlement to the enemy shakes the whole realm's faith in the crown.
  if(_wasP&&(t.owner!=="player"||t.ruined||t.razing))S.unity=clamp(S.unity-Math.min(10,5+Math.round(t.pop/1000)))}
