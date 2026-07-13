@@ -1,6 +1,6 @@
 # Crown Waters — UI / Interaction Audit
 
-_Generated 2026-07-13T02:29:33.685Z · runtime 103.6s · seed 111_
+_Generated 2026-07-13T04:56:19.494Z · runtime 100.0s · seed 111_
 
 Complements the headless sim audit (which no-ops rendering). Drives the **real rendered game**
 with Playwright across desktop viewports and emulated mobile devices (real mobile UA + touch +
