@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.32 · 2026.07.13 · tributaries taken & rebel; crushed risings often razed, first-conquest raze made rare for bands";
+const BUILD="v16.33 · 2026.07.13 · khanate is a nomad-CAMP institution; tribe realms are confederacies, never khanates";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -272,7 +272,8 @@ function govOf(s){if(!s)return null;if(s.owner==="player")return S.gov||s.gov;if
 function govName(g){return GOV[g]?.n||"—"}
 function govChip(s){let g=govOf(s);if(!g||!GOV[g])return"";return `<span class="chip" data-tip="${GOV[g].d}">${GOV[g].g} ${GOV[g].n}</span>`}
 function startGov(s,r){let coastal=s.water||(s.type&&(s.type.includes("port")||s.type==="fishing village"));
- if(s.type==="nomad camp"||(s.type&&s.type.includes("tribe")))return (s.pop>1400&&r()<.4)?"khanate":"tribal";
+ if(s.type&&s.type.includes("tribe"))return "tribal";
+ if(s.type==="nomad camp"||s.searaider)return (s.pop>1400&&r()<.4)?"khanate":"tribal";
  if(r()<.07)return "theocracy";
  let big=s.type&&s.type.includes("city"),town=s.type==="town";
  if(big){if(coastal&&r()<.62)return "republic";return (s.pop>5200&&r()<.4)?"empire":"monarchy"}
@@ -281,7 +282,7 @@ function startGov(s,r){let coastal=s.water||(s.type&&(s.type.includes("port")||s
  return r()<.5?"chiefdom":"monarchy"}
 function govEvolve(){let r=rng(S.seed+S.year*733+17);
  for(const f of W.factions.filter(x=>x.alive)){let lands=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(!lands.length)continue;let cap=lands.find(s=>f.cap&&s.id===f.cap.id)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];let totpop=lands.reduce((n,s)=>n+s.pop,0),coastal=cap.water||cap.type.includes("port");let g=f.gov||startGov(cap,r),ng=g;
-  if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.5&&isNomadType(cap))ng="khanate";
+  if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.5&&isCamp(cap))ng="khanate"; // camps become khanates; tribes become confederacies (handled in nomad-band growth), never khanates
   else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.22)ng="republic";
   else if(g==="monarchy"&&(lands.length>=5||totpop>16000)&&r()<.28)ng="empire";
   else if(g==="chiefdom"&&cap.pop>1800&&r()<.3)ng=coastal?"republic":"monarchy";
@@ -289,12 +290,14 @@ function govEvolve(){let r=rng(S.seed+S.year*733+17);
   else if(g==="khanate"&&!isNomadType(cap)&&r()<.5)ng=(totpop>14000||lands.length>=4)?"empire":"monarchy"; // a horde that has settled into cities is no longer a khanate
   else if(g==="khanate"&&lands.length>=4&&totpop>14000&&r()<.2)ng="empire";
   if(ng!==g){f.gov=ng;cap.gov=ng;if(nearPlayer(cap.x,cap.y,520))log(`<b>${f.name}</b> becomes ${ng==="empire"?"an":"a"} <b>${GOV[ng].n}</b>.`)}}
- for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25&&isNomadType(s))s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}
- // Lock: a khanate is a nomad institution only. A khanate faction that holds more settled towns than camps has settled down — it becomes an Empire/Kingdom; and any stray non-nomad settlement carrying the khanate label sheds it.
- for(const f of W.factions){if(!f.alive||f.gov!=="khanate")continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined),camps=ls.filter(isNomadType).length,settled=ls.length-camps;if(settled>0&&settled>=camps){f.gov=(ls.length>=4||settled>=2)?"empire":"monarchy";let c0=ls.sort((a,b)=>b.pop-a.pop)[0];if(c0){c0.gov=f.gov;if(nearPlayer(c0.x,c0.y,520))log(`<b>${f.name}</b> settle into their conquered cities and become ${f.gov==="empire"?"an Empire":"a Kingdom"}.`)}}}
- for(const s of W.settlements){if(!s.ruined&&s.gov==="khanate"&&!isNomadType(s))s.gov=(s.type||"").includes("city")?"monarchy":s.type==="town"?"citystate":"chiefdom"}}
+ for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25&&isCamp(s))s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}
+ // Lock: a khanate is a mounted-CAMP institution only. A khanate faction that has settled into conquered cities becomes an Empire/Kingdom; a tribe-led "khanate" (no camps) is really a Confederacy; and any stray tribe/city carrying the khanate label sheds it.
+ for(const f of W.factions){if(!f.alive||f.gov!=="khanate")continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined),camps=ls.filter(isCamp).length,tribes=ls.filter(s=>(s.type||"").includes("tribe")).length,settled=ls.length-camps-tribes,c0=ls.slice().sort((a,b)=>b.pop-a.pop)[0];
+  if(settled>0&&settled>=camps+tribes){f.gov=(ls.length>=4||settled>=2)?"empire":"monarchy";if(c0){c0.gov=f.gov;if(nearPlayer(c0.x,c0.y,520))log(`<b>${f.name}</b> settle into their conquered cities and become ${f.gov==="empire"?"an Empire":"a Kingdom"}.`)}}
+  else if(camps===0){f.gov="tribal";f.confederacy=true;if(c0)c0.gov="tribal"}} // no camps, only tribes — a confederacy, not a khanate
+ for(const s of W.settlements){if(s.ruined||s.gov!=="khanate"||isCamp(s))continue;s.gov=(s.type||"").includes("tribe")?"tribal":(s.type||"").includes("city")?"monarchy":s.type==="town"?"citystate":"chiefdom"}}
 function playerGovDrift(){if(!owned().length)return;let r=rng(S.seed+S.year*911+3),lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];if(!cap)return;let totpop=ownedPop(),coastal=cap.water||cap.type.includes("port"),g=S.gov,ng=g;
- if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.4&&isNomadType(cap))ng="khanate";
+ if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.4&&isCamp(cap))ng="khanate";
  else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.15)ng="republic";
  else if(g==="monarchy"&&(lands.length>=6||totpop>18000)&&r()<.2)ng="empire";
  else if(g==="chiefdom"&&cap.pop>1800&&r()<.25)ng=coastal?"republic":"monarchy";
@@ -833,6 +836,8 @@ function startTechForType(type){if(type.includes("tribe")||type==="nomad camp")r
 function stTech(s){return (s.owner==="player"&&S&&S.tech)?S.tech:(s.tech||[])}
 const UNIT_DOWNGRADE={cavalry:"nomad_rider",nomad_rider:"levy",horse_archers:"nomad_rider",heavy:"levy",guards:"cavalry",archers:"levy"};
 function isNomadType(s){return s&&(s.searaider||s.type==="nomad camp"||(s.type&&s.type.includes("tribe")))}
+// A khanate is a mounted-horde institution: nomad CAMPS only. Tribes are nomad-type but form Confederacies (tribal gov), never khanates.
+function isCamp(s){return s&&(s.searaider||s.type==="nomad camp")}
 // Turn a coastal/island tribe into a Viking-like sea-raider people: Norse culture, blue-water sailing, a shipyard, fierce temper, and a longship-raider name.
 function makeSeaRaider(s,r){let fam=FAM_BY_NAME["Fjelder"]||HILL_FAMS[0];s.searaider=true;s.type="sea raiders";s.family=fam.n;s.culture=fam.n;s.faith=fam.faith;s.sect="";s.faithMix=[{name:fam.faith,pct:100}];s.cultMix=[{name:s.culture,pct:100}];s.name=pick(r,NAMEBANK.Norse.pre)+pick(r,NAMEBANK.Norse.suf)+" "+pick(r,["Raiders","Sea-Kings","Wolves","Longships","Reavers"]);s.tech=Array.from(new Set([...(s.tech||[]),"navigation","bluewater"]));s.infra.shipyard=Math.max(s.infra.shipyard||0,1);s.jobs.sailors=Math.max(s.jobs.sailors||0,Math.round(s.pop*.05));s.gov="tribal";s.aggr=clamp(.72+r()*.28,.72,1)}
 // Biome-appropriate tribe kind (all include "tribe", so they behave as tribal raiders): jungle, tundra, or hill/mountain folk.
@@ -1948,7 +1953,7 @@ function razeOrScatter(t,byName){if(isNomadType(t))scatterNomads(t,byName);else 
 function resettleNomadPot(){if(!S.nomadPot)return;let r=rng(S.seed+S.year*613+S.season*17);for(const cont in S.nomadPot){let p=S.nomadPot[cont];if(!p)continue;if(p.pop<2500){if(p.pop<200)delete S.nomadPot[cont];continue}p.pressure=Math.min(5,(p.pressure||0)+.12);if(r()<.02*p.pressure){let newPop=Math.min(4000,Math.max(2000,2000+Math.floor(r()*Math.min(2000,p.pop-2000))));newPop=Math.min(newPop,p.pop);if(spawnNomadResettle(cont,p,newPop,r)){p.pop-=newPop;p.pressure=Math.max(0,p.pressure-2)}}}}
 function spawnNomadResettle(key,p,newPop,r){let base0=potCells(key),pool=base0.filter(c=>["steppe","desert","mountains","tundra"].includes(c.biome));if(!pool.length)pool=base0.filter(c=>c.biome!=="mountains");if(!pool.length)return false;let far=potSpread(pool,.15);for(let tries=0;tries<60;tries++){let c=pick(r,pool);if(!c)continue;let cont=c.cont,x=c.x+(r()-.5)*30,y=c.y+(r()-.5)*24;if(Math.hypot(x-p.x,y-p.y)<far)continue;if(W.settlements.some(s=>!s.ruined&&Math.hypot(s.x-x,s.y-y)<130))continue;
   let faithMix=mixFromWeights(p.faith),cultMix=mixFromWeights(p.culture),famName=(Object.entries(p.family).sort((a,b)=>b[1]-a[1])[0]||[])[0]||FAM_NOMAD.n,fam=FAMILIES.find(f=>f.n===famName)||FAM_NOMAD,type=c.biome==="mountains"?"mountain tribe":"nomad camp",base=Math.round(newPop);
-  let st={id:"v"+(S.spawnSeq=(S.spawnSeq||10000)+1),x,y,cont,biome:c.biome,type,name:tribe(r,c.biome,fam),pop:base,free:base,slaves:0,culture:(cultMix&&cultMix[0].name)||fam.n,family:famName,faith:(faithMix&&faithMix[0].name)||fam.faith,sect:"",owner:null,intel:nearPlayer(x,y,330)?1:0,garrisonIntel:0,resources:{},resourceQuality:{},infra:{roads:0,farms:1,canals:0,granary:0,barracks:0,walls:0,hospital:0,temple:0,shipyard:0,market:0,bazaar:0,woodcamp:0,quarry:0,mine:0,fishery:0,herbalist:0,workshop:0,aqueduct:0,fortress:0,academy:0},jobs:{farmers:Math.round(base*.5),laborers:Math.round(base*.08),builders:Math.round(base*.02),merchants:0,scholars:0,priests:0,diplomats:0,healers:0,sailors:0},slaveJobs:{farmers:0,laborers:0,builders:0,mines:0,household:0},taxLocal:0,units:[],stores:{food:Math.round(base*1.2),stone:8,brick:2,iron:5,copper:2,timber:8,gold:0,silver:0,horses:Math.round(base*.05)},plague:0,ruined:false,gov:base>3200?"khanate":"tribal",tech:["horsemanship"],lore:`A nomad people re-gathered in Year ${S.year} from the scattered survivors of a broken horde.`,water:false};
+  let st={id:"v"+(S.spawnSeq=(S.spawnSeq||10000)+1),x,y,cont,biome:c.biome,type,name:tribe(r,c.biome,fam),pop:base,free:base,slaves:0,culture:(cultMix&&cultMix[0].name)||fam.n,family:famName,faith:(faithMix&&faithMix[0].name)||fam.faith,sect:"",owner:null,intel:nearPlayer(x,y,330)?1:0,garrisonIntel:0,resources:{},resourceQuality:{},infra:{roads:0,farms:1,canals:0,granary:0,barracks:0,walls:0,hospital:0,temple:0,shipyard:0,market:0,bazaar:0,woodcamp:0,quarry:0,mine:0,fishery:0,herbalist:0,workshop:0,aqueduct:0,fortress:0,academy:0},jobs:{farmers:Math.round(base*.5),laborers:Math.round(base*.08),builders:Math.round(base*.02),merchants:0,scholars:0,priests:0,diplomats:0,healers:0,sailors:0},slaveJobs:{farmers:0,laborers:0,builders:0,mines:0,household:0},taxLocal:0,units:[],stores:{food:Math.round(base*1.2),stone:8,brick:2,iron:5,copper:2,timber:8,gold:0,silver:0,horses:Math.round(base*.05)},plague:0,ruined:false,gov:(type==="nomad camp"&&base>3200)?"khanate":"tribal",tech:["horsemanship"],lore:`A nomad people re-gathered in Year ${S.year} from the scattered survivors of a broken horde.`,water:false};
   st.faithMix=faithMix||[{name:st.faith,pct:100}];st.cultMix=cultMix||[{name:st.culture,pct:100}];st.island=false;seedGarrison(st,r);W.settlements.push(st);
   if(nearPlayer(x,y,380))log(`Scattered riders re-gather as a new ${type==="mountain tribe"?"mountain tribe":"nomad horde"}, the <b>${st.name}</b>, ${fmt(base)} strong.`,"world");
   return true}
