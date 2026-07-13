@@ -1735,7 +1735,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 27,
+    "count": 25,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -1788,7 +1788,7 @@
       "h": 31
      }
     ],
-    "msg": "27 visible interactive element(s) under 44px"
+    "msg": "25 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -1804,7 +1804,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 27,
+    "count": 25,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -1857,7 +1857,7 @@
       "h": 31
      }
     ],
-    "msg": "27 visible interactive element(s) under 44px"
+    "msg": "25 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -1873,7 +1873,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 27,
+    "count": 25,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -1926,7 +1926,7 @@
       "h": 31
      }
     ],
-    "msg": "27 visible interactive element(s) under 44px"
+    "msg": "25 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -1942,7 +1942,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 24,
+    "count": 22,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -1995,7 +1995,7 @@
       "h": 31
      }
     ],
-    "msg": "24 visible interactive element(s) under 44px"
+    "msg": "22 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2011,7 +2011,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2064,7 +2064,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2080,7 +2080,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2133,7 +2133,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2149,7 +2149,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2202,7 +2202,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2218,7 +2218,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2271,7 +2271,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2287,7 +2287,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2340,7 +2340,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2356,7 +2356,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2409,7 +2409,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2425,7 +2425,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2478,7 +2478,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2494,7 +2494,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2547,7 +2547,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2563,7 +2563,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2616,7 +2616,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2632,7 +2632,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 21,
+    "count": 19,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2685,7 +2685,7 @@
       "h": 31
      }
     ],
-    "msg": "21 visible interactive element(s) under 44px"
+    "msg": "19 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2701,7 +2701,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 31,
+    "count": 29,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2754,7 +2754,7 @@
       "h": 31
      }
     ],
-    "msg": "31 visible interactive element(s) under 44px"
+    "msg": "29 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2770,7 +2770,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 28,
+    "count": 26,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2823,7 +2823,7 @@
       "h": 31
      }
     ],
-    "msg": "28 visible interactive element(s) under 44px"
+    "msg": "26 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2839,7 +2839,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 26,
+    "count": 24,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2892,7 +2892,7 @@
       "h": 31
      }
     ],
-    "msg": "26 visible interactive element(s) under 44px"
+    "msg": "24 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2908,7 +2908,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 26,
+    "count": 24,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -2961,7 +2961,7 @@
       "h": 31
      }
     ],
-    "msg": "26 visible interactive element(s) under 44px"
+    "msg": "24 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -2977,7 +2977,7 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 27,
+    "count": 25,
     "samples": [
      {
       "t": "button#zoomIn.iconbtn",
@@ -3030,7 +3030,7 @@
       "h": 31
      }
     ],
-    "msg": "27 visible interactive element(s) under 44px"
+    "msg": "25 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -3039,213 +3039,6 @@
   "device": "desktop-1920x1080",
   "kind": "desktop",
   "surface": "20-modal-wonders",
-  "modal": true,
-  "modalShown": true,
-  "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 24,
-    "samples": [
-     {
-      "t": "button#zoomIn.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#zoomOut.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#homeMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#capMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#scoutMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#revealMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.tab",
-      "w": 63,
-      "h": 31
-     },
-     {
-      "t": "button.tab",
-      "w": 45,
-      "h": 31
-     }
-    ],
-    "msg": "24 visible interactive element(s) under 44px"
-   }
-  ],
-  "console": []
- },
- {
-  "device": "desktop-1920x1080",
-  "kind": "desktop",
-  "surface": "21-modal-scout",
-  "modal": true,
-  "modalShown": true,
-  "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 24,
-    "samples": [
-     {
-      "t": "button#zoomIn.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#zoomOut.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#homeMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#capMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#scoutMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#revealMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.tab",
-      "w": 63,
-      "h": 31
-     },
-     {
-      "t": "button.tab",
-      "w": 45,
-      "h": 31
-     }
-    ],
-    "msg": "24 visible interactive element(s) under 44px"
-   }
-  ],
-  "console": []
- },
- {
-  "device": "desktop-1920x1080",
-  "kind": "desktop",
-  "surface": "22-modal-mercs",
-  "modal": true,
-  "modalShown": true,
-  "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 27,
-    "samples": [
-     {
-      "t": "button#zoomIn.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#zoomOut.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#homeMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#capMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#scoutMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#revealMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.tab",
-      "w": 63,
-      "h": 31
-     },
-     {
-      "t": "button.tab",
-      "w": 45,
-      "h": 31
-     }
-    ],
-    "msg": "27 visible interactive element(s) under 44px"
-   }
-  ],
-  "console": []
- },
- {
-  "device": "desktop-1920x1080",
-  "kind": "desktop",
-  "surface": "23-modal-battle",
   "modal": true,
   "modalShown": true,
   "error": null,
@@ -3314,7 +3107,283 @@
  {
   "device": "desktop-1920x1080",
   "kind": "desktop",
+  "surface": "21-modal-scout",
+  "modal": true,
+  "modalShown": true,
+  "error": null,
+  "findings": [
+   {
+    "type": "tap-target",
+    "sev": "minor",
+    "count": 22,
+    "samples": [
+     {
+      "t": "button#zoomIn.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#zoomOut.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#homeMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#capMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#scoutMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#revealMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button.vtab.on",
+      "w": 49,
+      "h": 30
+     },
+     {
+      "t": "button.vtab",
+      "w": 58,
+      "h": 30
+     },
+     {
+      "t": "button.tab",
+      "w": 63,
+      "h": 31
+     },
+     {
+      "t": "button.tab",
+      "w": 45,
+      "h": 31
+     }
+    ],
+    "msg": "22 visible interactive element(s) under 44px"
+   }
+  ],
+  "console": []
+ },
+ {
+  "device": "desktop-1920x1080",
+  "kind": "desktop",
+  "surface": "22-modal-mercs",
+  "modal": true,
+  "modalShown": true,
+  "error": null,
+  "findings": [
+   {
+    "type": "tap-target",
+    "sev": "minor",
+    "count": 25,
+    "samples": [
+     {
+      "t": "button#zoomIn.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#zoomOut.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#homeMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#capMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#scoutMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#revealMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button.vtab.on",
+      "w": 49,
+      "h": 30
+     },
+     {
+      "t": "button.vtab",
+      "w": 58,
+      "h": 30
+     },
+     {
+      "t": "button.tab",
+      "w": 63,
+      "h": 31
+     },
+     {
+      "t": "button.tab",
+      "w": 45,
+      "h": 31
+     }
+    ],
+    "msg": "25 visible interactive element(s) under 44px"
+   }
+  ],
+  "console": []
+ },
+ {
+  "device": "desktop-1920x1080",
+  "kind": "desktop",
+  "surface": "23-modal-battle",
+  "modal": true,
+  "modalShown": true,
+  "error": null,
+  "findings": [
+   {
+    "type": "tap-target",
+    "sev": "minor",
+    "count": 20,
+    "samples": [
+     {
+      "t": "button#zoomIn.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#zoomOut.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#homeMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#capMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#scoutMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#revealMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button.vtab.on",
+      "w": 49,
+      "h": 30
+     },
+     {
+      "t": "button.vtab",
+      "w": 58,
+      "h": 30
+     },
+     {
+      "t": "button.tab",
+      "w": 63,
+      "h": 31
+     },
+     {
+      "t": "button.tab",
+      "w": 45,
+      "h": 31
+     }
+    ],
+    "msg": "20 visible interactive element(s) under 44px"
+   }
+  ],
+  "console": []
+ },
+ {
+  "device": "desktop-1920x1080",
+  "kind": "desktop",
   "surface": "24-modal-siege",
+  "modal": true,
+  "modalShown": true,
+  "error": null,
+  "findings": [
+   {
+    "type": "tap-target",
+    "sev": "minor",
+    "count": 22,
+    "samples": [
+     {
+      "t": "button#zoomIn.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#zoomOut.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#homeMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#capMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#scoutMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button#revealMap.iconbtn",
+      "w": 34,
+      "h": 34
+     },
+     {
+      "t": "button.vtab.on",
+      "w": 49,
+      "h": 30
+     },
+     {
+      "t": "button.vtab",
+      "w": 58,
+      "h": 30
+     },
+     {
+      "t": "button.tab",
+      "w": 63,
+      "h": 31
+     },
+     {
+      "t": "button.tab",
+      "w": 45,
+      "h": 31
+     }
+    ],
+    "msg": "22 visible interactive element(s) under 44px"
+   }
+  ],
+  "console": []
+ },
+ {
+  "device": "desktop-1920x1080",
+  "kind": "desktop",
+  "surface": "25-modal-conquest",
   "modal": true,
   "modalShown": true,
   "error": null,
@@ -3381,75 +3450,6 @@
   "console": []
  },
  {
-  "device": "desktop-1920x1080",
-  "kind": "desktop",
-  "surface": "25-modal-conquest",
-  "modal": true,
-  "modalShown": true,
-  "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 26,
-    "samples": [
-     {
-      "t": "button#zoomIn.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#zoomOut.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#homeMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#capMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#scoutMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button#revealMap.iconbtn",
-      "w": 34,
-      "h": 34
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.tab",
-      "w": 63,
-      "h": 31
-     },
-     {
-      "t": "button.tab",
-      "w": 45,
-      "h": 31
-     }
-    ],
-    "msg": "26 visible interactive element(s) under 44px"
-   }
-  ],
-  "console": []
- },
- {
   "device": "iphone13-portrait",
   "kind": "mobile",
   "surface": "01-map-terrain",
@@ -3460,50 +3460,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -3519,50 +3489,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab",
-      "w": 46,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 59,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -3578,50 +3518,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "t": "button.vtab",
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -3633,26 +3543,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3662,26 +3553,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3691,26 +3563,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3720,26 +3573,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3749,26 +3583,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3778,26 +3593,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3807,26 +3603,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3836,26 +3613,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3865,26 +3623,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3894,26 +3633,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3923,26 +3643,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -3956,25 +3657,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 3,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "button.btn.small",
       "w": 76,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "3 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -3986,51 +3677,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 7,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "select#lawSuccession",
-      "w": 304,
-      "h": 34
-     },
-     {
-      "t": "select#lawSlavery",
-      "w": 304,
-      "h": 34
-     },
-     {
-      "t": "select#lawMilitary",
-      "w": 304,
-      "h": 34
-     },
-     {
-      "t": "select#lawFaith",
-      "w": 304,
-      "h": 34
-     },
-     {
-      "t": "select#lawLocal",
-      "w": 304,
-      "h": 34
-     }
-    ],
-    "msg": "7 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4044,35 +3691,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#recruitNumber",
-      "w": 304,
-      "h": 37
-     },
-     {
-      "t": "input#recruitRange",
-      "w": 304,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4088,35 +3715,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#levyNum",
-      "w": 304,
-      "h": 37
-     },
-     {
-      "t": "input#levyRange",
-      "w": 304,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4132,40 +3739,30 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 6,
+    "count": 4,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "input#faithName",
       "w": 304,
-      "h": 37
+      "h": 44
      },
      {
       "t": "select#faithClergy",
       "w": 304,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#faithOne",
       "w": 304,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#faithTwo",
       "w": 304,
-      "h": 34
+      "h": 44
      }
     ],
-    "msg": "6 visible interactive element(s) under 44px"
+    "msg": "4 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4181,30 +3778,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 4,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 122,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 122,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 122,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "4 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4216,31 +3803,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 3,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#scoutRad",
-      "w": 304,
-      "h": 32
-     }
-    ],
-    "msg": "3 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4250,46 +3813,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 6,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_levy.jobin",
-      "w": 304,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_archers.jobin",
-      "w": 304,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_heavy.jobin",
-      "w": 304,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_cavalry.jobin",
-      "w": 304,
-      "h": 30
-     }
-    ],
-    "msg": "6 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4299,26 +3823,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4328,26 +3833,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4361,45 +3847,35 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 5,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 304,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 304,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 304,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 304,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 304,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 304,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "5 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4415,50 +3891,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
       "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
+      "h": 44
      },
      {
       "t": "button.vtab",
       "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4474,50 +3920,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab",
-      "w": 46,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 59,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
       "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
+      "h": 44
      },
      {
       "t": "button.vtab",
       "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4533,50 +3949,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "button.vtab",
       "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
+      "h": 44
      },
      {
       "t": "button.vtab",
       "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4588,26 +3974,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4617,26 +3984,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4646,26 +3994,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4675,26 +4004,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4704,26 +4014,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4733,26 +4024,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4762,26 +4034,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4791,26 +4044,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4820,26 +4054,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4849,26 +4064,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4878,26 +4074,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4911,25 +4088,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 3,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "button.btn.small",
       "w": 63,
-      "h": 28
+      "h": 40
      }
     ],
-    "msg": "3 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -4941,51 +4108,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 7,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "select#lawSuccession",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#lawSlavery",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#lawMilitary",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#lawFaith",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#lawLocal",
-      "w": 314,
-      "h": 34
-     }
-    ],
-    "msg": "7 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -4999,35 +4122,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#recruitNumber",
-      "w": 656,
-      "h": 37
-     },
-     {
-      "t": "input#recruitRange",
-      "w": 656,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 63,
-      "h": 28
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5043,45 +4146,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#levyNum",
-      "w": 656,
-      "h": 37
-     },
-     {
-      "t": "input#levyRange",
-      "w": 656,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 63,
-      "h": 28
-     },
-     {
-      "t": "button#confirmLevy.btn",
-      "w": 585,
-      "h": 39
-     },
-     {
-      "t": "button.btn.alt",
-      "w": 64,
-      "h": 39
+      "h": 40
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5093,56 +4166,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 8,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#faithName",
-      "w": 314,
-      "h": 37
-     },
-     {
-      "t": "select#faithClergy",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#faithOne",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "select#faithTwo",
-      "w": 314,
-      "h": 34
-     },
-     {
-      "t": "button#faithConfirm.btn",
-      "w": 585,
-      "h": 39
-     },
-     {
-      "t": "button.btn.alt",
-      "w": 64,
-      "h": 39
-     }
-    ],
-    "msg": "8 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5156,30 +4180,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 4,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 106,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 106,
-      "h": 28
-     },
-     {
-      "t": "button.btn.small",
-      "w": 106,
-      "h": 28
+      "h": 40
      }
     ],
-    "msg": "4 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5191,41 +4205,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 5,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#scoutRad",
-      "w": 656,
-      "h": 32
-     },
-     {
-      "t": "button#confirmScout.btn",
-      "w": 585,
-      "h": 39
-     },
-     {
-      "t": "button.btn.alt",
-      "w": 64,
-      "h": 39
-     }
-    ],
-    "msg": "5 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5235,56 +4215,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 8,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_levy.jobin",
-      "w": 314,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_archers.jobin",
-      "w": 314,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_heavy.jobin",
-      "w": 314,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_cavalry.jobin",
-      "w": 314,
-      "h": 30
-     },
-     {
-      "t": "button.btn",
-      "w": 585,
-      "h": 39
-     },
-     {
-      "t": "button.btn.alt",
-      "w": 64,
-      "h": 39
-     }
-    ],
-    "msg": "8 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5294,31 +4225,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 3,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button#battleOk.btn",
-      "w": 656,
-      "h": 39
-     }
-    ],
-    "msg": "3 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5328,41 +4235,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 5,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.btn",
-      "w": 405,
-      "h": 39
-     },
-     {
-      "t": "button.btn.alt",
-      "w": 133,
-      "h": 39
-     },
-     {
-      "t": "button.btn.danger",
-      "w": 104,
-      "h": 39
-     }
-    ],
-    "msg": "5 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5376,45 +4249,35 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 5,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 313,
+      "h": 40
      },
      {
       "t": "button.btn.small",
-      "w": 314,
-      "h": 28
+      "w": 313,
+      "h": 40
      },
      {
       "t": "button.btn.small",
-      "w": 314,
-      "h": 28
+      "w": 313,
+      "h": 40
      },
      {
       "t": "button.btn.small",
-      "w": 314,
-      "h": 28
+      "w": 313,
+      "h": 40
      },
      {
       "t": "button.btn.small",
-      "w": 314,
-      "h": 28
-     },
-     {
-      "t": "button.btn.small",
-      "w": 314,
-      "h": 28
+      "w": 313,
+      "h": 40
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "5 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5430,50 +4293,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5489,50 +4322,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab",
-      "w": 46,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 59,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5548,50 +4351,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "t": "button.vtab",
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5603,26 +4376,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5632,26 +4386,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5661,26 +4396,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5690,26 +4406,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5719,26 +4416,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5748,26 +4426,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5777,26 +4436,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5806,26 +4446,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5835,26 +4456,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5864,26 +4466,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5893,26 +4476,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -5926,35 +4490,25 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 3,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 76,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 76,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 76,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 76,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "3 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -5966,51 +4520,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 7,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "select#lawSuccession",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#lawSlavery",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#lawMilitary",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#lawFaith",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#lawLocal",
-      "w": 326,
-      "h": 34
-     }
-    ],
-    "msg": "7 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6024,35 +4534,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#recruitNumber",
-      "w": 326,
-      "h": 37
-     },
-     {
-      "t": "input#recruitRange",
-      "w": 326,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6068,35 +4558,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#levyNum",
-      "w": 326,
-      "h": 37
-     },
-     {
-      "t": "input#levyRange",
-      "w": 326,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6108,46 +4578,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 6,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#faithName",
-      "w": 326,
-      "h": 37
-     },
-     {
-      "t": "select#faithClergy",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#faithOne",
-      "w": 326,
-      "h": 34
-     },
-     {
-      "t": "select#faithTwo",
-      "w": 326,
-      "h": 34
-     }
-    ],
-    "msg": "6 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6161,35 +4592,25 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 3,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 122,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 122,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 122,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 122,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "3 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6201,31 +4622,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 3,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#scoutRad",
-      "w": 326,
-      "h": 32
-     }
-    ],
-    "msg": "3 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6235,46 +4632,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 6,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_levy.jobin",
-      "w": 326,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_archers.jobin",
-      "w": 326,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_heavy.jobin",
-      "w": 326,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_cavalry.jobin",
-      "w": 326,
-      "h": 30
-     }
-    ],
-    "msg": "6 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6284,26 +4642,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6313,26 +4652,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6346,45 +4666,35 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 5,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 326,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 326,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 326,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 326,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 326,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 326,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "5 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6400,50 +4710,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6459,50 +4739,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
       "t": "button.vtab",
-      "w": 46,
-      "h": 30
-     },
-     {
-      "t": "button.vtab.on",
-      "w": 59,
-      "h": 30
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6518,50 +4768,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 8,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
+      "t": "button.vtab",
+      "w": 39,
+      "h": 44
      },
      {
       "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 37,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 53,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 41,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 47,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 51,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 55,
-      "h": 30
+      "w": 43,
+      "h": 44
      }
     ],
-    "msg": "8 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6573,26 +4793,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6602,26 +4803,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6631,26 +4813,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6660,26 +4823,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6689,26 +4833,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6718,26 +4843,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6747,26 +4853,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6776,26 +4863,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6805,26 +4873,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6834,26 +4883,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6863,26 +4893,7 @@
   "modal": false,
   "modalShown": null,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -6896,25 +4907,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 3,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "button.btn.small",
       "w": 76,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "3 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6930,45 +4931,35 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 5,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
      {
       "t": "select#lawSuccession",
       "w": 287,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#lawSlavery",
       "w": 287,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#lawMilitary",
       "w": 287,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#lawFaith",
       "w": 287,
-      "h": 34
+      "h": 44
      },
      {
       "t": "select#lawLocal",
       "w": 287,
-      "h": 34
+      "h": 44
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "5 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -6984,35 +4975,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#recruitNumber",
-      "w": 287,
-      "h": 37
-     },
-     {
-      "t": "input#recruitRange",
-      "w": 287,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -7028,35 +4999,15 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 5,
+    "count": 1,
     "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#levyNum",
-      "w": 287,
-      "h": 37
-     },
-     {
-      "t": "input#levyRange",
-      "w": 287,
-      "h": 32
-     },
      {
       "t": "button.btn.alt",
       "w": 75,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "5 visible interactive element(s) under 44px"
+    "msg": "1 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -7068,46 +5019,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 6,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#faithName",
-      "w": 287,
-      "h": 37
-     },
-     {
-      "t": "select#faithClergy",
-      "w": 287,
-      "h": 34
-     },
-     {
-      "t": "select#faithOne",
-      "w": 287,
-      "h": 34
-     },
-     {
-      "t": "select#faithTwo",
-      "w": 287,
-      "h": 34
-     }
-    ],
-    "msg": "6 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -7121,30 +5033,20 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 4,
+    "count": 2,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 122,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 122,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 122,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "4 visible interactive element(s) under 44px"
+    "msg": "2 visible interactive element(s) under 44px"
    }
   ],
   "console": []
@@ -7156,31 +5058,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 3,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#scoutRad",
-      "w": 287,
-      "h": 32
-     }
-    ],
-    "msg": "3 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -7190,46 +5068,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 6,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_levy.jobin",
-      "w": 287,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_archers.jobin",
-      "w": 287,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_heavy.jobin",
-      "w": 287,
-      "h": 30
-     },
-     {
-      "t": "input#mrc_cavalry.jobin",
-      "w": 287,
-      "h": 30
-     }
-    ],
-    "msg": "6 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -7239,26 +5078,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -7268,26 +5088,7 @@
   "modal": true,
   "modalShown": true,
   "error": null,
-  "findings": [
-   {
-    "type": "tap-target",
-    "sev": "minor",
-    "count": 2,
-    "samples": [
-     {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
-     }
-    ],
-    "msg": "2 visible interactive element(s) under 44px"
-   }
-  ],
+  "findings": [],
   "console": []
  },
  {
@@ -7301,45 +5102,35 @@
    {
     "type": "tap-target",
     "sev": "minor",
-    "count": 7,
+    "count": 5,
     "samples": [
      {
-      "t": "button.vtab.on",
-      "w": 49,
-      "h": 30
-     },
-     {
-      "t": "button.vtab",
-      "w": 58,
-      "h": 30
+      "t": "button.btn.small",
+      "w": 287,
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 287,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 287,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 287,
-      "h": 37
+      "h": 40
      },
      {
       "t": "button.btn.small",
       "w": 287,
-      "h": 37
-     },
-     {
-      "t": "button.btn.small",
-      "w": 287,
-      "h": 37
+      "h": 40
      }
     ],
-    "msg": "7 visible interactive element(s) under 44px"
+    "msg": "5 visible interactive element(s) under 44px"
    }
   ],
   "console": []
