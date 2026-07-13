@@ -1,1 +1,3 @@
 node_modules/
+audit_out/_full_run.log
+audit_out/*.log
