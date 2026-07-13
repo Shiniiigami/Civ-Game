@@ -13,7 +13,11 @@ const { execSync } = require('child_process');
 
 const HTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const gameSrc = HTML.match(/<script>([\s\S]*?)<\/script>/)[1];
-const OUT = path.join(__dirname, 'audit_out');
+// Only --full writes the canonical audit_out/ dataset; quick/validation runs go to a gitignored
+// _verify/ subdir so iteration never clobbers the committed frozen campaign (HARN/clobber fix).
+const FULL = process.argv.includes('--full');
+const QUICK = process.argv.includes('--quick');
+const OUT = path.join(__dirname, FULL ? 'audit_out' : 'audit_out/_verify');
 fs.mkdirSync(OUT, { recursive: true });
 
 // ---------- INPUTS-backed DOM stub ----------
@@ -79,7 +83,6 @@ sandbox.window.devicePixelRatio = 1; sandbox.window.innerWidth = 1024; sandbox.w
 sandbox.window.storage = undefined;
 
 // Config passed in from Node so the driver can branch on validation vs full campaign.
-const FULL = process.argv.includes('--full');
 const FROZEN_SEEDS = [7,19,42,88,101,256,777,1337,4242,9001];
 sandbox.__CFG = {
   full: FULL,
@@ -87,8 +90,8 @@ sandbox.__CFG = {
            'diplomat','spymaster','thalassocrat','slaver','techlord','survivor'],
   // One-factor-at-a-time world scenarios (baseline + one variant per axis). The `scenario` label is a
   // leading join key alongside archetype,seed,year — so we avoid a full-factorial run explosion.
-  scenarios: FULL ? ['baseline','archipelago','pangaea','easy','hard','kingdom'] : ['baseline'],
-  seeds: FULL ? FROZEN_SEEDS.slice(0,3) : [7,42],
+  scenarios: FULL ? ['baseline','archipelago','pangaea','easy','hard','kingdom'] : QUICK ? ['baseline','pangaea','kingdom'] : ['baseline'],
+  seeds: FULL ? FROZEN_SEEDS.slice(0,3) : QUICK ? [7] : [7,42],
   years: 100
 };
 
@@ -116,7 +119,9 @@ const driver = `
   const canAct = c => !(S.actions && S.actions[c]);
   const mark   = c => { if(!S.actions) S.actions={}; S.actions[c]=true; };
   function ensureBuilders(c,b){ try{ if(builders(c)<b) setJob(c.id,'builders',(c.jobs.builders||0)+(b-builders(c))+4); }catch(_){} }
-  function tryBuild(c,key,g,b,res){ ensureBuilders(c,b); try{ return !!build(c,key,g,b,res||{}); }catch(_){ return false; } }
+  // HARN-03: respect the game's level-3 tier cap that act() enforces (build() itself doesn't), so the
+  // harness can't stack 80+ bazaars and inflate infra magnitudes. Walls are intentionally uncapped in-game.
+  function tryBuild(c,key,g,b,res){ if(key!=='walls' && (c.infra[key]||0)>=3) return false; ensureBuilders(c,b); try{ return !!build(c,key,g,b,res||{}); }catch(_){ return false; } }
   function levy(c,n){ __INPUTS.levyNum=String(n); try{ doRaiseLevy(c.id,'military'); return true; }catch(_){ return false; } }
   function recruit(c,type,n){ __INPUTS.recruitNumber=String(n); __INPUTS.recruitRange__max=String(n);
     try{ placeRecruitOrder(c.id,type,false,'military'); return true; }catch(_){ return false; } }
@@ -441,7 +446,7 @@ const driver = `
           start:'village',rulerName:'Rasa',dynasty:'Crownwater',realmName:'Audit',
           capitalName:'Riverhold',startAt:null}, SCEN[scen]||{}, {_seed:seed});
         S=newState(seed,cfg);
-        let acc={tax:0,trade:0,upkeep:0}, guard=0;
+        let acc={tax:0,trade:0,upkeep:0}, guard=0, lastPushed=0;
         let run={capturedCum:0, prevCaptives:S.captives||0, conquests:0, prevConq:0, prevCapCum:0};
         while(S.year<=CFG.years && !S.over && guard<(CFG.years*4+40)){
           guard++;
@@ -452,8 +457,12 @@ const driver = `
           // Accumulate captures as positive deltas in S.captives (raid/sack/enslave add; settle removes).
           run.capturedCum += Math.max(0, (S.captives||0) - run.prevCaptives); run.prevCaptives=S.captives||0;
           acc.tax+=(S.econ&&S.econ.tax)||0; acc.trade+=(S.econ&&S.econ.trade)||0; acc.upkeep+=(S.econ&&S.econ.upkeep)||0;
-          if(S.year!==py){ rows.push(snapWide(arch,scen,seed,py,acc,run)); acc={tax:0,trade:0,upkeep:0}; run.prevConq=run.conquests; run.prevCapCum=run.capturedCum; }
+          if(S.year!==py){ rows.push(snapWide(arch,scen,seed,py,acc,run)); acc={tax:0,trade:0,upkeep:0}; run.prevConq=run.conquests; run.prevCapCum=run.capturedCum; lastPushed=py; }
         }
+        // HARN-01: a mid-year collapse sets S.over without a year-rollover, so the year loop never logs
+        // that year. Emit a final row so the over=1 collapse is not silently dropped (the artifact that
+        // made the engine look like it crashed). Only when the collapse year was not already logged.
+        if(S.over && lastPushed!==S.year){ rows.push(snapWide(arch,scen,seed,S.year,acc,run)); }
         ends.push({archetype:arch, scenario:scen, seed, endedYear:S.year, over:!!S.over,
           pop:(typeof ownedPop==='function')?ownedPop():0, treasury:Math.round(S.treasury||0),
           capturedCum:Math.round(run.capturedCum), conquests:run.conquests, settlements:owned().length});
