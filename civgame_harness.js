@@ -186,14 +186,14 @@ const driver = `
   }
 
   // Distinct tax policy per archetype (set once) — no archetype touched setRealmTax before, so the
-  // governance taxRate column was a dead constant. Treasury-snowball styles tax hard; unity-fragile
-  // styles tax light; the rest stay normal.
-  const TAX_HEAVY=['merchant','exploit-hunter','builder'];
-  const TAX_LIGHT=['survivor','isolationist','faith','expansionist','diplomat'];
+  // governance taxRate column was a dead constant. Unity-fragile / expansion styles tax light to
+  // protect unity; the rest stay normal. (High/crushing tiers wreck a 1-2 city realm's unity ->
+  // revolt -> the city is lost, so we don't use them.)
+  const TAX_LIGHT=['survivor','isolationist','faith','expansionist','diplomat','nomad'];
   function playSeason(arch){
     const c=cap(); if(!c) return;
     if(arch==='passive') return;
-    if(!S._taxSet){ try{ setRealmTax(TAX_HEAVY.includes(arch)?'high':TAX_LIGHT.includes(arch)?'light':'normal'); }catch(_){} S._taxSet=true; }
+    if(!S._taxSet){ try{ setRealmTax(TAX_LIGHT.includes(arch)?'light':'normal'); }catch(_){} S._taxSet=true; }
 
     if(arch==='merchant'){
       research(['currency','masonry','irrigation','accounting','banking','bureaucracy','philosophy','scriptoria','guilds']);
@@ -326,14 +326,16 @@ const driver = `
       try{ if(allTechDone()){ for(const k of ['wisdom','prosperity','order','devotion','plenty','legions']){ try{ enactEdict(k); }catch(_){} } } }catch(_){}
     }
     else if(arch==='survivor'){
-      research(['irrigation','masonry','currency','engineering','bureaucracy','philosophy']);
-      if(canAct('trade') && sellSurplus(c)) mark('trade'); // steady income every season keeps authority off the death-spiral
-      if(canAct('infra') && S.treasury>260){ let key=(c.infra.bazaar||0)<1?'bazaar':(c.infra.walls||0)<2?'walls':(c.infra.granary||0)<1?'granary':'aqueduct';
-        let g=key==='granary'?55:key==='walls'?80:key==='aqueduct'?130:90, b=key==='granary'?20:24,
-            res=key==='granary'?{brick:12}:key==='walls'?{stone:20}:key==='aqueduct'?{stone:25}:{timber:10,brick:6};
-        if(tryBuild(c,key,g,b,res)) mark('infra'); } // 260 buffer -> treasury never bottoms out
-      if(canAct('agri') && S.treasury>120 && (c.infra.farms||0)<3){ if(tryBuild(c,'farms',25,12,{timber:8})) mark('agri'); }
-      if(canAct('military') && freeSoldiers(c) < c.pop*0.02 && S.treasury>140){ levy(c,20); mark('military'); }
+      // Pure economic turtle: NO research (research funding is a steady treasury drain that sinks a
+      // lone city). Grow pop via food + a bazaar for income; keep a fat treasury buffer so authority
+      // never spirals. This is the deliberate "is there a stable equilibrium?" control.
+      if(canAct('trade') && sellSurplus(c)) mark('trade');
+      if(canAct('infra') && S.treasury>220){ let key=(c.infra.bazaar||0)<2?'bazaar':(c.infra.aqueduct||0)<1?'aqueduct':(c.infra.walls||0)<1?'walls':'workshop';
+        let g=key==='aqueduct'?130:key==='walls'?80:key==='workshop'?75:90, b=24,
+            res=key==='aqueduct'?{stone:25}:key==='walls'?{stone:20}:{timber:12,brick:6};
+        if(tryBuild(c,key,g,b,res)) mark('infra'); }
+      if(canAct('agri') && S.treasury>90){ let g=(c.infra.granary||0)<1; if(tryBuild(c,g?'granary':'farms',g?55:25,g?20:12,g?{brick:12}:{timber:8})) mark('agri'); }
+      if(canAct('military') && freeSoldiers(c) < c.pop*0.015 && S.treasury>200){ levy(c,15); mark('military'); }
     }
   }
 
