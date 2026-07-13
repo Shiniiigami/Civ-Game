@@ -83,8 +83,12 @@ const FULL = process.argv.includes('--full');
 const FROZEN_SEEDS = [7,19,42,88,101,256,777,1337,4242,9001];
 sandbox.__CFG = {
   full: FULL,
-  arches: ['passive','conquest','faith','merchant','nomad','builder','isolationist','expansionist','balanced','exploit-hunter'],
-  seeds: FULL ? FROZEN_SEEDS.slice(0,5) : [7,42],
+  arches: ['passive','conquest','faith','merchant','nomad','builder','isolationist','expansionist','balanced','exploit-hunter',
+           'diplomat','spymaster','thalassocrat','slaver','techlord','survivor'],
+  // One-factor-at-a-time world scenarios (baseline + one variant per axis). The `scenario` label is a
+  // leading join key alongside archetype,seed,year — so we avoid a full-factorial run explosion.
+  scenarios: FULL ? ['baseline','archipelago','pangaea','easy','hard','kingdom'] : ['baseline'],
+  seeds: FULL ? FROZEN_SEEDS.slice(0,3) : [7,42],
   years: 100
 };
 
@@ -181,9 +185,15 @@ const driver = `
     }catch(_){ return false; }
   }
 
+  // Distinct tax policy per archetype (set once) — no archetype touched setRealmTax before, so the
+  // governance taxRate column was a dead constant. Treasury-snowball styles tax hard; unity-fragile
+  // styles tax light; the rest stay normal.
+  const TAX_HEAVY=['merchant','exploit-hunter','builder'];
+  const TAX_LIGHT=['survivor','isolationist','faith','expansionist','diplomat'];
   function playSeason(arch){
     const c=cap(); if(!c) return;
     if(arch==='passive') return;
+    if(!S._taxSet){ try{ setRealmTax(TAX_HEAVY.includes(arch)?'high':TAX_LIGHT.includes(arch)?'light':'normal'); }catch(_){} S._taxSet=true; }
 
     if(arch==='merchant'){
       research(['currency','masonry','irrigation','accounting','banking','bureaucracy','philosophy','scriptoria','guilds']);
@@ -249,6 +259,82 @@ const driver = `
       if(canAct('rule') && (S.captives||0)>0){ try{ settleCaptives(c.id); }catch(_){} }
       sendWarband(c,'raid');
     }
+    else if(arch==='diplomat'){
+      research(['writing','currency','bureaucracy','philosophy','accounting']);
+      if(canAct('diplo')){
+        let acted=false;
+        // Buy off a nearby raider group to keep the peace.
+        let raider=W.settlements.find(s=>!s.ruined && !s.owner && (s.type==='nomad camp'||(s.type||'').includes('tribe')) && distW(c.x,c.y,s.x,s.y)<520);
+        if(raider && S.treasury>90){ try{ payNomadTribute(raider.id); acted=true; }catch(_){} }
+        // Betroth the heir into a scouted foreign realm (warms relations, grants a claim).
+        if(!acted){ let ft=W.settlements.find(s=>s.owner&&s.owner!=='player'&&!s.ruined&&faction(s.owner)&&(s.intel||0)>=1&&!(S.marriages&&S.marriages[s.owner]));
+          if(ft && S.treasury>70){ try{ arrangeMarriage(ft,'diplo'); acted=true; }catch(_){} } }
+        // Otherwise pact/ally with a faction at peace.
+        if(!acted){ let f=(W.factions||[]).find(x=>x.alive && diploOf(x.id)==='peace');
+          if(f){ try{ setDiplo(f.id,(S.relations[f.id]||0)>=40?'alliance':'pact',8); }catch(_){} } }
+        mark('diplo');
+      }
+      if(canAct('trade') && sellSurplus(c)) mark('trade');
+      if(canAct('infra') && S.treasury>120){ if(tryBuild(c,(c.infra.bazaar||0)<1?'bazaar':'walls',80,24,{timber:12,stone:20})) mark('infra'); }
+    }
+    else if(arch==='spymaster'){
+      research(['writing','currency','bureaucracy','espionage','philosophy']);
+      if(known('espionage')){
+        if((c.jobs.spies||0) < 4){ try{ setJob(c.id,'spies',(c.jobs.spies||0)+1); }catch(_){} }
+        if(canAct('scout')){
+          let target=W.settlements.find(s=>s.owner!=='player'&&!s.ruined&&(s.intel||0)>=1&&!(S.spyPosts||[]).includes(s.id));
+          let fs2=0; try{ fs2=freeSpies(); }catch(_){}
+          if(target && fs2>=1){ try{ embedSpy(target.id); mark('scout'); }catch(_){} }
+        }
+      }
+      if(canAct('infra') && S.treasury>140){ if(tryBuild(c,(c.infra.academy||0)<1?'academy':'bazaar',140,30,{brick:20})) mark('infra'); }
+      if(canAct('trade') && sellSurplus(c)) mark('trade');
+    }
+    else if(arch==='thalassocrat'){
+      research(['masonry','currency','bluewater','cartography','galleys','astronomy']);
+      if(canAct('infra')){
+        if(!c.infra.shipyard){ if(tryBuild(c,'shipyard',110,28,{timber:25})) mark('infra'); }
+        else if(S.treasury>90 && tryBuild(c,(c.infra.bazaar||0)<1?'bazaar':'fishery',80,24,{timber:12})) mark('infra');
+      }
+      if(c.infra.shipyard){
+        if((c.jobs.sailors||0) < 24){ try{ setJob(c.id,'sailors',(c.jobs.sailors||0)+6); }catch(_){} }
+        if(canAct('military') && S.treasury>130){ let sk=(typeof SHIP==='object')?Object.keys(SHIP):[]; if(sk.length){ __INPUTS['sh_'+sk[0]]='2'; try{ buildFleet(c.id,'military'); }catch(_){} } mark('military'); }
+      }
+      if(canAct('scout') && S.treasury>70){ let rr=rng(S.seed+S.year*17+S.season), ang=rr()*6.283, R=240+rr()*200;
+        __INPUTS.scoutRad='300'; try{ confirmScout(Math.round(c.x+Math.cos(ang)*R),Math.round(c.y+Math.sin(ang)*R)); mark('scout'); }catch(_){} }
+      if(canAct('trade') && sellSurplus(c)) mark('trade');
+    }
+    else if(arch==='slaver'){
+      research(['smelting','masonry','bureaucracy','metallurgy','irrigation']);
+      if(canAct('trade') && sellSurplus(c)) mark('trade'); // income to fund the raids so it survives to raid
+      if(canAct('military') && S.treasury>80){ levy(c,25); mark('military'); }
+      sendWarband(c,'raid'); // raid feeds S.captives
+      if(canAct('rule') && (S.captives||0)>0){ try{ settleCaptives(c.id); }catch(_){} }
+      let un=0; try{ un=unassignedSlaves(c); }catch(_){}
+      if(un>0){ let job=(c.slaveJobs.mines||0)<un*.4?'mines':(c.slaveJobs.farmers||0)<un?'farmers':'laborers';
+        try{ setSlaveJob(c.id,job,(c.slaveJobs[job]||0)+Math.min(un,10)); }catch(_){} }
+      if(canAct('infra') && S.treasury>200){ if(tryBuild(c,(c.infra.mine||0)<1?'mine':'barracks',65,20,{timber:10})) mark('infra'); }
+    }
+    else if(arch==='techlord'){
+      research(['writing','currency','philosophy','masonry','irrigation','bureaucracy','accounting','mathematics','astronomy','scriptoria','universities','scholarship','engineering','metallurgy','naturalphil','smelting','horsemanship','guilds']);
+      if(canAct('trade') && sellSurplus(c)) mark('trade'); // income first: research funding drains treasury, and empty treasury -> collapse
+      if(canAct('infra') && S.treasury>170){ let key=(c.infra.bazaar||0)<2?'bazaar':(c.infra.academy||0)<3?'academy':'workshop';
+        let g=key==='academy'?140:key==='workshop'?75:90, res=key==='academy'?{brick:20}:{timber:12,brick:6};
+        if(tryBuild(c,key,g,key==='academy'?30:24,res)) mark('infra'); }
+      let scap=0; try{ scap=scholarCap(c); }catch(_){}
+      if(S.treasury>260 && (c.jobs.scholars||0) < scap){ try{ setJob(c.id,'scholars',Math.min(scap,(c.jobs.scholars||0)+2)); }catch(_){} }
+      try{ if(allTechDone()){ for(const k of ['wisdom','prosperity','order','devotion','plenty','legions']){ try{ enactEdict(k); }catch(_){} } } }catch(_){}
+    }
+    else if(arch==='survivor'){
+      research(['irrigation','masonry','currency','engineering','bureaucracy','philosophy']);
+      if(canAct('trade') && sellSurplus(c)) mark('trade'); // steady income every season keeps authority off the death-spiral
+      if(canAct('infra') && S.treasury>260){ let key=(c.infra.bazaar||0)<1?'bazaar':(c.infra.walls||0)<2?'walls':(c.infra.granary||0)<1?'granary':'aqueduct';
+        let g=key==='granary'?55:key==='walls'?80:key==='aqueduct'?130:90, b=key==='granary'?20:24,
+            res=key==='granary'?{brick:12}:key==='walls'?{stone:20}:key==='aqueduct'?{stone:25}:{timber:10,brick:6};
+        if(tryBuild(c,key,g,b,res)) mark('infra'); } // 260 buffer -> treasury never bottoms out
+      if(canAct('agri') && S.treasury>120 && (c.infra.farms||0)<3){ if(tryBuild(c,'farms',25,12,{timber:8})) mark('agri'); }
+      if(canAct('military') && freeSoldiers(c) < c.pop*0.02 && S.treasury>140){ levy(c,20); mark('military'); }
+    }
   }
 
   // Phased combat resolver: drive every pending siege/conquest/spoils to conclusion. Modals are
@@ -276,7 +362,7 @@ const driver = `
         continue;
       }
       let act=(arch==='conquest'||arch==='exploit-hunter') ? 'sack'
-             :(arch==='nomad') ? 'enslave'
+             :(arch==='nomad'||arch==='slaver') ? 'enslave'
              :'occupy'; // faith/builder/merchant/etc keep the city intact (avoid razeslave's distribute modal)
       try{ conquestChoose(t.id, act); run.conquests++; }
       catch(_){ S._curConquest=null; continue; }
@@ -297,7 +383,7 @@ const driver = `
     return n;
   }
   function sumInfra(own,k){ return own.reduce((n,s)=>n+((s.infra&&s.infra[k])||0),0); }
-  function snapWide(arch,seed,year,acc,run){
+  function snapWide(arch,scenario,seed,year,acc,run){
     let live=W.settlements.filter(s=>!s.ruined), own=owned();
     let slaves=own.reduce((n,s)=>n+(s.slaves||0),0), free=own.reduce((n,s)=>n+(s.free||0),0);
     let jobsTot=own.reduce((n,s)=>n+Object.values(s.jobs||{}).reduce((m,v)=>m+v,0),0);
@@ -314,7 +400,7 @@ const driver = `
     let fs2=0; try{ fs2=freeSpies(); }catch(_){}
     let atd=0; try{ atd=allTechDone()?1:0; }catch(_){}
     return {
-      archetype:arch, seed, year,
+      archetype:arch, scenario, seed, year,
       treasury:Math.round(S.treasury||0), tax:Math.round(acc.tax), trade:Math.round(acc.trade), upkeep:Math.round(acc.upkeep),
       net:Math.round(acc.tax+acc.trade-acc.upkeep), routes:(S.routes||[]).length, resTotal:Math.round(resTot),
       gold:Math.round(res.gold||0), iron:Math.round(res.iron||0), timber:Math.round(res.timber||0), horses:Math.round(res.horses||0),
@@ -336,29 +422,40 @@ const driver = `
     };
   }
 
+  // OFAT world scenarios: baseline cfg + per-scenario overrides.
+  const SCEN={
+    baseline:{},
+    archipelago:{size:'large', terrain:'archipelago', density:'sparse'},
+    pangaea:{size:'small', terrain:'pangaea', density:'crowded'},
+    easy:{ai:2, difficulty:'easy'},
+    hard:{ai:5, difficulty:'hard'},
+    kingdom:{start:'kingdom'}
+  };
   const rows=[], ends=[];
-  for(const arch of CFG.arches){
-    for(const seed of CFG.seeds){
-      const cfg={size:'medium',terrain:'continents',density:'balanced',ai:3,difficulty:'normal',
-        start:'village',rulerName:'Rasa',dynasty:'Crownwater',realmName:'Audit',
-        capitalName:'Riverhold',startAt:null,_seed:seed};
-      S=newState(seed,cfg);
-      let acc={tax:0,trade:0,upkeep:0}, guard=0;
-      let run={capturedCum:0, prevCaptives:S.captives||0, conquests:0, prevConq:0, prevCapCum:0};
-      while(S.year<=CFG.years && !S.over && guard<(CFG.years*4+40)){
-        guard++;
-        const py=S.year;
-        try{ playSeason(arch); }catch(e){ /* keep simulating */ }
-        try{ advanceSeason(); }catch(e){ break; }
-        try{ resolveModals(arch, run); }catch(e){}
-        // Accumulate captures as positive deltas in S.captives (raid/sack/enslave add; settle removes).
-        run.capturedCum += Math.max(0, (S.captives||0) - run.prevCaptives); run.prevCaptives=S.captives||0;
-        acc.tax+=(S.econ&&S.econ.tax)||0; acc.trade+=(S.econ&&S.econ.trade)||0; acc.upkeep+=(S.econ&&S.econ.upkeep)||0;
-        if(S.year!==py){ rows.push(snapWide(arch,seed,py,acc,run)); acc={tax:0,trade:0,upkeep:0}; run.prevConq=run.conquests; run.prevCapCum=run.capturedCum; }
+  for(const scen of CFG.scenarios){
+    for(const arch of CFG.arches){
+      for(const seed of CFG.seeds){
+        const cfg=Object.assign({size:'medium',terrain:'continents',density:'balanced',ai:3,difficulty:'normal',
+          start:'village',rulerName:'Rasa',dynasty:'Crownwater',realmName:'Audit',
+          capitalName:'Riverhold',startAt:null}, SCEN[scen]||{}, {_seed:seed});
+        S=newState(seed,cfg);
+        let acc={tax:0,trade:0,upkeep:0}, guard=0;
+        let run={capturedCum:0, prevCaptives:S.captives||0, conquests:0, prevConq:0, prevCapCum:0};
+        while(S.year<=CFG.years && !S.over && guard<(CFG.years*4+40)){
+          guard++;
+          const py=S.year;
+          try{ playSeason(arch); }catch(e){ /* keep simulating */ }
+          try{ advanceSeason(); }catch(e){ break; }
+          try{ resolveModals(arch, run); }catch(e){}
+          // Accumulate captures as positive deltas in S.captives (raid/sack/enslave add; settle removes).
+          run.capturedCum += Math.max(0, (S.captives||0) - run.prevCaptives); run.prevCaptives=S.captives||0;
+          acc.tax+=(S.econ&&S.econ.tax)||0; acc.trade+=(S.econ&&S.econ.trade)||0; acc.upkeep+=(S.econ&&S.econ.upkeep)||0;
+          if(S.year!==py){ rows.push(snapWide(arch,scen,seed,py,acc,run)); acc={tax:0,trade:0,upkeep:0}; run.prevConq=run.conquests; run.prevCapCum=run.capturedCum; }
+        }
+        ends.push({archetype:arch, scenario:scen, seed, endedYear:S.year, over:!!S.over,
+          pop:(typeof ownedPop==='function')?ownedPop():0, treasury:Math.round(S.treasury||0),
+          capturedCum:Math.round(run.capturedCum), conquests:run.conquests, settlements:owned().length});
       }
-      ends.push({archetype:arch, seed, endedYear:S.year, over:!!S.over,
-        pop:(typeof ownedPop==='function')?ownedPop():0, treasury:Math.round(S.treasury||0),
-        capturedCum:Math.round(run.capturedCum), conquests:run.conquests, settlements:owned().length});
     }
   }
   globalThis.__ROWS=rows; globalThis.__ENDS=ends;
@@ -376,7 +473,7 @@ const ends = sandbox.__ENDS || [];
 if(!rows.length){ console.error('No rows produced'); process.exit(3); }
 
 // ---------- per-domain CSVs (all share leading keys archetype,seed,year) ----------
-const KEYS = ['archetype','seed','year'];
+const KEYS = ['archetype','scenario','seed','year'];
 const DOMAINS = {
   economy:        ['treasury','tax','trade','upkeep','net','routes','resTotal','gold','iron','timber','horses'],
   population:     ['pop','settlements','captivesNow','capturedCum','slaves','freePop','jobsTotal','popCeiling'],
@@ -403,7 +500,7 @@ fs.writeFileSync(path.join(OUT, 'master.json'), JSON.stringify(rows));
 let gitSha = 'unknown';
 try { gitSha = execSync('git rev-parse HEAD', { cwd: __dirname }).toString().trim(); } catch(e){}
 const scriptHash = crypto.createHash('sha256').update(gameSrc).digest('hex').slice(0,16);
-const collapses = ends.filter(e=>e.over).map(e=>({archetype:e.archetype, seed:e.seed, year:e.endedYear}));
+const collapses = ends.filter(e=>e.over).map(e=>({archetype:e.archetype, scenario:e.scenario, seed:e.seed, year:e.endedYear}));
 const meta = {
   generated_utc: new Date().toISOString(),
   mode: FULL ? 'full' : 'validation',
@@ -411,6 +508,7 @@ const meta = {
   index_script_sha256_16: scriptHash,
   runtime_ms: runtimeMs,
   archetypes: sandbox.__CFG.arches,
+  scenarios: sandbox.__CFG.scenarios,
   seeds: sandbox.__CFG.seeds,
   years: sandbox.__CFG.years,
   runs: ends.length,
@@ -423,9 +521,18 @@ fs.writeFileSync(path.join(OUT, 'RUN_META.json'), JSON.stringify(meta, null, 1))
 // ---------- console summary + validation asserts ----------
 console.log(`OK — ${rows.length} year-rows across ${ends.length} runs · ${(runtimeMs/1000).toFixed(1)}s · mode=${FULL?'full':'validation'}`);
 console.log(`CSVs: ${Object.keys(DOMAINS).map(d=>d+'.csv').join(', ')}`);
-console.log('\nEnded (year reached / collapse):');
-for(const e of ends){
-  console.log(`  ${e.archetype.padEnd(14)} s${String(e.seed).padStart(4)}: yr ${String(e.endedYear).padStart(3)}${e.over?' (CROWN FELL)':' (survived)'} | pop ${String(e.pop).padStart(6)} | treas ${String(e.treasury).padStart(6)} | sett ${e.settlements} | captured ${e.capturedCum} | conquests ${e.conquests}`);
+const scenSet = [...new Set(ends.map(e=>e.scenario))];
+if(ends.length <= 40){
+  console.log('\nEnded (year reached / collapse):');
+  for(const e of ends){
+    console.log(`  ${e.scenario.padEnd(11)} ${e.archetype.padEnd(14)} s${String(e.seed).padStart(4)}: yr ${String(e.endedYear).padStart(3)}${e.over?' (CROWN FELL)':' (survived)'} | pop ${String(e.pop).padStart(6)} | treas ${String(e.treasury).padStart(6)} | sett ${e.settlements} | captured ${e.capturedCum} | conquests ${e.conquests}`);
+  }
+} else {
+  // Compact: survival count per scenario, and per-archetype survivor tally across scenarios.
+  console.log('\nSurvival to yr100 (per scenario):');
+  for(const sc of scenSet){ const es=ends.filter(e=>e.scenario===sc); console.log(`  ${sc.padEnd(11)}: ${es.filter(e=>!e.over).length}/${es.length} survived · collapses ${es.filter(e=>e.over).length}`); }
+  console.log('\nSurvivor tally per archetype (out of '+scenSet.length*sandbox.__CFG.seeds.length+' runs):');
+  for(const a of sandbox.__CFG.arches){ const es=ends.filter(e=>e.archetype===a); console.log(`  ${a.padEnd(14)}: survived ${es.filter(e=>!e.over).length} · captured(max) ${Math.max(0,...es.map(e=>e.capturedCum))} · conquests(max) ${Math.max(0,...es.map(e=>e.conquests))}`); }
 }
 
 // Validation gates (README 1b): all 10 archetypes produce rows; conquest takes captives;
@@ -433,9 +540,10 @@ for(const e of ends){
 const archesSeen = new Set(rows.map(r=>r.archetype));
 const missingArch = sandbox.__CFG.arches.filter(a=>!archesSeen.has(a));
 const conquestCaptured = Math.max(0, ...ends.filter(e=>e.archetype==='conquest').map(e=>e.capturedCum));
-const keySig = f => fs.readFileSync(path.join(OUT,f),'utf8').split('\n')[0].split(',').slice(0,3).join(',');
-const keysOk = Object.keys(DOMAINS).every(d => keySig(d+'.csv') === 'archetype,seed,year');
+const keySig = f => fs.readFileSync(path.join(OUT,f),'utf8').split('\n')[0].split(',').slice(0,4).join(',');
+const keysOk = Object.keys(DOMAINS).every(d => keySig(d+'.csv') === 'archetype,scenario,seed,year');
+const nArch = sandbox.__CFG.arches.length;
 console.log('\nValidation:');
-console.log(`  all 10 archetypes present: ${missingArch.length===0 ? 'YES' : 'NO ('+missingArch.join(',')+')'}`);
+console.log(`  all ${nArch} archetypes present: ${missingArch.length===0 ? 'YES' : 'NO ('+missingArch.join(',')+')'}`);
 console.log(`  conquest took captives:    ${conquestCaptured>0 ? 'YES ('+conquestCaptured+')' : 'NO'}`);
 console.log(`  all CSVs share keys:       ${keysOk ? 'YES' : 'NO'}`);
