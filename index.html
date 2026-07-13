@@ -289,7 +289,10 @@ function govEvolve(){let r=rng(S.seed+S.year*733+17);
   else if(g==="khanate"&&!isNomadType(cap)&&r()<.5)ng=(totpop>14000||lands.length>=4)?"empire":"monarchy"; // a horde that has settled into cities is no longer a khanate
   else if(g==="khanate"&&lands.length>=4&&totpop>14000&&r()<.2)ng="empire";
   if(ng!==g){f.gov=ng;cap.gov=ng;if(nearPlayer(cap.x,cap.y,520))log(`<b>${f.name}</b> becomes ${ng==="empire"?"an":"a"} <b>${GOV[ng].n}</b>.`)}}
- for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25&&isNomadType(s))s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}}
+ for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="tribal"&&s.pop>2600&&r()<.25&&isNomadType(s))s.gov="khanate";else if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"}
+ // Lock: a khanate is a nomad institution only. A khanate faction that holds more settled towns than camps has settled down — it becomes an Empire/Kingdom; and any stray non-nomad settlement carrying the khanate label sheds it.
+ for(const f of W.factions){if(!f.alive||f.gov!=="khanate")continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined),camps=ls.filter(isNomadType).length,settled=ls.length-camps;if(settled>0&&settled>=camps){f.gov=(ls.length>=4||settled>=2)?"empire":"monarchy";let c0=ls.sort((a,b)=>b.pop-a.pop)[0];if(c0){c0.gov=f.gov;if(nearPlayer(c0.x,c0.y,520))log(`<b>${f.name}</b> settle into their conquered cities and become ${f.gov==="empire"?"an Empire":"a Kingdom"}.`)}}}
+ for(const s of W.settlements){if(!s.ruined&&s.gov==="khanate"&&!isNomadType(s))s.gov=(s.type||"").includes("city")?"monarchy":s.type==="town"?"citystate":"chiefdom"}}
 function playerGovDrift(){if(!owned().length)return;let r=rng(S.seed+S.year*911+3),lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];if(!cap)return;let totpop=ownedPop(),coastal=cap.water||cap.type.includes("port"),g=S.gov,ng=g;
  if(g==="tribal"&&(totpop>9000||cap.pop>3200)&&r()<.4&&isNomadType(cap))ng="khanate";
  else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.15)ng="republic";
