@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.65 · 2026.07.14 · Navies of flesh and timber: the Sailors occupation is gone — instead your fleet size is a HARD cap set by your shipyards and the new Naval Academy, and rises further at ports, fishing towns and coastal holdings. Ships now cost gold, timber, iron, POPULATION (the crew, drawn from the port) and seasons to build. In battle hulls are SUNK (their crew drowned — a few rescued only within 10 hexes of a friendly port) or DAMAGED; a battered fleet limps to a friendly shipyard to repair its hulls (gold + materials) and take on fresh crew.";
+const BUILD="v16.66 · 2026.07.14 · Coastal tribes colonise far more freely — their seaside colonies now need only ~6 hexes of clearance from other settlements (down from 12), so a seafaring people plants many more Viking / Pacific-Islander landfalls across the map: about a dozen per long game, still on remote, fertile, seaside shores.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1459,7 +1459,7 @@ function aiFoundColony(f,src,r,gc){gc=gc||GOV_COLONY[f&&f.gov]||GOV_COLONY.monar
  st.faithMix=gc.faith?[{name:src.faith,pct:100}]:(src.faithMix||[{name:src.faith,pct:100}]).slice();st.cultMix=(src.cultMix||[{name:src.culture,pct:100}]).slice();(RESOURCES[c.biome]||["clay"]).slice(0,1+Math.floor(r()*2)).forEach(q=>st.resources[q]=1+Math.floor(r()*2));Object.keys(st.resources).forEach(q=>{let z=r();st.resourceQuality[q]=z<.2?"poor":z<.8?"common":"rich"});seedGarrison(st,r);st.founded=S.year;W.settlements.push(st);
  if(nearPlayer(x,y,360))log(`<b>${ownerName(f.id)}</b> plant a new colony, <b>${st.name}</b>, on open land settled from ${src.name}.`);return st}
 // Coastal-raider colonisation — Viking / Pacific-Islander style. A coastal tribe readily sends colonists FAR across the water to raise a new seaside settlement, choosing a REMOTE, FERTILE shore well clear of every other people (≥ ~12 hexes). The colony is itself a seafaring coastal tribe of the same stock, born with a longship fleet.
-const SEARAIDER_COLONY={rate:.09,range:1700,minPop:1650,minFree:340,party:[240,460],gapHex:12,cooldown:4};
+const SEARAIDER_COLONY={rate:.09,range:1700,minPop:1650,minFree:340,party:[240,460],gapHex:6,cooldown:4};
 function searaiderColonize(s,r){if(!s||s.ruined||!s.searaider||!dockPos(s))return null;
  if((s.pop||0)<SEARAIDER_COLONY.minPop||(s.free||s.pop||0)<SEARAIDER_COLONY.minFree)return null;
  if(s._colonyYear!=null&&S.year-s._colonyYear<SEARAIDER_COLONY.cooldown)return null;
