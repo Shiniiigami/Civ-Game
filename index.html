@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.77 · 2026.07.14 · Trade routes now run through STAGES (nodes) — a short lane has one, a long sea route four to eight. Raiders who seize a stage throttle the lane instead of cutting it dead: a little for one stage, more for many, but never to zero. And a longer route shrugs off the loss of a single stage, while a short one is gutted by it. Raider-held stages glow red on the map and in the trade panel. Trade-minded realms also strike trade treaties far more readily than raider-khanates.";
+const BUILD="v16.78 · 2026.07.14 · Raiders now PROFIT from the lanes they choke. Whoever holds a trade-route stage skims a share of the caravans passing through — the coin value of what they carried, never your stored furs or spices — and sometimes food besides. It cuts both ways: park an army or fleet on an enemy realm's trade stage and you bleed their commerce into your own treasury. Independent raiders grow fat and infamous on the tolls; blockading a rich enemy lane becomes a strategy in itself.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1487,8 +1487,9 @@ function processAiRoutes(){if(!W.aiRoutes||!W.aiRoutes.length)return;let live=[]
   if(a.owner!==rt.faction&&b.owner!==rt.faction){continue}/* the owning realm no longer holds either end — the route lapses */
   rt.a={x:a.x,y:a.y};rt.b={x:b.x,y:b.y};
   if((rt.cooldown||0)>0)rt.cooldown--;/* raiders holding nodes throttle the lane (graded), never a hard cut */
-  let ne=routeNodeEff(rt,rt.faction),inc=(rt.value||rt.plunder||20)*.5*ne;fac.treasury=(fac.treasury||0)+inc;
+  let o=routeOccupancy(rt,rt.faction),ne=occEff(o),gross=(rt.value||rt.plunder||20)*.5,inc=gross*ne;fac.treasury=(fac.treasury||0)+inc;
   [a,b].forEach(s=>{if(s.owner===rt.faction&&!s.ruined){let g=Math.round(s.pop*.0008*ne);s.pop+=g;s.free=(s.free||s.pop)+g}});
+  if(o.occ>0){let skim=skimRouteNodes(o,gross,rt);/* if the player's forces hold the lane, that plunder reaches your treasury via grantNodeLoot */if(skim>0&&o.holders.some(h=>isPlayerForce(h))&&nearPlayer(rt.a.x,rt.a.y,560)&&(S.year*4+S.season)%3===0)log(`Your blockade of the ${fac.name} trade lane between <b>${a.name}</b> and <b>${b.name}</b> skims <b>${fmt(Math.round(skim))} gold</b> from their caravans.`)}
   live.push(rt);}
  W.aiRoutes=live;}
 // An AI realm sends settlers from a large holding to found a new colony on nearby empty, fertile land of its own landmass.
@@ -2561,13 +2562,26 @@ function routeNodesOf(rt){if(!rt.nodes||!rt.nodes.length){let a=routeEndA(rt),b=
 function fleetThreatens(f,ownerId){if(!f||f.owner===ownerId)return false;if(ownerId==="player")return fleetHostileToPlayer(f);if(f.owner==="player")return true;return !f.owner||f.searaider||f.raider||f.corsair||atWar(f.owner)}
 function settleThreatens(s,ownerId){if(!s||s.ruined||s.owner===ownerId)return false;if(ownerId==="player"){if(playerTributeActive(s.id))return false;return isRaiderGroup(s)||(s.owner&&atWar(s.owner))}return isRaiderGroup(s)}
 function armyThreatens(a,ownerId){if(!a)return false;if(a.owner===ownerId)return false;if(ownerId==="player")return !a.owner||atWar(a.owner);return a.owner==="player"}
-function nodeRaiderAt(x,y,sea,ownerId){
- if(sea){let f=(W.fleets||[]).find(f=>fleetShipCount(f)>0&&distW(f.x,f.y,x,y)<ROUTE_NODE_R&&fleetThreatens(f,ownerId));if(f)return f}
+function nodeRaiderAt(x,y,sea,ownerId){let mine=ownerId==="player";
+ if(sea){let pool=mine?(W.fleets||[]):(W.fleets||[]).concat(S.fleets||[]),f=pool.find(f=>fleetShipCount(f)>0&&distW(f.x,f.y,x,y)<ROUTE_NODE_R&&fleetThreatens(f,ownerId));if(f)return f}
  let s=W.settlements.find(s=>distW(s.x,s.y,x,y)<ROUTE_NODE_R&&settleThreatens(s,ownerId));if(s)return s;
- let a=(W.armies||[]).find(a=>distW(a.x,a.y,x,y)<ROUTE_NODE_R&&armyThreatens(a,ownerId));if(a)return a;
+ let apool=mine?(W.armies||[]):(W.armies||[]).concat(S.armies||[]),a=apool.find(a=>distW(a.x,a.y,x,y)<ROUTE_NODE_R&&armyThreatens(a,ownerId));if(a)return a;
  return null}
 function routeOccupancy(rt,ownerId){let nodes=routeNodesOf(rt),occ=0,holders=[];for(const nd of nodes){let raider=nodeRaiderAt(nd.x,nd.y,rt.sea,ownerId);if(raider)occ++;holders.push(raider||null)}rt._occ=occ;rt._ntot=nodes.length;rt._holdOcc=holders.map(Boolean);return {total:nodes.length,occ,holders}}
-function routeNodeEff(rt,ownerId){let o=routeOccupancy(rt,ownerId);if(!o.total)return 1;let frac=o.occ/o.total;return clamp(1-NODE_MAXCUT*Math.pow(frac,NODE_RES_POW),NODE_FLOOR,1)}
+function occEff(o){if(!o.total)return 1;let frac=o.occ/o.total;return clamp(1-NODE_MAXCUT*Math.pow(frac,NODE_RES_POW),NODE_FLOOR,1)}
+function routeNodeEff(rt,ownerId){return occEff(routeOccupancy(rt,ownerId))}
+// ===== Node skim (v16.78): whoever holds a node pockets a share of the lane's gold — the monetary value of the caravans, never the physical furs/spices — and sometimes food. =====
+const NODE_SKIM_RATE=.35;
+function isPlayerForce(h){if(!h)return false;if(h.ships)return !!(S.fleets&&S.fleets.indexOf(h)>=0);if(h.infra)return h.owner==="player";return (S.armies&&S.armies.indexOf(h)>=0)||h.owner==="player"}
+function addRaiderGold(s,g){if(s.owner&&faction(s.owner))faction(s.owner).treasury=(faction(s.owner).treasury||0)+g;else{s.stores=s.stores||{};s.stores.gold=(s.stores.gold||0)+g}}
+// Grant one node's worth of plundered coin (and sometimes food) to whoever holds it — a settlement, a fleet's home port, an army's realm, or the player.
+function grantNodeLoot(h,gold,rt){if(gold<=0||!h)return;let r=rng(S.seed+S.year*151+S.season*7+Math.round((h.x||0)*3+(h.y||0))),food=r()<.3?Math.round(gold*(.4+r()*.5)):0;
+ if(isPlayerForce(h)){S.treasury+=gold;if(S.econ)S.econ.trade+=gold;if(food){let hold=owned().find(s=>!s.ruined);if(hold){hold.stores=hold.stores||{};hold.stores.food=(hold.stores.food||0)+food}}if(r()<.2)S.captives=(S.captives||0)+1+Math.floor(r()*2);return}
+ if(h.ships){let home=W.settlements.find(s=>s.id===h.home&&!s.ruined);if(home){addRaiderGold(home,gold);if(food){home.stores=home.stores||{};home.stores.food=(home.stores.food||0)+food}if(home.searaider&&r()<.4)home.notoriety=(home.notoriety||0)+1}else if(h.owner&&faction(h.owner))faction(h.owner).treasury=(faction(h.owner).treasury||0)+gold;return}
+ if(h.infra){addRaiderGold(h,gold);if(food){h.stores=h.stores||{};h.stores.food=(h.stores.food||0)+food}if(h.searaider&&r()<.4)h.notoriety=(h.notoriety||0)+1;return}
+ if(h.owner&&faction(h.owner))faction(h.owner).treasury=(faction(h.owner).treasury||0)+gold}
+// Pay each occupied node's holder a share of the lane's gross gold value. Returns total skimmed (for feedback).
+function skimRouteNodes(o,gross,rt){if(!o.occ||!o.total)return 0;let per=Math.round(gross*NODE_SKIM_RATE/o.total);if(per<=0)return 0;let total=0;o.holders.forEach(h=>{if(h){grantNodeLoot(h,per,rt);total+=per}});return total}
 function routeLuxOnLane(a,b){let lux=[];for(const q in (a.resources||{}))if(LUX.includes(q)&&!(b.resources&&b.resources[q]))lux.push(q);for(const q in (b.resources||{}))if(LUX.includes(q)&&!(a.resources&&a.resources[q]))lux.push(q);return lux}
 function routeMonoF(a,b){let lux=routeLuxOnLane(a,b);if(!lux.length)return 1;let m=0;lux.forEach(q=>m+=monopolyMult(q));return m/lux.length}
 function routeIncome(rt){let a=routeSet(rt.from),b=routeSet(rt.to);if(!a||!b)return 0;
@@ -2597,7 +2611,7 @@ function assignEscort(rtId){let rt=(S.routes||[]).find(x=>x.id===rtId);if(!rt)re
  let mx=(a.x+b.x)/2,my=(a.y+b.y)/2,avail=(S.fleets||[]).filter(f=>fleetShipCount(f)>0&&!f.escortRoute&&fleetCarried(f)<=0&&!f.invade);
  if(!avail.length)return toast("No idle fleet is free to escort — build a fleet or recall one first");
  let f=avail.sort((x,y)=>distW(x.x,x.y,mx,my)-distW(y.x,y.y,mx,my))[0];f.escortRoute=rtId;f.order="escort";f.targetId=null;f.targetFleet=null;f.dest=null;toast(`${f.name} sails to convoy the lane between ${a.name} and ${b.name}.`);renderAll();autoPersist()}
-function processRoutes(){let eff=routeEfficiency();for(const rt of S.routes){let a=routeSet(rt.from),b=routeSet(rt.to);if(!a||!b||a.owner!=="player"){rt.dead=true;continue}if(rt.cooldown>0)rt.cooldown--;/* raiders holding nodes throttle the lane (never to zero) instead of a hard cut */let ne=routeNodeEff(rt,"player"),inc=Math.round(routeIncome(rt)*eff*ne);S.treasury+=inc;if(S.econ)S.econ.trade+=inc}S.routes=S.routes.filter(r=>!r.dead)}
+function processRoutes(){let eff=routeEfficiency();for(const rt of S.routes){let a=routeSet(rt.from),b=routeSet(rt.to);if(!a||!b||a.owner!=="player"){rt.dead=true;continue}if(rt.cooldown>0)rt.cooldown--;/* raiders holding nodes throttle the lane (never to zero) instead of a hard cut */let o=routeOccupancy(rt,"player"),ne=occEff(o),gross=Math.round(routeIncome(rt)*eff),inc=Math.round(gross*ne);S.treasury+=inc;if(S.econ)S.econ.trade+=inc;if(o.occ>0){let skim=skimRouteNodes(o,gross,rt);/* the raiders pocket the coin value of what the caravans carried — never your stored goods */if(skim>0&&nearPlayer((a.x+uwx(b.x,a.x))/2,(a.y+b.y)/2,540)&&(S.year*4+S.season)%3===0)log(`Raiders holding ${o.occ} of ${o.total} stage${o.total>1?"s":""} of your lane between <b>${a.name}</b> and <b>${b.name}</b> skim <b>${fmt(Math.round(skim))} gold</b> from the caravans — it runs at ${Math.round(ne*100)}%.`)}}S.routes=S.routes.filter(r=>!r.dead)}
 function raidRoutes(r){for(const rt of S.routes){if(rt.cooldown>0)continue;let a=routeSet(rt.from),b=routeSet(rt.to);if(!a||!b)continue;let mx=(a.x+b.x)/2,my=(a.y+b.y)/2,threats;if(rt.sea)threats=W.settlements.filter(s=>s.owner!=="player"&&!s.ruined&&(s.biome.includes("island")||s.coast||s.type.includes("port"))&&Math.hypot(s.x-mx,s.y-my)<270);else threats=W.settlements.filter(s=>s.owner!=="player"&&!s.ruined&&(s.type.includes("tribe")||s.type==="nomad camp"||s.owner)&&(Math.hypot(s.x-mx,s.y-my)<200||Math.hypot(s.x-a.x,s.y-a.y)<150||Math.hypot(s.x-b.x,s.y-b.y)<150));
  // Tribes and nomads raid freely; an organized realm only preys on your routes if it is at war with you — and never raids a route it is itself a party to.
  threats=threats.filter(s=>{let tribe=s.type.includes("tribe")||s.type==="nomad camp";if(s.owner&&(s.owner===a.owner||s.owner===b.owner))return false;if(!tribe&&s.owner&&!atWar(s.owner))return false;if(tribe&&playerTributeActive(s.id))return false;return true});
