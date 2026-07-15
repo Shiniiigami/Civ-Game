@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v18.1 · 2026.07.15 · NO REALM STANDS ALONE. A single city, however rich, is not yet a state. When a prosperous free city rises to found a realm it must now actually bind a neighbour — drawing a nearby free settlement under its rule (or already holding a tributary) — so a new faction is born with at least two holdings, never a lone dot on the map. A great city with no free neighbour to gather simply bides its time as a free city until one is within reach.";
+const BUILD="v18.2 · 2026.07.15 · A WILDER WORLD OF TRIBES. The land is peopled with roughly twice as many free tribes as before — drawn now not only from the mountains, jungles and tundra but from the lowlands and the coasts, where some folk who would have raised a village or a fishing hamlet instead keep to the old tribal ways. tribeType now names lowland and coastal tribes too, and they still keep their distance from the settled towns and from one another, so the frontier teems with independent peoples to raid, trade with, convert, or bring to heel.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -616,13 +616,13 @@ function makeWorld(seed,cfg){
   else if(c.biome==="mountains"||c.biome==="highland")type=r()<.9?tribeType(c.biome):"village";
   else if(c.biome==="rainforest")type=r()<.75?tribeType(c.biome):(r()<.4?"town":"village");
   else if(c.biome==="tundra")type=r()<.75?tribeType(c.biome):"village";
-  else if(c.coast)type=r()<.28?"port city":"fishing village";
+  else if(c.coast)type=r()<.26?"port city":(r()<.26?tribeType(c.biome):"fishing village");/* some coastal folk are free tribes, not fishing villages — roughly doubles the tribe count */
   else if(c.biome==="floodplain"&&water)type=r()<.32?"city":r()<.62?"town":"village";
-  else if(water)type=r()<.18?"city":r()<.5?"town":"village";
-  else type=r()<.12?"town":"village";
+  else if(water)type=r()<.18?"city":(r()<.42?"town":(r()<.26?tribeType(c.biome):"village"));
+  else type=r()<.12?"town":(r()<.28?tribeType(c.biome):"village");
   const min=type.includes("city")?155:112;let close=w.settlements.find(s=>Math.hypot(s.x-x,s.y-y)<min);const twin=close&&type.includes("city")&&close.type.includes("city")&&r()<.025&&Math.hypot(close.x-x,close.y-y)>45;if(close&&!twin)continue;
   if(oppositeKindNear(x,y,type.includes("tribe")||type==="nomad camp"))continue;/* keep tribes and settled towns 8 hexes apart */
-  if((type.includes("tribe")||type==="nomad camp")&&tribeNear(x,y,4.5))continue;/* more tribes overall, but spaced ~4-5 hexes so they don't clump */
+  if((type.includes("tribe")||type==="nomad camp")&&tribeNear(x,y,4.1))continue;/* more tribes overall, but spaced so they don't clump */
   let base=type.includes("city")?6000:type==="town"?2200:type.includes("village")?650:type==="nomad camp"?1800:1100;if(!water&&type.includes("city"))base*=.55;if(c.biome==="tundra"||c.biome==="desert")base*=.65;if(c.biome==="ice")base*=.3;if(c.biome==="rainforest")base*=.8;if(c.biome==="highland")base*=.6;if(c.biome==="savanna")base*=.85;if(c.biome==="mangrove")base*=.8;if(c.biome==="floodplain")base*=1.2;base=Math.round(base*(.65+r()*.9));
   const fam=famFor(w,c,type),sub="",cult=fam.n,sect="",war=(type.includes("tribe")||type==="nomad camp"?.2:.08)+(c.biome==="steppe"||c.biome==="mountains"?.12:0);
   let st={id:"s"+w.settlements.length,x,y,cont:c.cont,biome:c.biome,type,name:type.includes("tribe")||type==="nomad camp"?tribe(r,c.biome,fam):name(r,fam.n),pop:base,free:base,slaves:0,culture:cult,family:fam.n,faith:fam.faith,sect,owner:null,intel:0,garrisonIntel:0,resources:{},resourceQuality:{},infra:{roads:0,farms:1,canals:0,granary:0,barracks:type.includes("city")?1:0,walls:type.includes("city")?1:0,hospital:0,temple:0,shipyard:type.includes("port")?1:0,market:type.includes("city")?1:0,bazaar:0,woodcamp:0,quarry:0,mine:0,fishery:0,herbalist:0,workshop:0,aqueduct:0,fortress:0,academy:0},jobs:{farmers:Math.round(base*.52),laborers:Math.round(base*.08),builders:Math.round(base*.03),merchants:Math.round(base*.02),scholars:0,priests:0,diplomats:0,healers:0,sailors:type.includes("port")?Math.round(base*.02):0},slaveJobs:{farmers:0,laborers:0,builders:0,mines:0,household:0},taxLocal:0,units:[],stores:{food:Math.round(base*1.4),stone:20,brick:10,iron:8,copper:5,timber:25,gold:0,silver:0,horses:c.biome==="steppe"?20:3},plague:0,ruined:false,lore:"",water};
@@ -1309,7 +1309,7 @@ function badNomadCampSite(x,y){return !nomadIslesAllowed()&&smallIsle(x,y)}
 // Turn a coastal/island tribe into a Viking-like COASTAL TRIBE: Norse culture, blue-water sailing, a shipyard, fierce temper, a starting fleet, and a longship-raider name. Still a tribe (tribalchiefdom), just sea-borne.
 function makeSeaRaider(s,r){let fam=FAM_BY_NAME["Fjelder"]||HILL_FAMS[0];s.searaider=true;s.type="coastal tribe";s.family=fam.n;s.culture=fam.n;s.faith=fam.faith;s.sect="";s.faithMix=[{name:fam.faith,pct:100}];s.cultMix=[{name:s.culture,pct:100}];s.name=pick(r,NAMEBANK.Norse.pre)+pick(r,NAMEBANK.Norse.suf)+" "+pick(r,["Raiders","Sea-Kings","Wolves","Longships","Reavers"]);s.tech=Array.from(new Set([...(s.tech||[]),"navigation","bluewater"]));s.infra.shipyard=Math.max(s.infra.shipyard||0,1);s.jobs.sailors=Math.max(s.jobs.sailors||0,Math.round(s.pop*.05));s.gov="tribalchiefdom";s.aggr=clamp(.72+r()*.28,.72,1)}
 // Biome-appropriate tribe kind (all include "tribe", so they behave as tribal raiders): jungle, tundra, or hill/mountain folk.
-function tribeType(b){return b==="rainforest"?"jungle tribe":(b==="tundra"||b==="tundra_island")?"tundra tribe":"mountain tribe"}
+function tribeType(b){return (b==="rainforest"||b==="mangrove"||b==="wetland")?"jungle tribe":(b==="tundra"||b==="tundra_island")?"tundra tribe":(b==="mountains"||b==="highland")?"mountain tribe":(b&&b.includes("island"))?"coastal tribe":"tribe"}
 // A tribe/nomad group's raiding temper (0–1), shaped by culture, faith, government, kind, and a fixed leadership roll — some peoples simply raid more than others.
 const MARTIAL_FAITH={"The Eternal Sky":.09,"The Frost-Fathers":.09,"The Undying Fire":.06,"The Plumed Serpent":.07,"The Old Grove":.03,"The Eternal Wheel":-.09,"The Tide Mothers":-.07,"The Household Gods":-.03};
 function computeTribeAggr(s){let fam=FAM_BY_NAME[s.family],role=fam?fam.role:"core";
