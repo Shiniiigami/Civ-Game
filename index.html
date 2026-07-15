@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v17.0 · 2026.07.15 · FOG OF WAR FALLS ON ALL. The mist that hides the world from you now hides it from every realm alike. A power treats only with those it has actually found — met where their lands or roaming hosts came within sight of one another. Until a realm has encountered you or a neighbour, it cannot declare war on them, march or raid against them, weave a trade route to them, seek a treaty, or preach its faith among them: strangers over the horizon simply do not exist to it. Contact, once made, is remembered for good, so the known world widens as armies march and caravans range.";
+const BUILD="v17.1 · 2026.07.15 · WARS OF REASON, AND PEACE. Realms no longer stumble into war on a dice-roll. A power takes up arms against you only when a true cause and the strength to press it come together — a warlike, aggrieved neighbour who reckons it can win will march; a weak or contented one will not, whatever the grudge. And war is no longer forever: once a realm has won what it came for, spent its armies, wearied of a long grind, or seen its treasury and court fail, its envoys come to the court suing for a white peace — which the crown may accept and end the war, or refuse and fight on.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1674,6 +1674,36 @@ function newFactionRuler(f,r){let cap=f.cap||W.settlements.find(s=>s.owner===f.i
 function rulerFlavor(rl){let dims=[["greed",rl.greed,"grasping and greedy for plunder"],["zeal",rl.zeal,"a devout zealot who spreads the faith"],["build",rl.build,"a great builder of works"],["guile",rl.guile,"a cunning diplomat"]].filter(d=>d[1]>=.66).sort((a,b)=>b[1]-a[1]);return dims.length?dims[0][2]:null}
 function factionAggr(f){if(!f)return .3;if(f.ruler&&typeof f.ruler.aggr==="number")return f.ruler.aggr;return f.temper==="warlike"?.85:f.temper==="zealous"?.58:f.temper==="cautious"?.3:.4}
 function factionGreed(f){return f&&f.ruler&&typeof f.ruler.greed==="number"?f.ruler.greed:.4}
+// ===== Purposeful war & AI peace (v17.1): realms go to war only when a real cause and the strength to press it line up — and, once the war has run its course, sue for peace rather than fight on forever. =====
+function hostStrength(units){let t=0;for(const u of (units||[]))if(u.type!=="settler")t+=u.count*((UNIT[u.type]&&UNIT[u.type].power)||1)*(u.elite?1.5:1);return t}
+// A realm's whole military weight — its garrisons and its armies afield.
+function realmMil(fid){let t=0;for(const s of W.settlements){if(s.ruined)continue;if(fid==="player"?s.owner==="player":s.owner===fid)t+=hostStrength(s.units)}let pool=fid==="player"?(S.armies||[]):(W.armies||[]);for(const a of pool){if(fid==="player"||a.owner===fid)t+=hostStrength(a.units)}return t}
+// How badly faction f wants THIS war: the means to win it × the strength of the grievance behind it, coloured by temperament. Below ~1 it is not worth the sword.
+function factionWarDesire(f,cb,defId){if(!f||!cb)return 0;
+ let ownMil=realmMil(f.id),foeMil=realmMil(defId),ratio=ownMil/Math.max(1,foeMil),means=clamp((ratio-.7)/.8,0,1.4);/* you want a war you can win: near-parity or better */
+ let motive=.4;
+ if(cb.key==="vengeance")motive=clamp((f.grievance||0)/40,.3,1.2);
+ else if(cb.key==="reconquest")motive=1.1;
+ else if(cb.key==="subjugation"||cb.key==="superiority"||cb.key==="civilize")motive=.45+clamp(ratio-1,0,1)*.7;/* opportunistic — the stronger they are, the keener */
+ else if(cb.key==="holy")motive=.3+factionZeal(f)*.9;
+ else if(cb.key==="culture")motive=.45+factionZeal(f)*.4;
+ else if(cb.key==="border"||cb.key==="trade")motive=.5;
+ let rel=defId==="player"?(S.relations[f.id]||0):(S.relations[defId]||0),relWant=clamp((10-rel)/40,0,.6);
+ let temper=(f.temper==="warlike"||f.temper==="zealous")?1.3:(f.temper==="cautious"||f.temper==="mercantile"||f.temper==="isolationist")?.62:1;
+ return means*(motive+relWant)*temper}
+// Once at war with the crown, a realm weighs whether to keep fighting: it sues for peace when its goal is won, its armies are spent, the war has dragged on, or its state is failing.
+function maybeAiSuePeace(f,r){if(!f||!atWar(f.id)||S.pendingPrompt||S.over||!owned().length)return;
+ if(f._peaceOfferSeason!=null&&absSeason()-f._peaceOfferSeason<6)return;
+ let ownMil=realmMil(f.id),foeMil=realmMil("player"),ratio=ownMil/Math.max(1,foeMil);
+ let years=f.warGoal?(S.year-(f.warGoal.started||S.year)):3;
+ let goalTarget=f.warGoal&&f.warGoal.targetId?W.settlements.find(s=>s.id===f.warGoal.targetId):null,goalWon=!!(goalTarget&&goalTarget.owner===f.id);
+ let losing=ratio<.72,weary=years>=(3+((f.temper==="warlike"||f.temper==="zealous")?3:0)),lowState=(f.authority||50)<28||(f.treasury||0)<8;
+ if(!(goalWon||losing||weary||lowState))return;
+ let base=(goalWon?.85:0)+(losing?.5:0)+(weary?.32:0)+(lowState?.3:0),temper=(f.temper==="warlike"||f.temper==="zealous")?.6:(f.temper==="cautious"||f.temper==="mercantile"||f.temper==="isolationist")?1.35:1;
+ if(r()>=clamp(base*temper*.5,.05,.6))return;
+ f._peaceOfferSeason=absSeason();
+ let reason=goalWon?"content with what it has won":losing?"its armies spent and its levies bled white":weary?"weary of the long, grinding war":"its coffers drained and its court strained";
+ S.pendingPrompt={kind:"aipeace",fid:f.id,title:`${f.name} Sues for Peace`,text:`Envoys from <b>${f.name}</b>${f.ruler?`, under ${f.ruler.name},`:""}, ${reason}, come to the court seeking an end to the war — a white peace, each realm keeping what it holds. Does the crown accept?`,opts:[{label:"🕊 Accept the peace — end the war",kind:"acceptAiPeace",fid:f.id},{label:"⚔ Refuse — press the war on",kind:"refuseAiPeace",fid:f.id}]}}
 function factionZeal(f){return f&&f.ruler&&typeof f.ruler.zeal==="number"?f.ruler.zeal:(f&&f.temper==="zealous"?.7:.3)}
 function factionBuild(f){return f&&f.ruler&&typeof f.ruler.build==="number"?f.ruler.build:.4}
 // A ruler's temperament steers what their realm builds — a steward invests in the economy, a warlord in walls and barracks, the pious in temples, a builder in works and learning.
@@ -1721,7 +1751,8 @@ function aiTurn(filter,salt,indie){let r=rng(S.seed+S.year*131+S.season*17+(salt
   // …and a keen trader at peace with you may propose a trade treaty of its own.
   maybeAiTradeOffer(f,lands,r);
   // A realm that holds a casus belli against the crown — and the temperament to press it — may declare a justified war, targeting the holding its cause names.
-  if(owned().length&&factionMetRealm(f,"player")&&!atWar(f.id)&&!isAllied(f.id)&&!isPact(f.id)&&(S.relations[f.id]||0)<25&&r()<.006+factionAggr(f)*.03){let cb=factionCB(f,"player");if(cb){setDiplo(f.id,"war");S.relations[f.id]=(S.relations[f.id]||0)-20;f.warGoal={key:cb.key,n:cb.n,goal:cb.goal,targetId:cb.targetId,started:S.year};if(cb.key==="vengeance")f.grievance=0;if(cb.key==="holy"&&faithLeader(factionFaithName(f.id))===f.id){let joined=callCrusade(f.id,factionFaithName(f.id),true);if(joined.length)log(`<b>${f.name} proclaims a holy war</b> upon your realm — and the faithful answer: <b>${joined.join(", ")}</b> take up the cross beside them.`)}}}
+  if(owned().length&&factionMetRealm(f,"player")&&!atWar(f.id)&&!isAllied(f.id)&&!isPact(f.id)&&(S.relations[f.id]||0)<40){let cb=factionCB(f,"player");if(cb){let desire=factionWarDesire(f,cb,"player");/* wars are chosen, not rolled: a realm marches only when a real cause and the strength to win it come together */if(desire>=1&&r()<clamp(.1+(desire-1)*.35,.06,.5)){setDiplo(f.id,"war");S.relations[f.id]=(S.relations[f.id]||0)-20;f.warGoal={key:cb.key,n:cb.n,goal:cb.goal,targetId:cb.targetId,started:S.year};if(cb.key==="vengeance")f.grievance=0;if(cb.key==="holy"&&faithLeader(factionFaithName(f.id))===f.id){let joined=callCrusade(f.id,factionFaithName(f.id),true);if(joined.length)log(`<b>${f.name} proclaims a holy war</b> upon your realm — and the faithful answer: <b>${joined.join(", ")}</b> take up the cross beside them.`)}}}}
+  else if(atWar(f.id))maybeAiSuePeace(f,r);
   if(r()<factionZeal(f)*.17){let t=pick(r,W.settlements.filter(s=>s.owner!==f.id&&s.cont===f.cap.cont&&factionMet(f,s)&&Math.hypot(s.x-f.cap.x,s.y-f.cap.y)<300));if(t&&f.cap.faith)shiftFaith(t,f.cap.faith,2+r()*3)}
   if(isAllied(f.id)&&r()<.03+factionGuile(f)*.05){let gift=Math.round(20+lands.reduce((n,s)=>n+s.pop,0)*.003);S.treasury+=gift;S.relations[f.id]=Math.min(100,(S.relations[f.id]||0)+2);log(`Your ally <b>${f.name}</b> sends a gift of ${gift} gold and warm words.`)}
  }
@@ -2996,6 +3027,8 @@ function resolvePrompt(i){let p=S.pendingPrompt;if(!p){closeModal();return}let o
  else if(o.kind==="brace"){S.authority=clamp(S.authority+3);log(`The crown quietly readies its defences.`)}
  else if(o.kind==="acceptTrade"){let a=W.settlements.find(s=>s.id===o.fromId),b=W.settlements.find(s=>s.id===o.toId);if(a&&b&&a.owner==="player"&&!routeExists(a.id,b.id)){S.routes.push({id:"rt"+S.routes.length+"_"+S.year,from:a.id,to:b.id,sea:!!o.sea,cooldown:0});S.relations[o.fid]=(S.relations[o.fid]||0)+6;log(`A trade treaty is signed with <b>${faction(o.fid)?.name||"a merchant realm"}</b> — a new route links <b>${a.name}</b> and <b>${b.name}</b>.`)}else toast("The proposed route could not be opened.")}
  else if(o.kind==="declineTrade"){S.relations[o.fid]=(S.relations[o.fid]||0)-2;log(`You decline ${faction(o.fid)?.name||"the merchants'"} offer of trade.`)}
+ else if(o.kind==="acceptAiPeace"){let f=faction(o.fid);if(f){setDiplo(o.fid,"peace",3);S.relations[o.fid]=(S.relations[o.fid]||0)+15;S.unity=clamp(S.unity+2);if(f.warGoal)f.warGoal=null;log(`<b>Peace with ${f.name}</b> — a white peace is struck, each realm keeping what it holds, and the war is ended.`)}}
+ else if(o.kind==="refuseAiPeace"){let f=faction(o.fid);if(f){S.relations[o.fid]=(S.relations[o.fid]||0)-5;log(`You spurn ${f.name}'s envoys — the war goes on, and there will be no second offer soon.`)}}
  else if(o.kind==="suepeace"){let f=faction(o.fid);if(f){if(S.treasury<o.cost)toast("The treasury cannot afford the peace offering.");else{S.treasury-=o.cost;let r=rng(S.seed+S.year*53+S.season+7),dip=(S.ruler&&S.ruler.diplomacy)||3;if(r()<clamp(.3+dip*.06,.2,.75)){setDiplo(o.fid,"peace",3);S.relations[o.fid]=(S.relations[o.fid]||0)+15;log(`<b>${f.name} accepts your peace</b> — the war ends before it truly begins.`)}else{S.relations[o.fid]=(S.relations[o.fid]||0)+5;log(`${f.name} spurns your envoys; the war goes on.`)}}}}
  closeModal();renderAll();
  if(S.seasonBrief&&S.seasonBrief.notable&&!S.over){showBriefing();return}
