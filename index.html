@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v16.78 · 2026.07.14 · Raiders now PROFIT from the lanes they choke. Whoever holds a trade-route stage skims a share of the caravans passing through — the coin value of what they carried, never your stored furs or spices — and sometimes food besides. It cuts both ways: park an army or fleet on an enemy realm's trade stage and you bleed their commerce into your own treasury. Independent raiders grow fat and infamous on the tolls; blockading a rich enemy lane becomes a strategy in itself.";
+const BUILD="v16.79 · 2026.07.15 · Guarding the lanes. Station an army or an escort fleet on a trade-route stage and it CLEARS the raiders holding it, restoring the lane — an escort now steers to whichever stage is under threat and drives the corsairs off. And trade-minded realms at peace with you will now send envoys to PROPOSE trade treaties of their own, the keener their commerce and the warmer relations, the more often they ask — while raider-khanates never do.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1453,6 +1453,8 @@ function aiTurn(filter,salt,indie){let r=rng(S.seed+S.year*131+S.season*17+(salt
   if(lands.some(s=>s.coast||s.water||(s.biome||"").includes("island")))aiGrowFleet(f,lands,r);
   // A trading realm weaves caravan and sea routes among its holdings and free neighbours — trade govs densest, raiders least.
   aiWeaveTrade(f,lands,r);
+  // …and a keen trader at peace with you may propose a trade treaty of its own.
+  maybeAiTradeOffer(f,lands,r);
   if(r()<factionZeal(f)*.17){let t=pick(r,W.settlements.filter(s=>s.owner!==f.id&&s.cont===f.cap.cont&&Math.hypot(s.x-f.cap.x,s.y-f.cap.y)<300));if(t&&f.cap.faith)shiftFaith(t,f.cap.faith,2+r()*3)}
   if(isAllied(f.id)&&r()<.03+factionGuile(f)*.05){let gift=Math.round(20+lands.reduce((n,s)=>n+s.pop,0)*.003);S.treasury+=gift;S.relations[f.id]=Math.min(100,(S.relations[f.id]||0)+2);log(`Your ally <b>${f.name}</b> sends a gift of ${gift} gold and warm words.`)}
  }
@@ -1492,6 +1494,15 @@ function processAiRoutes(){if(!W.aiRoutes||!W.aiRoutes.length)return;let live=[]
   if(o.occ>0){let skim=skimRouteNodes(o,gross,rt);/* if the player's forces hold the lane, that plunder reaches your treasury via grantNodeLoot */if(skim>0&&o.holders.some(h=>isPlayerForce(h))&&nearPlayer(rt.a.x,rt.a.y,560)&&(S.year*4+S.season)%3===0)log(`Your blockade of the ${fac.name} trade lane between <b>${a.name}</b> and <b>${b.name}</b> skims <b>${fmt(Math.round(skim))} gold</b> from their caravans.`)}
   live.push(rt);}
  W.aiRoutes=live;}
+// A trade-minded realm at peace with you may PROPOSE a trade treaty — the keener its commerce and the warmer relations, the more often it asks.
+function maybeAiTradeOffer(f,lands,r){if(S.pendingPrompt||S.over)return;if(aiTradeDrive(f)<1.2)return;if(atWar(f.id)||(S.relations[f.id]||0)<10)return;if(f._tradeOfferYear!=null&&S.year-f._tradeOfferYear<6)return;
+ let mine=owned();if(!mine.length)return;let best=null;
+ for(const t of lands){if(isNomadType(t)||t.ruined)continue;let o=mine.filter(m=>m.id!==t.id&&!routeExists(m.id,t.id)).sort((a,b)=>distW(a.x,a.y,t.x,t.y)-distW(b.x,b.y,t.x,t.y))[0];if(o){let d=distW(o.x,o.y,t.x,t.y);if(d<520&&(!best||d<best.d))best={t,o,d}}}
+ if(!best)return;if(r()>=clamp(.05*aiTradeDrive(f)+(S.relations[f.id]||0)*.0012,0,.3))return;
+ f._tradeOfferYear=S.year;let sea=!sameLandmass(best.o,best.t),inc=routeIncome({id:"_q",from:best.o.id,to:best.t.id,sea,cooldown:0});queueTradeOffer(f.id,best.o.id,best.t.id,inc,sea)}
+function queueTradeOffer(fid,fromId,toId,inc,sea){let f=faction(fid),a=W.settlements.find(s=>s.id===fromId),b=W.settlements.find(s=>s.id===toId);if(!f||!a||!b)return;
+ S.pendingPrompt={kind:"tradeoffer",fid,title:`${f.name} Proposes Trade`,text:`Envoys from <b>${f.name}</b>${f.ruler?`, under ${f.ruler.name},`:""} — a people of commerce — propose a ${sea?"sea":"land"} trade route between their <b>${b.name}</b> and your <b>${a.name}</b>. It would pay about <b>${inc}g each season</b> and warm relations, though raiders may prey on its stages.`,
+  opts:[{label:`🤝 Sign the trade treaty (~+${inc}g/season, +relations)`,kind:"acceptTrade",fid,fromId,toId,sea},{label:"🚫 Decline politely",kind:"declineTrade",fid}]}}
 // An AI realm sends settlers from a large holding to found a new colony on nearby empty, fertile land of its own landmass.
 // How each GOVERNMENT founds settled colonies (tribes/confederacies/khanates don't — they split, conquer, and tributary instead). rate: per-season base chance (×ruler build); range: how far a colony may be planted; sea: may cross water to another landmass; minPop/minFree: seat size needed to spare settlers; party:[min,max] founders; coastB/fertB: site-preference weights; town: found towns/port-cities (not villages) when the party is large; far: (city-state apoikia) only colonize BEYOND this distance; faith: colony carries the state faith at full purity.
 const GOV_COLONY={
@@ -2438,7 +2449,7 @@ function processFleets(){for(const f of [...S.fleets]){if(fleetShipCount(f)<=0){
  // Convoy escort duty: the fleet keeps station over its assigned sea lane's midpoint and drives off any raider that comes within reach.
  if(f.escortRoute){let rt=(S.routes||[]).find(x=>x.id===f.escortRoute),ra=rt&&routeSet(rt.from),rb=rt&&routeSet(rt.to);
   if(!rt||!ra||!rb||ra.owner!=="player"){f.escortRoute=null;f.order="hold";}
-  else{f.order="escort";f.targetId=null;f.targetFleet=null;let mx=(ra.x+rb.x)/2,my=(ra.y+rb.y)/2,d=Math.hypot(dxWrap(mx,f.x),my-f.y),sp=fleetSpeed(f);markSeen(f.x,f.y,220);
+  else{f.order="escort";f.targetId=null;f.targetFleet=null;let o=routeOccupancy(rt,"player"),tgt=null,bd=1e9;o.holders.forEach((h,i)=>{if(h&&rt.nodes[i]){let nd=rt.nodes[i],dd=distW(f.x,f.y,nd.x,nd.y);if(dd<bd){bd=dd;tgt=nd}}});/* steer to the nearest raider-held stage; else patrol the midpoint */let mx=tgt?tgt.x:(ra.x+rb.x)/2,my=tgt?tgt.y:(ra.y+rb.y)/2,d=Math.hypot(dxWrap(mx,f.x),my-f.y),sp=fleetSpeed(f);markSeen(f.x,f.y,220);
    if(d>sp*.6)sailStep(f,mx,my,sp,{deep:hasTech("bluewater"),ice:hasTech("icebreaking")});
    let raider=W.fleets.find(x=>fleetShipCount(x)>0&&distW(x.x,x.y,f.x,f.y)<NAVAL_ENGAGE_R&&fleetHostileToPlayer(x));if(raider)navalBattle(f,raider);
    continue;}}
@@ -2567,7 +2578,12 @@ function nodeRaiderAt(x,y,sea,ownerId){let mine=ownerId==="player";
  let s=W.settlements.find(s=>distW(s.x,s.y,x,y)<ROUTE_NODE_R&&settleThreatens(s,ownerId));if(s)return s;
  let apool=mine?(W.armies||[]):(W.armies||[]).concat(S.armies||[]),a=apool.find(a=>distW(a.x,a.y,x,y)<ROUTE_NODE_R&&armyThreatens(a,ownerId));if(a)return a;
  return null}
-function routeOccupancy(rt,ownerId){let nodes=routeNodesOf(rt),occ=0,holders=[];for(const nd of nodes){let raider=nodeRaiderAt(nd.x,nd.y,rt.sea,ownerId);if(raider)occ++;holders.push(raider||null)}rt._occ=occ;rt._ntot=nodes.length;rt._holdOcc=holders.map(Boolean);return {total:nodes.length,occ,holders}}
+// Whether the route's OWNER has a force of their own sitting on a node — which contests and clears it.
+function nodeDefended(x,y,sea,ownerId){
+ if(ownerId==="player"){if(sea&&(S.fleets||[]).some(f=>fleetShipCount(f)>0&&distW(f.x,f.y,x,y)<ROUTE_NODE_R))return true;return (S.armies||[]).some(a=>distW(a.x,a.y,x,y)<ROUTE_NODE_R)}
+ if(sea&&(W.fleets||[]).some(f=>f.owner===ownerId&&fleetShipCount(f)>0&&distW(f.x,f.y,x,y)<ROUTE_NODE_R))return true;
+ return (W.armies||[]).some(a=>a.owner===ownerId&&distW(a.x,a.y,x,y)<ROUTE_NODE_R)}
+function routeOccupancy(rt,ownerId){let nodes=routeNodesOf(rt),occ=0,holders=[];for(const nd of nodes){let raider=nodeRaiderAt(nd.x,nd.y,rt.sea,ownerId);if(raider&&nodeDefended(nd.x,nd.y,rt.sea,ownerId))raider=null;/* a friendly escort/garrison on the stage clears it */if(raider)occ++;holders.push(raider||null)}rt._occ=occ;rt._ntot=nodes.length;rt._holdOcc=holders.map(Boolean);return {total:nodes.length,occ,holders}}
 function occEff(o){if(!o.total)return 1;let frac=o.occ/o.total;return clamp(1-NODE_MAXCUT*Math.pow(frac,NODE_RES_POW),NODE_FLOOR,1)}
 function routeNodeEff(rt,ownerId){return occEff(routeOccupancy(rt,ownerId))}
 // ===== Node skim (v16.78): whoever holds a node pockets a share of the lane's gold — the monetary value of the caravans, never the physical furs/spices — and sometimes food. =====
@@ -2686,6 +2702,8 @@ function showPrompt(){let p=S.pendingPrompt;if(!p)return;let opts=p.opts.map((o,
 function resolvePrompt(i){let p=S.pendingPrompt;if(!p){closeModal();return}let o=p.opts[i]||{};S.pendingPrompt=null;
  if(o.kind==="defiance"){S.unity=clamp(S.unity+5);S.prestige=(S.prestige||0)+1;if(p.fid)S.relations[p.fid]=(S.relations[p.fid]||0)-10;log(`<b>The realm rallies to war</b> against ${faction(p.fid)?.name||"the foe"} — the people harden their hearts.`)}
  else if(o.kind==="brace"){S.authority=clamp(S.authority+3);log(`The crown quietly readies its defences.`)}
+ else if(o.kind==="acceptTrade"){let a=W.settlements.find(s=>s.id===o.fromId),b=W.settlements.find(s=>s.id===o.toId);if(a&&b&&a.owner==="player"&&!routeExists(a.id,b.id)){S.routes.push({id:"rt"+S.routes.length+"_"+S.year,from:a.id,to:b.id,sea:!!o.sea,cooldown:0});S.relations[o.fid]=(S.relations[o.fid]||0)+6;log(`A trade treaty is signed with <b>${faction(o.fid)?.name||"a merchant realm"}</b> — a new route links <b>${a.name}</b> and <b>${b.name}</b>.`)}else toast("The proposed route could not be opened.")}
+ else if(o.kind==="declineTrade"){S.relations[o.fid]=(S.relations[o.fid]||0)-2;log(`You decline ${faction(o.fid)?.name||"the merchants'"} offer of trade.`)}
  else if(o.kind==="suepeace"){let f=faction(o.fid);if(f){if(S.treasury<o.cost)toast("The treasury cannot afford the peace offering.");else{S.treasury-=o.cost;let r=rng(S.seed+S.year*53+S.season+7),dip=(S.ruler&&S.ruler.diplomacy)||3;if(r()<clamp(.3+dip*.06,.2,.75)){setDiplo(o.fid,"peace",3);S.relations[o.fid]=(S.relations[o.fid]||0)+15;log(`<b>${f.name} accepts your peace</b> — the war ends before it truly begins.`)}else{S.relations[o.fid]=(S.relations[o.fid]||0)+5;log(`${f.name} spurns your envoys; the war goes on.`)}}}}
  closeModal();renderAll();
  if(S.seasonBrief&&S.seasonBrief.notable&&!S.over){showBriefing();return}
