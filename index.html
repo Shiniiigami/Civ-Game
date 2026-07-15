@@ -148,7 +148,7 @@ button:active{transform:translateY(1px)}
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v17.5 · 2026.07.15 · A DOCTRINE OF ARMS. Realms now raise their hosts in the manner of their kind. A merchant republic or free city keeps a small corps of high-quality troops — heavy citizen-spears, marksmen and hired horse-archers — and trusts to its strong fleets, disdaining the cheap levy. An empire drowns its foes in sheer numbers, padding great hosts with provincial levies. A theocracy fields devout low-tier levies in bulk; a monarchy balances knights and men-at-arms. A martial culture or militant faith hardens any of them, and the mercenary companies that take a crown’s coin are grander for the wealthy, high-tier powers than for humble chiefs.";
+const BUILD="v17.6 · 2026.07.15 · REPUBLICS OF THE SALT SEA. A merchant republic lives by the open sea-lanes, so its capital must stand on a true sea coast — never a mere lakeshore or riverbank. A city set only on fresh water can grow rich and great, but it will rule as a monarchy or free city-state, not a republic; only salt water and a harbour open to the ocean make a merchant commonwealth. This holds for realms as they rise and for your own crown’s reforms alike.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -307,7 +307,7 @@ const CONSOLIDATE_HOLDINGS=3, DECONSOLIDATE_HOLDINGS=2, CONSOLIDATE_GRACE=3;
 const GOV_FALLBACK={empire:"monarchy",republic:"monarchy",theocracy:"monarchy",citystate:"monarchy",monarchy:"chiefdom"};
 // Does a FACTION still meet the prerequisites of its current settled government? (Khanate/Confederacy are handled separately by the nomad-band system.) Mirrors govReq but scoped to a faction's own holdings, and a touch looser so realms don't churn on the margin.
 function factionGovMeets(f,ls,cap){let g=f&&f.gov;if(!GOV_FALLBACK[g])return true;if(!cap)return true;
- let n=ls.length,totpop=ls.reduce((k,s)=>k+s.pop,0),coastal=cap.water||(cap.type&&(cap.type.includes("port")||cap.type==="fishing village")),
+ let n=ls.length,totpop=ls.reduce((k,s)=>k+s.pop,0),coastal=isSeaCoast(cap),
   temples=ls.reduce((k,s)=>k+((s.infra&&s.infra.temple)||0),0),markets=ls.reduce((k,s)=>k+(((s.infra&&s.infra.market)||0)+((s.infra&&s.infra.bazaar)||0)),0),
   isCity=cap.type&&cap.type.includes("city"),hasT=t=>ls.some(s=>(s.tech||[]).includes(t));
  switch(g){
@@ -330,7 +330,7 @@ function govReq(g){
  if(!owned().length)return {ok:true};
  let lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0]||{},
   n=lands.length,totpop=ownedPop(),
-  coastal=cap.water||(cap.type&&(cap.type.includes("port")||cap.type==="fishing village")),
+  coastal=isSeaCoast(cap),
   hasNomad=lands.some(isNomadType),camp=lands.some(isCamp),
   temples=lands.reduce((k,s)=>k+(s.infra.temple||0),0),
   markets=lands.reduce((k,s)=>k+(s.infra.market||0)+(s.infra.bazaar||0),0),
@@ -360,7 +360,9 @@ function succReq(k){
  return {ok:true};
 }
 function govChip(s){let g=govOf(s);if(!g||!GOV[g])return"";return `<span class="chip" data-tip="${GOV[g].d}">${GOV[g].g} ${GOV[g].n}</span>`}
-function startGov(s,r){let coastal=s.water||(s.type&&(s.type.includes("port")||s.type==="fishing village")),market=!!(s.infra&&((s.infra.market||0)+(s.infra.bazaar||0))>0);
+// A true SEA-coast (ocean-adjacent) holding — not merely lakeside or riverside. Merchant republics need salt water and open sea-lanes, so a lakeside city can never become one.
+function isSeaCoast(s){if(!s)return false;if(s.island)return true;if(s.type&&(s.type.includes("port")||s.searaider))return true;let c=(typeof cellAt==="function")?cellAt(s.x,s.y):null;return !!(c&&c.coast&&!c.lake)}
+function startGov(s,r){let coastal=isSeaCoast(s),market=!!(s.infra&&((s.infra.market||0)+(s.infra.bazaar||0))>0);
  if(s.type&&s.type.includes("tribe"))return "tribalchiefdom";
  if(s.type==="nomad camp"||s.searaider)return "tribalchiefdom"; // every tribe/camp starts a lone Tribal Chiefdom — a Khanate or Confederacy must be EARNED by binding multiple holdings
  // A LONE starting holding may only take a government whose prerequisites it ALREADY meets — never an Empire (needs 4+ holdings & great pop & Law), a Khanate/Confederacy (3+ holdings), or a Theocracy (an organized faith it does not yet have). Those must be EARNED through play.
@@ -377,7 +379,7 @@ function enforceGovPrereqs(){
  if(owned().length){if(S.gov==="khanate"||S.gov==="confederacy"){let cps=owned().filter(isNomadType),cids=cps.map(c=>c.id),ph=cps.length+W.settlements.filter(s=>!s.ruined&&s.overlord&&cids.includes(s.overlord)).length;if(ph<CONSOLIDATE_HOLDINGS){S.gov="tribalchiefdom";owned().forEach(s=>{if(s.gov==="khanate"||s.gov==="confederacy")s.gov="tribalchiefdom"})}}
   else{let ng=S.gov,guard=0;while(GOV_FALLBACK[ng]&&!govReq(ng).ok&&guard++<6)ng=GOV_FALLBACK[ng];if(ng!==S.gov)S.gov=ng}}}
 function govEvolve(){let r=rng(S.seed+S.year*733+17);
- for(const f of W.factions.filter(x=>x.alive)){let lands=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(!lands.length)continue;let cap=lands.find(s=>f.cap&&s.id===f.cap.id)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];let totpop=lands.reduce((n,s)=>n+s.pop,0),coastal=cap.water||cap.type.includes("port");let g=f.gov||startGov(cap,r),ng=g;
+ for(const f of W.factions.filter(x=>x.alive)){let lands=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(!lands.length)continue;let cap=lands.find(s=>f.cap&&s.id===f.cap.id)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];let totpop=lands.reduce((n,s)=>n+s.pop,0),coastal=isSeaCoast(cap);let g=f.gov||startGov(cap,r),ng=g;
   if(g==="tribalchiefdom"&&(totpop>9000||cap.pop>3200)&&r()<.5&&isCamp(cap)&&bandHoldingCount(f.id)>=3)ng="khanate"; // camps become khanates ONLY once they bind multiple holdings (never a lone camp); tribes become confederacies via nomad-band growth
   else if(g==="monarchy"&&coastal&&cap.pop>4200&&r()<.22)ng="republic";
   else if(g==="monarchy"&&(lands.length>=5||totpop>16000)&&r()<.28)ng="empire";
@@ -386,7 +388,7 @@ function govEvolve(){let r=rng(S.seed+S.year*733+17);
   else if(g==="khanate"&&!isNomadType(cap)&&r()<.5)ng=(totpop>14000||lands.length>=4)?"empire":"monarchy"; // a horde that has settled into cities is no longer a khanate
   else if(g==="khanate"&&lands.length>=4&&totpop>14000&&r()<.2)ng="empire";
   if(ng!==g){f.gov=ng;cap.gov=ng;if(nearPlayer(cap.x,cap.y,520))log(`<b>${f.name}</b> becomes ${ng==="empire"?"an":"a"} <b>${GOV[ng].n}</b>.`)}}
- for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=(s.water||s.type.includes("port"))?"republic":"monarchy"} /* a lone independent camp is NEVER a khanate — it must bind holdings first (processNomadBands) */
+ for(const s of W.settlements.filter(x=>!x.owner&&!x.ruined)){let g=s.gov;if(!g)continue;if(g==="chiefdom"&&s.pop>2000&&r()<.2)s.gov=isSeaCoast(s)?"republic":"monarchy"} /* a lone independent camp is NEVER a khanate — it must bind holdings first (processNomadBands) */
  // Lock: a khanate is a mounted-CAMP institution only. A khanate faction that has settled into conquered cities becomes an Empire/Kingdom; a tribe-led "khanate" (no camps) is really a Confederacy; and any stray tribe/city carrying the khanate label sheds it.
  for(const f of W.factions){if(!f.alive||f.gov!=="khanate")continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined),camps=ls.filter(isCamp).length,tribes=ls.filter(s=>(s.type||"").includes("tribe")).length,settled=ls.length-camps-tribes,c0=ls.slice().sort((a,b)=>b.pop-a.pop)[0];
   if(settled>0&&settled>=camps+tribes){f.gov=(ls.length>=4||settled>=2)?"empire":"monarchy";if(c0){c0.gov=f.gov;if(nearPlayer(c0.x,c0.y,520))log(`<b>${f.name}</b> settle into their conquered cities and become ${f.gov==="empire"?"an Empire":"a Kingdom"}.`)}}
@@ -394,7 +396,7 @@ function govEvolve(){let r=rng(S.seed+S.year*733+17);
  for(const s of W.settlements){if(s.ruined||s.gov!=="khanate"||isCamp(s))continue;s.gov=(s.type||"").includes("tribe")?"tribalchiefdom":(s.type||"").includes("city")?"monarchy":s.type==="town"?"citystate":"chiefdom"}
  // Grace-period reversion for SETTLED governments: a realm that no longer meets its government's prerequisites (a Republic that lost its coast/market, an Empire fallen below its holdings/population, etc.) falls back to a simpler form after CONSOLIDATE_GRACE years. Khanate/Confederacy reversion is handled by the nomad-band system.
  for(const f of W.factions){if(!f.alive||!GOV_FALLBACK[f.gov])continue;let ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(!ls.length)continue;let cap=ls.find(s=>f.cap&&s.id===f.cap.id)||ls.slice().sort((a,b)=>b.pop-a.pop)[0];if(factionGovMeets(f,ls,cap)){f.govBelowSince=null;continue}if(f.govBelowSince==null){f.govBelowSince=S.year;continue}if(S.year-f.govBelowSince>=CONSOLIDATE_GRACE){let old=f.gov,fb=GOV_FALLBACK[old];f.gov=fb;f.govBelowSince=null;if(cap)cap.gov=fb;if(cap&&nearPlayer(cap.x,cap.y,520))log(`<b>${f.name}</b>, no longer meeting what a <b>${GOV[old].n}</b> requires, falls back to ${fb==="empire"?"an":"a"} <b>${GOV[fb].n}</b>.`)}}}
-function playerGovDrift(){if(!owned().length)return;let r=rng(S.seed+S.year*911+3),lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];if(!cap)return;let totpop=ownedPop(),coastal=cap.water||cap.type.includes("port"),g=S.gov,ng=g;
+function playerGovDrift(){if(!owned().length)return;let r=rng(S.seed+S.year*911+3),lands=owned(),cap=lands.find(s=>s.capital)||lands.slice().sort((a,b)=>b.pop-a.pop)[0];if(!cap)return;let totpop=ownedPop(),coastal=isSeaCoast(cap),g=S.gov,ng=g;
  // Player Khanate/Confederacy is inherited, but reverts to a loose Tribal Chiefdom after a grace period below the holdings threshold.
  if(g==="khanate"||g==="confederacy"){let pcamps=lands.filter(isNomadType),pids=pcamps.map(c=>c.id),phold=pcamps.length+W.settlements.filter(s=>!s.ruined&&s.overlord&&pids.includes(s.overlord)).length;if(phold<DECONSOLIDATE_HOLDINGS){if(S.belowSince==null)S.belowSince=S.year;else if(S.year-S.belowSince>=CONSOLIDATE_GRACE){let wasKhan=g==="khanate";S.gov=g="tribalchiefdom";S.belowSince=null;cap.gov="tribalchiefdom";log(`Your ${wasKhan?"Khanate":"Confederacy"}, fallen below the holdings it needs, dissolves back into a loose <b>Tribal Chiefdom</b>.`)}}else S.belowSince=null}
  // Any SETTLED government (Monarchy/Republic/Theocracy/City-state/Empire) that no longer meets its prerequisites reverts to a simpler form after the same grace period.
@@ -2058,7 +2060,7 @@ function splinterBand(f,r){let camps=bandCamps(f.id);if(camps.length<2)return;le
 // Total pop a band controls (its camps/tribes + their tributaries) — one of the three sedentarization gates.
 function bandTotalPop(fid){let cs=bandCamps(fid),ids=cs.map(c=>c.id),trib=W.settlements.filter(s=>!s.ruined&&s.overlord&&ids.includes(s.overlord));return cs.reduce((n,s)=>n+s.pop,0)+trib.reduce((n,s)=>n+s.pop,0)}
 // Which settled government a sedentarizing band adopts, by its capital and holdings.
-function pickSettledGov(f){let cap=f.cap;if(!cap)return"monarchy";let coastal=cap.water||(cap.type&&cap.type.includes("port")),ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(coastal&&(cap.tech||[]).includes("currency"))return"republic";if(cap.pop>=8000&&ls.length>=4)return"empire";return"monarchy"}
+function pickSettledGov(f){let cap=f.cap;if(!cap)return"monarchy";let coastal=isSeaCoast(cap),ls=W.settlements.filter(s=>s.owner===f.id&&!s.ruined);if(coastal&&(cap.tech||[]).includes("currency"))return"republic";if(cap.pop>=8000&&ls.length>=4)return"empire";return"monarchy"}
 // A Khanate/Confederacy puts down roots: ONLY the capital re-types into a settled town/city at once; the government becomes settled; its other tribal holdings stay tribal but turn restive (conquered) until pacified or converted with gold.
 function sedentarize(f,gov){let cap=f.cap;if(!cap||cap.ruined)return;gov=gov||pickSettledGov(f);
  cap.type=settledTypeByPop(cap.pop);cap.searaider=false;cap.gov=gov;
