@@ -182,7 +182,7 @@ button:active{transform:translateY(1px)}
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
-const BUILD="v18.41 · 2026.07.19 · LEANER COFFERS. <b>Taxes and trade were still too generous</b> — the treasury filled too easily. Tax rates are cut ~20% at every band, and market, bazaar, merchant and road tax yields trimmed. <b>Trade-route income falls a further ~20%</b> (atop v18.39's 40% cut) and luxury sales pay less. Wealth now comes from a broad, well-run realm, not a single fat town.";
+const BUILD="v18.42 · 2026.07.19 · A HEAVIER PAYROLL. <b>Soldier upkeep now scales with the unit's tier</b> — a plate-clad heavy cavalryman eats far more of the treasury each season than a plain spearman (base + battle-power). Spearmen still run ~0.21g/100, but heavy infantry, horse archers and heavy cavalry climb steeply; war elephants and mercenaries stay dearest, camels, thralls and peasant levies cheapest. A great professional host is now a real burden to keep. The Muster Hall shows each unit's upkeep.";
 try{let vt=document.getElementById("verTag");if(vt)vt.textContent="Crown Waters · "+BUILD}catch(e){}
 const $=id=>document.getElementById(id), clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), fmt=n=>Math.round(n).toLocaleString(), pick=(r,a)=>a[Math.floor(r()*a.length)];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1539,7 +1539,16 @@ function standingLoad(s){return s.units.filter(u=>!UNIT[u.type]?.levy&&!u.merc).
 function queuedLoad(s){return S.orders.filter(o=>o.type==="training"&&o.settlement===s.id).reduce((n,o)=>n+(o.count-o.trained)*unitCapWeight(o.unit),0)}
 // v18.25 Per-soldier seasonal gold upkeep, factored out so display and the treasury stay in lock-step. Mercenaries are the dearest to keep; enslaved and levy troops the cheapest. Standing-army doctrines cut the bill.
 function unitUpkeepMult(){return (hasTech("doctrine")?.8:1)*(hasTech("legions")?.85:1)}
-function unitUpkeepRate(u){return (u.slave?.012:u.merc?.05:u.type==="war_elephant"?.07:u.type==="camel_rider"?.013:u.elite?.03:UNIT[u.type]?.levy?.006:.022)*unitUpkeepMult()}
+// v18.42 Upkeep SCALES WITH THE UNIT'S TIER — a higher-tier soldier (heavier arms, armour, warhorse) costs more to keep in the field than a plain spearman. Battle power stands in for tier: base .012 + power×.009, so a spearman (power 1) runs ~.021, heavy infantry ~.027, heavy cavalry ~.035. Special cases keep their flavour: mercenaries dearest, camels famously cheap, elephants dearest of all, thralls and peasant levies cheapest.
+function unitTierRate(type){let p=UNIT[type]?UNIT[type].power:1;return .012+clamp(p,.5,3.2)*.009}
+function unitUpkeepRate(u){let base;
+ if(u.merc)base=.05;                                                   // mercenaries — quartered at a steep premium
+ else if(u.type==="war_elephant")base=.075;                            // war beasts eat a kingdom
+ else if(u.type==="camel_rider")base=.013;                             // desert camels — famously low upkeep
+ else if(UNIT[u.type]&&UNIT[u.type].levy)base=.006;                    // peasant levies barely paid
+ else if(u.slave)base=.010+(UNIT[u.type]?UNIT[u.type].power:.8)*.004;  // thralls cheap, but heavier thralls a little dearer
+ else base=unitTierRate(u.type)*(u.elite?1.35:1);                      // regular troops scale by tier; elites cost more
+ return base*unitUpkeepMult()}
 // Upkeep for a prospective/plain unit of a given type (opt: {slave,merc,elite}).
 function unitUpkeepFor(type,opt){opt=opt||{};return unitUpkeepRate({type,slave:!!opt.slave,merc:!!opt.merc,elite:!!opt.elite})}
 // Total seasonal gold upkeep of a settlement's whole garrison (all contingents, mercs included).
